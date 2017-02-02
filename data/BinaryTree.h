@@ -20,9 +20,9 @@
 #ifndef TREE_H_
 #define TREE_H_
 
-#include "Iterate.h"
+#include "algorithm/Iterate.h"
 
-#include "Trace.h"
+#include "ubiquitous/Trace.h"
 
 namespace container {
 

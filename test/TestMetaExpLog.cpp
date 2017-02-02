@@ -19,7 +19,7 @@
 
 #include "CppUTest/TestHarness.h"
 
-#include "ExpLog.h"
+#include "meta/ExpLog.h"
 
 using namespace meta;
 

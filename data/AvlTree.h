@@ -20,7 +20,7 @@
 #ifndef SRC_AVLTREE_H_
 #define SRC_AVLTREE_H_
 
-#include "BinaryTree.h"
+#include "data/BinaryTree.h"
 
 #include <stddef.h>
 

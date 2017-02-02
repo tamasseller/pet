@@ -20,9 +20,9 @@
 #ifndef DOUBLELIST_H_
 #define DOUBLELIST_H_
 
-#include "Compiler.h"
-#include "FieldAccessor.h"
-#include "Iterate.h"
+#include "ubiquitous/Compiler.h"
+#include "meta/FieldAccessor.h"
+#include "algorithm/Iterate.h"
 
 namespace container {
 

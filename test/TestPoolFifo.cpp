@@ -21,7 +21,7 @@
 
 #undef new
 
-#include "Fifo.h"
+#include "pool/Fifo.h"
 
 #include "MockAllocator.h"
 #include "FailureInjectorPlugin.h"

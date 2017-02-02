@@ -20,7 +20,7 @@
 #ifndef ERROR_H_
 #define ERROR_H_
 
-#include "Failable.h"
+#include "ubiquitous/Failable.h"
 
 namespace ubiq {
 

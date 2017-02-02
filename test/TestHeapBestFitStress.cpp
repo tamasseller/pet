@@ -21,12 +21,12 @@
 
 #undef new
 
-#include "Heap.h"
-#include "BestFitPolicy.h"
+#include "heap/Heap.h"
+#include "heap/BestFitPolicy.h"
 
 using namespace mm;
 
-#include "HeapStress.h"
+#include "TestHeapStress.h"
 
 #include <iostream>
 

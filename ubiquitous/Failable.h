@@ -20,7 +20,7 @@
 #ifndef FAILABLE_H_
 #define FAILABLE_H_
 
-#include "ConfigHelper.h"
+#include "ubiquitous/ConfigHelper.h"
 
 namespace ubiq {
 

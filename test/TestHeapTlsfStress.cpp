@@ -7,12 +7,12 @@
 
 #include "CppUTest/TestHarness.h"
 
-#include "Heap.h"
-#include "TlsfPolicy.h"
+#include "heap/Heap.h"
+#include "heap/TlsfPolicy.h"
 
 using namespace mm;
 
-#include "HeapStress.h"
+#include "TestHeapStress.h"
 
 TEST_GROUP(TlsfStress) {
 	HeapStress<TlsfHeap<uint32_t, 2, true>, 256*1024, 64, 0, 4096> test;

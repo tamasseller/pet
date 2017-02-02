@@ -20,8 +20,8 @@
 #ifndef BESTFITPOLICY_H_
 #define BESTFITPOLICY_H_
 
-#include "Heap.h"
-#include "LinkedList.h"
+#include "heap/Heap.h"
+#include "data/LinkedList.h"
 
 namespace mm {
 

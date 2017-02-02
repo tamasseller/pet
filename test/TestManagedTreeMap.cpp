@@ -17,7 +17,7 @@
  *
  *******************************************************************************/
 
-#include "TreeMap.h"
+#include "managed/TreeMap.h"
 #include "MockAllocator.h"
 
 #include "CppUTest/TestHarness.h"

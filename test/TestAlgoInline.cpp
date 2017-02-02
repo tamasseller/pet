@@ -5,7 +5,7 @@
  *      Author: tamas.seller
  */
 
-#include "LinkedList.h"
+#include "data/LinkedList.h"
 
 namespace {
 	struct SimpleElement {

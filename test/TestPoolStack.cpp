@@ -19,7 +19,7 @@
 
 #include "CppUTest/TestHarness.h"
 
-#include "Stack.h"
+#include "pool/Stack.h"
 
 #include "MockAllocator.h"
 #include "FailureInjectorPlugin.h"

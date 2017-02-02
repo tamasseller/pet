@@ -8,8 +8,8 @@
 #ifndef AVLTREEPOLICY_H_
 #define AVLTREEPOLICY_H_
 
-#include "Heap.h"
-#include "AvlTree.h"
+#include "heap/Heap.h"
+#include "data/AvlTree.h"
 
 class AvlPolicyInternalsTest;
 

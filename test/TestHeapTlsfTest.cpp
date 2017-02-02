@@ -19,8 +19,8 @@
 
 #include "CppUTest/TestHarness.h"
 
-#include "Heap.h"
-#include "TlsfPolicy.h"
+#include "heap/Heap.h"
+#include "heap/TlsfPolicy.h"
 
 using namespace mm;
 

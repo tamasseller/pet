@@ -23,8 +23,8 @@
 #include <malloc.h>
 
 #include "FailureSource.h"
-#include "Error.h"
-#include "Trace.h"
+#include "ubiquitous/Error.h"
+#include "ubiquitous/Trace.h"
 
 class MockAllocatorTrace: public ubiq::Trace<MockAllocatorTrace> {};
 

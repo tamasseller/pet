@@ -20,7 +20,7 @@
 #ifndef FIFO_H_
 #define FIFO_H_
 
-#include "Error.h"
+#include "ubiquitous/Error.h"
 
 #include <stddef.h>
 

@@ -18,8 +18,9 @@
  *******************************************************************************/
 
 #include "CppUTest/TestHarness.h"
+#include "CppUTestExt/MockSupport.h"
 
-#include "Error.h"
+#include "ubiquitous/Error.h"
 
 using namespace ubiq;
 
@@ -67,7 +68,11 @@ ExpResult testWrongExpTimesTwo(int x)
 
 TEST_GROUP(Failable)
 {
+	TEST_SETUP() {
+		assertMocked = true;
+	}
 	TEST_TEARDOWN() {
+		assertMocked = false;
 	    mock().checkExpectations();
 		mock().clear();
 	}
@@ -75,14 +80,14 @@ TEST_GROUP(Failable)
 
 TEST(Failable, TotallyCareless)
 {
-    mock().expectOneCall("failedAssert");
+    mock().expectOneCall("uncheckedErrorReport");
 
 	testExp(2);
 }
 
 TEST(Failable, NoErrorHasCheck)
 {
-    mock().expectNCalls(0, "failedAssert");
+    mock().expectNCalls(0, "uncheckedErrorReport");
 
 	ExpResult result = testExp(2);
 
@@ -95,7 +100,7 @@ TEST(Failable, NoErrorHasCheck)
 
 TEST(Failable, ErroneousHasCheck)
 {
-    mock().expectNCalls(0, "failedAssert");
+    mock().expectNCalls(0, "uncheckedErrorReport");
 
 	ExpResult result = testExp(-1);
 
@@ -105,7 +110,7 @@ TEST(Failable, ErroneousHasCheck)
 
 TEST(Failable, PorpagateHappy)
 {
-    mock().expectNCalls(0, "failedAssert");
+    mock().expectNCalls(0, "uncheckedErrorReport");
 
     ExpResult result = testExpTimesTwo(1);
 
@@ -118,7 +123,7 @@ TEST(Failable, PorpagateHappy)
 
 TEST(Failable, NoErrorNoCheck)
 {
-    mock().expectOneCall("failedAssert");
+    mock().expectOneCall("uncheckedErrorReport");
 
 	ExpResult result = testExp(2);
 	int value = result;
@@ -127,7 +132,7 @@ TEST(Failable, NoErrorNoCheck)
 
 TEST(Failable, ErroneousNoCheck)
 {
-    mock().expectOneCall("failedAssert");
+    mock().expectOneCall("uncheckedErrorReport");
 
 	ExpResult result = testExp(-1);
 	int value = result;
@@ -135,7 +140,7 @@ TEST(Failable, ErroneousNoCheck)
 
 TEST(Failable, PorpagateWrongMiddleUser)
 {
-    mock().expectOneCall("failedAssert");
+    mock().expectOneCall("uncheckedErrorReport");
 
     ExpResult result = testWrongExpTimesTwo(1);
 
@@ -148,7 +153,7 @@ TEST(Failable, PorpagateWrongMiddleUser)
 
 TEST(Failable, PorpagateWrongEndUserHappy)
 {
-    mock().expectOneCall("failedAssert");
+    mock().expectOneCall("uncheckedErrorReport");
 
     ExpResult result = testExpTimesTwo(1);
 
@@ -158,7 +163,7 @@ TEST(Failable, PorpagateWrongEndUserHappy)
 
 TEST(Failable, PorpagateWrongEndUserErroneous)
 {
-    mock().expectOneCall("failedAssert");
+    mock().expectOneCall("uncheckedErrorReport");
 
     ExpResult result = testExpTimesTwo(-1);
     volatile int value = result;

@@ -19,7 +19,7 @@
 
 #include "CppUTest/TestHarness.h"
 
-#include "FieldAccessor.h"
+#include "meta/FieldAccessor.h"
 
 using namespace meta;
 

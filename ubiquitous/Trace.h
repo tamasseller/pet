@@ -20,7 +20,7 @@
 #ifndef TRACEIMPL_H_
 #define TRACEIMPL_H_
 
-#include "ConfigHelper.h"
+#include "ubiquitous/ConfigHelper.h"
 
 namespace ubiq {
 

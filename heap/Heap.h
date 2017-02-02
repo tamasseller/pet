@@ -20,8 +20,8 @@
 #ifndef HEAP_H_
 #define HEAP_H_
 
-#include "Trace.h"
-#include "Error.h"
+#include "ubiquitous/Trace.h"
+#include "ubiquitous/Error.h"
 
 class HeapInternalsTest;
 

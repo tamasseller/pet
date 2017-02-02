@@ -20,9 +20,9 @@
 #ifndef TREEMAP_H_
 #define TREEMAP_H_
 
-#include "AvlTree.h"
-#include "Pool.h"
-#include "Arena.h"
+#include "data/AvlTree.h"
+#include "pool/Pool.h"
+#include "pool/Arena.h"
 
 #include <stddef.h>
 
@@ -209,12 +209,17 @@ public:
 	 * @param	key with which the specified value is to be associated
 	 * @param 	value to be associated with the specified key
 	 */
-	void put(const KeyType &key, const ValueType &value){
+	bool put(const KeyType &key, const ValueType &value){
 		BinaryTree::Position pos = BinaryTree::seek<KeyType, ImmutableTreeMap<KeyType, ValueType>::comparator>(key);
 		if(pos.getNode()){
 			((Node*)pos.getNode())->setValue(value);
 		}else{
-			Node* nnode = new(pool.acquire()) Node(key, value);
+			auto ptr = pool.acquire();
+
+			if(ptr.failed())
+				return false;
+
+			Node* nnode = new(ptr) Node(key, value);
 			AvlTree::insert(pos, nnode);
 		}
 	}

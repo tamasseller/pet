@@ -17,7 +17,7 @@
  *
  *******************************************************************************/
 
-#include "AvlTree.h"
+#include "data/AvlTree.h"
 
 using namespace container;
 

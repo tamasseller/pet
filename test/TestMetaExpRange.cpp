@@ -19,8 +19,8 @@
 
 #include "CppUTest/TestHarness.h"
 
-#include "Range.h"
-#include "ExpLog.h"
+#include "meta/Range.h"
+#include "meta/ExpLog.h"
 
 using namespace meta;
 

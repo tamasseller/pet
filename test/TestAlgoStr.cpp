@@ -19,7 +19,7 @@
 
 #include "CppUTest/TestHarness.h"
 
-#include "Str.h"
+#include "algorithm/Str.h"
 
 #include <string.h>
 

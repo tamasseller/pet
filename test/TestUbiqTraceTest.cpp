@@ -8,7 +8,7 @@
 #include "CppUTest/TestHarness.h"
 #include "CppUTestExt/MockSupport.h"
 
-#include "Trace.h"
+#include "ubiquitous/Trace.h"
 
 const char *critMsg = "Critical\n";
 const char *failMsg = "Failure\n";
@@ -44,7 +44,12 @@ TEST_GROUP(TraceTest) {
 	B b;
 	ns::C c;
 
+	TEST_SETUP() {
+		writerMocked = true;
+	}
+
 	TEST_TEARDOWN() {
+		writerMocked = false;
 		mock("MockWriter").checkExpectations();
 		mock().clear();
 	}

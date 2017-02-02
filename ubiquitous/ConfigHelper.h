@@ -20,8 +20,8 @@
 #ifndef CONFIGHELPER_H_
 #define CONFIGHELPER_H_
 
-#include "TraceCommon.h"
-#include "FailableCommon.h"
+#include "ubiquitous/TraceCommon.h"
+#include "ubiquitous/FailableCommon.h"
 #include "DebugConfig.h"
 
 #endif /* CONFIGHELPER_H_ */

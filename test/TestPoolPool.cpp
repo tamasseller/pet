@@ -17,12 +17,12 @@
  *
  *******************************************************************************/
 
-#include "Pool.h"
+#include "pool/Pool.h"
 
 #include "CppUTest/TestHarness.h"
 
 #include "MockAllocator.h"
-#include "General.h"
+#include "ubiquitous/General.h"
 #include <cstdlib>
 
 using namespace mm;

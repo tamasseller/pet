@@ -17,7 +17,7 @@
  *
  *******************************************************************************/
 
-#include "IdentifierRegistry.h"
+#include "managed/IdentifierRegistry.h"
 #include "MockAllocator.h"
 
 #include "CppUTest/TestHarness.h"

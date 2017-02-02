@@ -20,7 +20,7 @@
 #ifndef ARENA_H_
 #define ARENA_H_
 
-#include "Error.h"
+#include "ubiquitous/Error.h"
 
 namespace mm {
 /**

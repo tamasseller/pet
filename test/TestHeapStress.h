@@ -12,7 +12,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "Trace.h"
+#include "ubiquitous/Trace.h"
 
 class HeapStressTestTraceTag;
 

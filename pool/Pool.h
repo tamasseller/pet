@@ -20,9 +20,9 @@
 #ifndef POOL_H_
 #define POOL_H_
 
-#include "LinkedList.h"
-#include "DoubleList.h"
-#include "Error.h"
+#include "data/LinkedList.h"
+#include "data/DoubleList.h"
+#include "ubiquitous/Error.h"
 
 namespace mm {
 

@@ -20,8 +20,8 @@
 #ifndef TLSFPOLICY_H_
 #define TLSFPOLICY_H_
 
-#include "Heap.h"
-#include "DoubleList.h"
+#include "heap/Heap.h"
+#include "data/DoubleList.h"
 
 class TlsfPolicyInternalsTest;
 

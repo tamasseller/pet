@@ -9,13 +9,13 @@
 
 #undef new
 
-#include "AvlTreePolicy.h"
+#include "heap/AvlTreePolicy.h"
 
 using namespace mm;
 
 typedef AvlHeap<uint32_t, 2, true> TestHeap;
 
-#include "HeapStress.h"
+#include "TestHeapStress.h"
 
 #include <iostream>
 

@@ -20,7 +20,9 @@
 #ifndef MOCKWRITER_H_
 #define MOCKWRITER_H_
 
-class MockWriter {
+#include "ubiquitous/PrintfWriter.h"
+
+class MockWriter: ubiq::PrintfWriter {
 protected:
 	static void write(const char* val);
 	static void write(short val);

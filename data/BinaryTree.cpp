@@ -17,9 +17,9 @@
  *
  *******************************************************************************/
 
-#include "BinaryTree.h"
+#include "data/BinaryTree.h"
 
-#include "Trace.h"
+#include "ubiquitous/Trace.h"
 
 using namespace container;
 

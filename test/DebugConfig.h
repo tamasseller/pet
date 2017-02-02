@@ -17,10 +17,29 @@
  *
  *******************************************************************************/
 
-#include "CppUTest/CommandLineTestRunner.h"
-#include "CppUTest/TestRegistry.h"
+#ifndef DEBUGCONFIG_H_
+#define DEBUGCONFIG_H_
 
-int main(int ac, char** av)
-{
-    return CommandLineTestRunner::RunAllTests(ac, av);
+#include "CppUTest/TestHarness.h"
+#include "CppUTestExt/MockSupport.h"
+#include "Addr2lineBacktrace.h"
+#include "MockWriter.h"
+
+extern bool assertMocked;
+extern bool writerMocked;
+
+UNCHECKED_ERROR_REPORT() {
+	if(assertMocked) {
+		mock().actualCall("uncheckedErrorReport");
+	} else {
+		Addr2lineBacktrace().print();
+		FAIL("Unchecked Error");
+	}
 }
+
+TRACE_WRITER(MockWriter);
+GLOBAL_TRACE_POLICY(Failure);
+CLIENT_TRACE_POLICY(B, All)
+CLIENT_TRACE_POLICY_NS(ns, C, Warning);
+
+#endif /* DEBUGCONFIG_H_ */

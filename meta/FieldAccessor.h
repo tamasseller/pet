@@ -20,8 +20,8 @@
 #ifndef FIELDACCESSOR_H_
 #define FIELDACCESSOR_H_
 
-#include "Compiler.h"
-#include "MemberPointers.h"
+#include "ubiquitous/Compiler.h"
+#include "meta/MemberPointers.h"
 
 namespace meta {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

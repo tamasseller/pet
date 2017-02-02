@@ -18,7 +18,7 @@
  *******************************************************************************/
 
 
-#include "Arena.h"
+#include "pool/Arena.h"
 
 #include "CppUTest/TestHarness.h"
 

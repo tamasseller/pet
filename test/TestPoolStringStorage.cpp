@@ -17,7 +17,7 @@
  *
  *******************************************************************************/
 
-#include "StringCollector.h"
+#include "pool/StringCollector.h"
 
 #include "CppUTest/TestHarness.h"
 

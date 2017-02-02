@@ -17,7 +17,7 @@
  *
  *******************************************************************************/
 
-#include "Heap.h"
+#include "heap/Heap.h"
 
 #include <stdint.h>
 #include <vector>
@@ -421,33 +421,3 @@ TEST(Heap_ ## type ## _ ## align ## _ ## spare, FreeCorner) {test->freeCornerCas
 TEST(Heap_ ## type ## _ ## align ## _ ## spare, Deplete) {test->deplete();}								  \
 TEST(Heap_ ## type ## _ ## align ## _ ## spare, Shrink) {test->shrink();}								  \
 TEST(Heap_ ## type ## _ ## align ## _ ## spare, ShrinkCorner) {test->shrinkCornerCases();}
-
-TEST_TEMPLATE(uint16_t, 2, 17)
-TEST_TEMPLATE(uint16_t, 2, 16)
-TEST_TEMPLATE(uint16_t, 2, 15)
-TEST_TEMPLATE(uint16_t, 2, 9)
-
-TEST_TEMPLATE(uint16_t, 1, 8)
-TEST_TEMPLATE(uint16_t, 1, 7)
-TEST_TEMPLATE(uint16_t, 1, 5)
-TEST_TEMPLATE(uint16_t, 1, 4)
-
-TEST_TEMPLATE(uint16_t, 0, 17)
-TEST_TEMPLATE(uint16_t, 0, 15)
-TEST_TEMPLATE(uint16_t, 0, 3)
-TEST_TEMPLATE(uint16_t, 0, 0)
-
-TEST_TEMPLATE(uint32_t, 2, 15)
-TEST_TEMPLATE(uint32_t, 2, 9)
-TEST_TEMPLATE(uint32_t, 2, 4)
-TEST_TEMPLATE(uint32_t, 2, 0)
-
-TEST_TEMPLATE(uint32_t, 1, 9)
-TEST_TEMPLATE(uint32_t, 1, 8)
-TEST_TEMPLATE(uint32_t, 1, 4)
-TEST_TEMPLATE(uint32_t, 1, 3)
-
-TEST_TEMPLATE(uint32_t, 0, 16)
-TEST_TEMPLATE(uint32_t, 0, 9)
-TEST_TEMPLATE(uint32_t, 0, 7)
-TEST_TEMPLATE(uint32_t, 0, 4)

@@ -20,7 +20,7 @@
 #ifndef MEMBERPOINTERS_H_
 #define MEMBERPOINTERS_H_
 
-#include "Packs.h"
+#include "meta/Packs.h"
 
 namespace meta {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

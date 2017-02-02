@@ -1,0 +1,6 @@
+[submodule "test/failure-injector"]
+	path = test/failure-injector
+	url = http://github.com/tamasseller/failure-injector
+[submodule "test/ultimate-makefile"]
+	path = test/ultimate-makefile
+	url = http://github.com/tamasseller/ultimate-makefile

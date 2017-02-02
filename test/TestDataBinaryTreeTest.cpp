@@ -19,7 +19,7 @@
 
 #include "CppUTest/TestHarness.h"
 
-#include "BinaryTree.h"
+#include "data/BinaryTree.h"
 
 using namespace container;
 

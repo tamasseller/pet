@@ -20,10 +20,10 @@
 #ifndef IDENTIFIERREGISTRY_H_
 #define IDENTIFIERREGISTRY_H_
 
-#include "AvlTree.h"
-#include "Fnv.h"
-#include "Str.h"
-#include "StringCollector.h"
+#include "data/AvlTree.h"
+#include "algorithm/Fnv.h"
+#include "algorithm/Str.h"
+#include "pool/StringCollector.h"
 
 namespace container {
 
