@@ -11,7 +11,7 @@ SOURCES += ../ubiquitous/PrintfWriter.cpp
 #SOURCES +=  TestAlgoInline.cpp
 SOURCES +=  TestAlgoIterate.cpp
 SOURCES +=  TestAlgoStr.cpp
-SOURCES +=  TestDataBinaryTreeTest.cpp
+SOURCES +=  TestDataBinaryTree.cpp
 SOURCES +=  TestDataDoubleList.cpp
 SOURCES +=  TestDataLinkedList.cpp
 SOURCES +=  TestHeapAvlStress.cpp
@@ -23,7 +23,7 @@ SOURCES +=  TestHeapHost4.cpp
 SOURCES +=  TestHeapHost5.cpp
 SOURCES +=  TestHeapHost6.cpp
 SOURCES +=  TestHeapTlsfStress.cpp
-SOURCES +=  TestHeapTlsfTest.cpp
+SOURCES +=  TestHeapTlsf.cpp
 SOURCES +=  TestManagedHstring.cpp
 SOURCES +=  TestManagedRegistry.cpp
 SOURCES +=  TestManagedTreeMap.cpp
@@ -39,7 +39,7 @@ SOURCES +=  TestPoolStack.cpp
 SOURCES +=  TestPoolStringStorage.cpp
 SOURCES +=  TestUbiqFailable.cpp
 SOURCES +=  TestUbiqError.cpp
-SOURCES +=  TestUbiqTraceTest.cpp
+SOURCES +=  TestUbiqTrace.cpp
 
 # Test support
 
