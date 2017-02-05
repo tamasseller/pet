@@ -10,7 +10,7 @@ The abundance of RAM also makes it quite possible to allocate much more memory u
 actually needed, in order to avoid the copying when a capacity increase is needed.
 
 However with small MMU-less embedded systems, there is no significant caching happening,
-so there is no real benefit in spatial maintaining spacial locality, so 'pointer chasing'
+so there is no real benefit in maintaining spatial locality, so 'pointer chasing'
 is not necassarily a drawback.
 Also dynamic memory management needs to be carefully controlled, due to increased probability
 of heap fragmentation, thus has to be decoupled from the containers as much as possible.
