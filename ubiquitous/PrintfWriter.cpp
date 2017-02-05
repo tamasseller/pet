@@ -28,7 +28,7 @@ void PrintfWriter::write(const char* val) {
 }
 
 void PrintfWriter::write(const void* val) {
-	printf("%X", (int)val);
+	printf("%p", val);
 }
 
 void PrintfWriter::write(short val) {
