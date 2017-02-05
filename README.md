@@ -65,7 +65,7 @@ Embedded firmware can benefit pretty much from Zero-overhead C++ features alone,
 can explicitly shift several kind of computations to compile time leaving the application with pre-processed data.
 However it is not for the faint hearted, so several utilities to ease the process are provided in this directory.
 
-algorithm - Thing that could not fit into the others
+algorithm - Things that could not fit into the others
 ----------------------------------------------------
 
 These are really just a bunch of random stuff that have proven to be useful, like: binary-search, fnv hash, string utilites.
