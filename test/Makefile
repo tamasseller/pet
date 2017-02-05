@@ -1,4 +1,4 @@
-OUTPUT = PetTest
+OUTPUT = pet-test
 
 # Library sources
 
