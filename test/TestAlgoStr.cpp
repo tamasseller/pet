@@ -210,3 +210,100 @@ TEST(Str, nLength) {
 	CHECK(Str::nLength(temp3, 1) == 1);
 	CHECK(Str::nLength(temp4, 1) == 1);
 }
+
+TEST(Str, utoa10) {
+	char temp[12];
+
+	CHECK(Str::utoa<10>(0, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "0") == 0);
+
+	CHECK(Str::utoa<10>(1, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "1") == 0);
+
+	CHECK(Str::utoa<10>(10, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "10") == 0);
+
+	CHECK(Str::utoa<10>(11, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "11") == 0);
+
+	CHECK(Str::utoa<10>(23, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "23") == 0);
+
+	CHECK(Str::utoa<10>(99, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "99") == 0);
+
+	CHECK(Str::utoa<10>(100, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "100") == 0);
+
+	CHECK(Str::utoa<10>(654, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "654") == 0);
+
+	CHECK(!Str::utoa<10>(999999, temp, 0));
+	CHECK(!Str::utoa<10>(999999, temp, 1));
+	CHECK(!Str::utoa<10>(999999, temp, 2));
+	CHECK(!Str::utoa<10>(999999, temp, 3));
+	CHECK(!Str::utoa<10>(999999, temp, 4));
+	CHECK(!Str::utoa<10>(999999, temp, 5));
+	CHECK(!Str::utoa<10>(999999, temp, 6));
+	CHECK(Str::utoa<10>(999999, temp, 7));
+	CHECK(strcmp(temp, "999999") == 0);
+}
+
+TEST(Str, utoa13) {
+	char temp[12];
+
+	CHECK(Str::utoa<13>(13, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "10") == 0);
+
+	CHECK(Str::utoa<13>(14, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "11") == 0);
+
+	CHECK(Str::utoa<13>(25, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "1c") == 0);
+
+	CHECK(Str::utoa<13>(26, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "20") == 0);
+
+	CHECK(Str::utoa<13>(168, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "cc") == 0);
+
+	CHECK(Str::utoa<13>(169, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "100") == 0);
+}
+
+TEST(Str, utoa2) {
+	char temp[12];
+
+	CHECK(Str::utoa<2>(5, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "101") == 0);
+
+	CHECK(Str::utoa<2>(3, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "11") == 0);
+
+	CHECK(Str::utoa<2>(5, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "101") == 0);
+
+	CHECK(Str::utoa<2>(9, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "1001") == 0);
+
+	CHECK(Str::utoa<2>(180, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "10110100") == 0);
+}
+
+TEST(Str, utoa16) {
+	char temp[12];
+
+	CHECK(Str::utoa<16>(4919, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "1337") == 0);
+
+	CHECK(Str::utoa<16>(721077, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "b00b5") == 0);
+
+	CHECK(Str::utoa<16>(24589, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "600d") == 0);
+
+	char big[sizeof(uint32_t)*2+1];
+	CHECK(Str::utoa<16>(UINT_MAX, big, sizeof(big)));
+	CHECK(strcmp(big, "ffffffff") == 0);
+}
+

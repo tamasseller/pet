@@ -22,6 +22,9 @@
 
 #define restrict __restrict
 
+#include "meta/ExpLog.h"
+#include "meta/Range.h"
+
 namespace algorithm {
 
 /**
@@ -157,6 +160,33 @@ struct Str {
 			ret++;
 
 		return ret;
+	}
+
+	template<unsigned int base>
+	static inline bool utoa(unsigned int x, char* output, unsigned int length)
+	{
+		static constexpr const char digits[] = "0123456789abcdef";
+
+		static_assert(base <= (sizeof(digits)/sizeof(digits[0])), "Radix too high");
+
+		constexpr auto maxPlaces = meta::log<base>::template x<UINT_MAX>::value;
+		constexpr auto &table = meta::applyOverRange<meta::exp<base>::template x, 1, maxPlaces>::value;
+
+		unsigned int n = 0;
+		while(x >= table[n] && n < sizeof(table)/sizeof(table[0])) n++;
+
+		if(!length || n >= length - 1)
+			return false; // too long
+
+		output += n;
+		output[1] = '\0';
+
+		do {
+			*output-- = digits[x % base];
+			x /= base;
+		} while(n--);
+
+		return true;
 	}
 };
 
