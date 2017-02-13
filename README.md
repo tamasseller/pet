@@ -16,7 +16,7 @@ The structure of the source tree is segmented into directories based on topic,
 but please note that there are significant amount of cross including between the headers, 
 so to keep things simple **add the root of the libraray tree to your include path** to get things going.
 
-data - Intrusive containers
+Intrusive containers (data)
 ---------------------------
 
 These containers take a completely different route than the STL containers, and are supposed to
@@ -33,8 +33,8 @@ is not necassarily a drawback.
 Also dynamic memory management needs to be carefully controlled, due to increased probability
 of heap fragmentation, thus has to be decoupled from the containers as much as possible.
 
-heap - Heap implementation with some extra.
--------------------------------------------
+Heap implementation with some extra (heap)
+------------------------------------------
 
 Although completely dynamic memory management can be problematic in MMU-less systems, sometimes it is inevitable.
 The heap solution provided is designed in a manner that enables the user to tweak all of the relevant aspects of 
@@ -43,7 +43,7 @@ its behavior, and also it is extensible by additional user supplied 'policies' (
 It is designed to have minimal overhead and to provide blocks with arbitrary bits of alignment.
 It also provides a checksumming feature, that is invaluable to detect application memory management errors.
 
-pool - All sorts of memory pools
+All sorts of memory pools (pool)
 --------------------------------
 
 Memory pools are memory management helpers - much simpler than a Heap - that can be used to group together several 
@@ -51,26 +51,26 @@ allocations request into a single block allocation, which can be satisfied by ei
 
 There are many variants implemented here, all of which offer a different tradeoff between overhead and flexibility.
 
-managed - More automatic containers
+More automatic containers (managed)
 -----------------------------------
 
 These are much more STL like high-level containers based on the lower level things found in the _data_ directory.
 These are mainly convenince wrappers, to be used in scenarios where the lower level ones do not offer any benefit.
 Can be used with the provided pools (some of which can in turn be backed by a heap).
 
-meta - Metaprogramming utilites 
+Metaprogramming utilites (meta)
 -------------------------------
 
 Embedded firmware can benefit pretty much from Zero-overhead C++ features alone, but template metaprogramming techniques
 can explicitly shift several kind of computations to compile time leaving the application with pre-processed data.
 However it is not for the faint hearted, so several utilities to ease the process are provided in this directory.
 
-algorithm - Things that could not fit into the others
-----------------------------------------------------
+Things that could not fit into the others (algorithm)
+-----------------------------------------------------
 
 These are really just a bunch of random stuff that have proven to be useful, like: binary-search, fnv hash, string utilites.
 
-ubiquitous - Stuff that always come in handy
+Stuff that always come in handy (ubiquitous)
 --------------------------------------------
 
 Two things in here: a compile time configurable tracing helper, to avoid spoling the code with 'debug printfs'.
