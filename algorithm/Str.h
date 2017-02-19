@@ -25,6 +25,8 @@
 #include "meta/ExpLog.h"
 #include "meta/Range.h"
 
+#include <limits.h>
+
 namespace algorithm {
 
 /**
