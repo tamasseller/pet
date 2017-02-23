@@ -39,8 +39,7 @@ private:
 public:
 	Pool(){
 		static_assert(size != 0xff, "Túl nagy pool");
-		head = 0xff;
-		tail = 0;
+		clear();
 	}
 
 	/**
@@ -97,6 +96,14 @@ public:
 	 */
 	bool isEmpty(){
 		return !hasFree() && !hasSpare();
+	}
+
+	/**
+	 * Resets the pool.
+	 */
+	void clear() {
+		head = 0xff;
+		tail = 0;
 	}
 };
 
