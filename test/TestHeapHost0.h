@@ -31,7 +31,7 @@
 
 #undef new
 
-using namespace mm;
+using namespace pet;
 
 template<class SizeType, unsigned int alignmentBits, unsigned int spare>
 class MockPolicy: HeapBase<SizeType, alignmentBits> {

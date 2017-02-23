@@ -20,7 +20,7 @@
 #ifndef FNV_H_
 #define FNV_H_
 
-namespace algorithm {
+namespace pet {
 
 /**
  * FNV hash.

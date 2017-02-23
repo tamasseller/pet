@@ -23,7 +23,7 @@
 #include "heap/Heap.h"
 #include "data/LinkedList.h"
 
-namespace mm {
+namespace pet {
 
 /**
  * Singly linked list based best-fit allocator policy.
@@ -42,22 +42,22 @@ class BestFitPolicy: protected HeapBase<SizeType, alignmentBits>
 		FreeBlock* next;
 	};
 
-	container::LinkedList<FreeBlock> freeStore;
+	pet::LinkedList<FreeBlock> freeStore;
 
 protected:
-	/** @copydoc mm::TlsfPolicy::freeHeaderSize */
+	/** @copydoc pet::TlsfPolicy::freeHeaderSize */
 	static constexpr unsigned int freeHeaderSize = sizeof(FreeBlock);
 
-	/** @copydoc mm::TlsfPolicy::add(Block */
+	/** @copydoc pet::TlsfPolicy::add(Block */
 	inline void add(Block block);
 
-	/** @copydoc mm::TlsfPolicy::remove */
+	/** @copydoc pet::TlsfPolicy::remove */
 	inline void remove(Block block);
 
-	/** @copydoc mm::TlsfPolicy::findAndRemove */
+	/** @copydoc pet::TlsfPolicy::findAndRemove */
 	inline Block findAndRemove(unsigned int size);
 
-	/** @copydoc mm::TlsfPolicy::update */
+	/** @copydoc pet::TlsfPolicy::update */
 	inline void update(unsigned int oldSize, Block block);
 };
 

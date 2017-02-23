@@ -26,7 +26,7 @@
 #include "MockAllocator.h"
 #include "FailureInjectorPlugin.h"
 
-using namespace mm;
+using namespace pet;
 
 typedef DynamicFifo<int, FailableAllocator, 3> TestFifo;
 

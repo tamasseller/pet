@@ -11,7 +11,7 @@
 
 #include "heap/AvlTreePolicy.h"
 
-using namespace mm;
+using namespace pet;
 
 typedef AvlHeap<uint32_t, 2, true> TestHeap;
 

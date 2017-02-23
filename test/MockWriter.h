@@ -22,7 +22,7 @@
 
 #include "ubiquitous/PrintfWriter.h"
 
-class MockWriter: ubiq::PrintfWriter {
+class MockWriter: pet::PrintfWriter {
 protected:
 	static void write(const char* val);
 	static void write(short val);

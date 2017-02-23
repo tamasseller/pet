@@ -22,7 +22,7 @@
 
 #include "CppUTest/TestHarness.h"
 
-using namespace container;
+using namespace pet;
 
 typedef DynamicTreeMap<int, int, Allocator> TestMap;
 

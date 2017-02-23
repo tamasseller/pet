@@ -28,7 +28,7 @@
 #include <iostream>
 #include <algorithm>
 
-using namespace container;
+using namespace pet;
 
 TEST_GROUP(RegistrySanity) {
 	TEST_TEARDOWN() {

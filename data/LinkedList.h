@@ -24,7 +24,7 @@
 #include "meta/FieldAccessor.h"
 #include "algorithm/Iterate.h"
 
-namespace container {
+namespace pet {
 
 /**
  * Singly linked list.
@@ -45,7 +45,7 @@ namespace container {
  * @note 	An object can be added to a list only once.
  */
 template<class Element>
-class LinkedList: public algorithm::IterativeSearch<LinkedList<Element>, Element>::Decorator {
+class LinkedList: public pet::IterativeSearch<LinkedList<Element>, Element>::Decorator {
 	Element* first = 0;
 public:
 	/**

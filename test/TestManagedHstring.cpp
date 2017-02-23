@@ -26,7 +26,7 @@
 
 #undef new
 
-using namespace container;
+using namespace pet;
 
 struct HstringHelper: public IdentifierRegistryInternals::Hstring {
 	inline HstringHelper(const char* str): IdentifierRegistryInternals::Hstring(str){}

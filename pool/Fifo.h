@@ -24,7 +24,7 @@
 
 #include <stddef.h>
 
-namespace mm {
+namespace pet {
 
 /**
  * Dynamic, framed FIFO object.

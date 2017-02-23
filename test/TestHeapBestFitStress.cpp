@@ -24,7 +24,7 @@
 #include "heap/Heap.h"
 #include "heap/BestFitPolicy.h"
 
-using namespace mm;
+using namespace pet;
 
 #include "TestHeapStress.h"
 

@@ -24,7 +24,7 @@
 #include "data/DoubleList.h"
 #include "ubiquitous/Error.h"
 
-namespace mm {
+namespace pet {
 
 /**
  * Static pool of objects.
@@ -48,7 +48,7 @@ public:
 	 *
 	 * @return	The allocated item.
 	 */
-	ubiq::FailPointer<Element> acquire(){
+	pet::FailPointer<Element> acquire(){
 		Element* ret = 0;
 		if(!hasFree()){
 			if(hasSpare())
@@ -100,7 +100,7 @@ public:
 	}
 };
 
-/** @copydoc mm::Pool */
+/** @copydoc pet::Pool */
 template <typename Element, class Allocator, unsigned int countPerFrame = 16>
 class StaticPool: public Pool<Element, countPerFrame> {};
 
@@ -150,8 +150,8 @@ private:
 
 protected:
 	/** The first element in the frame list */
-	container::DoubleList<Frame> nonemptyFrames;
-	container::LinkedList<Frame> emptyFrames;
+	pet::DoubleList<Frame> nonemptyFrames;
+	pet::LinkedList<Frame> emptyFrames;
 
 public:
 	/**
@@ -161,7 +161,7 @@ public:
 	 *
 	 * @return 	The allocated object or NULL on failure.
 	 */
-	ubiq::FailPointer<Element> acquire()
+	pet::FailPointer<Element> acquire()
 	{
 		Frame* current = nonemptyFrames.iterator().current();
 

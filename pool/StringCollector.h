@@ -22,7 +22,7 @@
 
 #include <stddef.h>
 
-namespace mm {
+namespace pet {
 
 /**
  * Appendable multiple string storage.

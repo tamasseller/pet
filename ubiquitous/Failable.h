@@ -22,7 +22,7 @@
 
 #include "ubiquitous/ConfigHelper.h"
 
-namespace ubiq {
+namespace pet {
 
 /** @cond */
 
@@ -80,7 +80,7 @@ inline Police::Police(const Police& old): errorHandle(old.errorHandle) {
  * and if it reaches zero, then the flag is checked. If the error has not been checked until this
  * point, the alarm is triggered.
  *
- * @note This class is supposed to be used through the typedef ubiq::Failable.
+ * @note This class is supposed to be used through the typedef pet::Failable.
  *
  * @tparam	Value			The wrapped type.
  * @tparam	Specific		CRTP style client that has to inherit from this class and
@@ -151,7 +151,7 @@ public:
  *
  * Wrapps automatic error reporting optimize-out hacks.
  *
- * @note 	This class is supposed to be used instead of ubiq::Failable.
+ * @note 	This class is supposed to be used instead of pet::Failable.
  *
  * @tparam	Value			The wrapped type.
  * @tparam	Specific		CRTP style client that has to inherit from this class and

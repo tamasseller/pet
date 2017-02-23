@@ -33,7 +33,7 @@
 
 /** @cond */
 
-namespace ubiq {
+namespace pet {
 
 class Global;
 
@@ -61,11 +61,11 @@ public:
 
 
 #define UNCHECKED_ERROR_REPORT()											\
-namespace ubiq { template<> struct ErrorReporter<Global>: public Police {	\
+namespace pet { template<> struct ErrorReporter<Global>: public Police {	\
 	inline static void reportError();										\
 };}																			\
 																			\
-inline void ubiq::ErrorReporter<ubiq::Global>::reportError()
+inline void pet::ErrorReporter<pet::Global>::reportError()
 
 
 

@@ -24,9 +24,9 @@
 
 #include "ubiquitous/Trace.h"
 
-namespace container {
+namespace pet {
 
-class BinaryTreeTrace: public ubiq::Trace<BinaryTreeTrace> {};
+class BinaryTreeTrace: public pet::Trace<BinaryTreeTrace> {};
 
 /**
  * Generic in-memory binary search tree.

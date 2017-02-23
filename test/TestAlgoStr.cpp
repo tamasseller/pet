@@ -23,7 +23,7 @@
 
 #include <string.h>
 
-using namespace algorithm;
+using namespace pet;
 
 TEST_GROUP(Str)
 {

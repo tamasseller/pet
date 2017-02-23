@@ -10,7 +10,7 @@
 #include "heap/Heap.h"
 #include "heap/TlsfPolicy.h"
 
-using namespace mm;
+using namespace pet;
 
 #include "TestHeapStress.h"
 

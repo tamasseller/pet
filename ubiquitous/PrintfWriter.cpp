@@ -21,7 +21,7 @@
 
 #include <cstdio>
 
-namespace ubiq {
+namespace pet {
 
 void PrintfWriter::write(const char* val) {
 	printf("%s", val);

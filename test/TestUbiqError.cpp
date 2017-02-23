@@ -22,7 +22,7 @@
 
 #include "ubiquitous/Error.h"
 
-using namespace ubiq;
+using namespace pet;
 
 TEST_GROUP(FailPointer) {
 	template <class T>

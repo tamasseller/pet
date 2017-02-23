@@ -20,7 +20,7 @@
 #ifndef EXPLOG_H_
 #define EXPLOG_H_
 
-namespace meta {
+namespace pet {
 
 namespace detail {
 	template<unsigned int base, unsigned int n>

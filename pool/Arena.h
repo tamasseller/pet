@@ -22,7 +22,7 @@
 
 #include "ubiquitous/Error.h"
 
-namespace mm {
+namespace pet {
 /**
  * Incremental allocator.
  *
@@ -56,7 +56,7 @@ public:
 	 *
 	 * @return 	The allocated object or NULL on failure.
 	 */
-	ubiq::FailPointer<Element> acquire(){
+	pet::FailPointer<Element> acquire(){
 		if(!frameList || counter == countPerFrame){
 			counter = 0;
 

@@ -27,7 +27,7 @@
 
 #include <limits.h>
 
-namespace algorithm {
+namespace pet {
 
 /**
  * String utility functions.
@@ -171,8 +171,8 @@ struct Str {
 
 		static_assert(base <= (sizeof(digits)/sizeof(digits[0])), "Radix too high");
 
-		constexpr auto maxPlaces = meta::log<base>::template x<UINT_MAX>::value;
-		constexpr auto &table = meta::applyOverRange<meta::exp<base>::template x, 1, maxPlaces>::value;
+		constexpr auto maxPlaces = pet::log<base>::template x<UINT_MAX>::value;
+		constexpr auto &table = pet::applyOverRange<pet::exp<base>::template x, 1, maxPlaces>::value;
 
 		unsigned int n = 0;
 		while(x >= table[n] && n < sizeof(table)/sizeof(table[0])) n++;

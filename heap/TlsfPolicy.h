@@ -25,7 +25,7 @@
 
 class TlsfPolicyInternalsTest;
 
-namespace mm {
+namespace pet {
 
 /**
  * Two-level segregated fit allocator policy.
@@ -89,7 +89,7 @@ class TlsfPolicy: private HeapBase<SizeType, alignmentBits> {
          * This class represents a bucket, that contains
          * the blocks of the associated size range.
          */
-        class FreeList: protected container::DoubleList<FreeBlock> {
+        class FreeList: protected pet::DoubleList<FreeBlock> {
         public:
         	/**
         	 * Add front.
@@ -134,7 +134,7 @@ class TlsfPolicy: private HeapBase<SizeType, alignmentBits> {
          * This lives in the payload section of a freed up block.
          */
         class FreeBlock {
-        	friend container::DoubleList<FreeBlock>;
+        	friend pet::DoubleList<FreeBlock>;
 			FreeBlock *next, *prev;
         };
 

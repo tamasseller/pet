@@ -1,7 +1,7 @@
 Heap
 ====
 
-The heap solution provided by the mm namespace consists of two layers: the host and a policy layer.
+The heap solution provided consists of two layers: the host and a policy layer.
 An actual heap is made of the host component and one policy bound together.
 Also the user can easily create additional policies if that fit his/her specific requirements more closely.
 

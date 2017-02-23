@@ -20,7 +20,7 @@
 #ifndef PRINTFWRITER_H_
 #define PRINTFWRITER_H_
 
-namespace ubiq {
+namespace pet {
 
 /**
  * Tarce writer that uses printf.

@@ -24,7 +24,7 @@
 #include "meta/FieldAccessor.h"
 #include "algorithm/Iterate.h"
 
-namespace container {
+namespace pet {
 
 /**
  * Doubly linked list.
@@ -44,7 +44,7 @@ namespace container {
  * @note 	An object can be added to a list only once.
  */
 template<class Element>
-class DoubleList: public algorithm::IterativeSearch<DoubleList<Element>, Element>::Decorator {
+class DoubleList: public pet::IterativeSearch<DoubleList<Element>, Element>::Decorator {
 	Element* first = 0;
 public:
 	/** @copydoc LinkedList::Iterator */

@@ -26,7 +26,7 @@
 
 #include <stddef.h>
 
-namespace container {
+namespace pet {
 
 /**
  * AVL tree backed key-value store template.
@@ -287,7 +287,7 @@ public:
 template <class KeyType, class ValueType, class Allocator>
 using ArenaTreeMap = TreeMap<	KeyType,
 								ValueType,
-								mm::Arena<typename ImmutableTreeMap<KeyType, ValueType>::Node, Allocator>>;
+								pet::Arena<typename ImmutableTreeMap<KeyType, ValueType>::Node, Allocator>>;
 
 /**
  * Dynamic pool backed KV store.
@@ -301,6 +301,6 @@ using ArenaTreeMap = TreeMap<	KeyType,
 template <class KeyType, class ValueType, class Allocator, unsigned int poolParam = 16>
 using DynamicTreeMap = TreeMap<	KeyType,
 								ValueType,
-								mm::DynamicPool<typename ImmutableTreeMap<KeyType, ValueType>::Node, Allocator, poolParam>>;
+								pet::DynamicPool<typename ImmutableTreeMap<KeyType, ValueType>::Node, Allocator, poolParam>>;
 }
 #endif

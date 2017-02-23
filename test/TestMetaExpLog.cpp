@@ -21,7 +21,7 @@
 
 #include "meta/ExpLog.h"
 
-using namespace meta;
+using namespace pet;
 
 TEST_GROUP(Exp) {};
 

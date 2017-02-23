@@ -29,14 +29,14 @@ struct TestBase {
 		Client::assert(false);
 		Client::assert(true, "foo");
 		Client::assert(false, "bar");
-		Client::template assert<ubiq::Level::Warning>(false, "foobar");
+		Client::template assert<pet::Level::Warning>(false, "foobar");
 	}
 };
 
-struct A: ubiq::Trace<A>, TestBase<A> {};
-struct B: ubiq::Trace<B>, TestBase<B> {};
+struct A: pet::Trace<A>, TestBase<A> {};
+struct B: pet::Trace<B>, TestBase<B> {};
 namespace ns {
-struct C: ubiq::Trace<C>, TestBase<C> {};
+struct C: pet::Trace<C>, TestBase<C> {};
 }
 
 TEST_GROUP(TraceTest) {

@@ -22,7 +22,7 @@
 
 #include "ubiquitous/Failable.h"
 
-namespace ubiq {
+namespace pet {
 
 /**
  * Pointer that is null on error.
@@ -39,7 +39,7 @@ class FailPointer: public Failable<FailPointer<T>, T*> {
 		return this->value == 0;
 	}
 public:
-	/** @copydoc ubiq::FailableBase::FailableBase() */
+	/** @copydoc pet::FailableBase::FailableBase() */
 	inline FailPointer(T* value): Failable<FailPointer<T>, T*>(value) {}
 
 	/**
@@ -76,7 +76,7 @@ class FailValue: public Failable<FailValue<T, errorValue>, T> {
 		return this->value == errorValue;
 	}
 public:
-	/** @copydoc ubiq::FailableBase::FailableBase() */
+	/** @copydoc pet::FailableBase::FailableBase() */
 	inline FailValue(T value): Failable<FailValue<T, errorValue>, T>(value) {}
 
 	/**
@@ -96,7 +96,7 @@ public:
 		return (U)(T)(*this);
 	};
 
-	/** @copydoc ubiq::FailableBase::rethrow() */
+	/** @copydoc pet::FailableBase::rethrow() */
 	FailValue rethrow() {
 		return FailValue(this->value);
 	}
@@ -300,7 +300,7 @@ public:
 	/** @copydoc FailValue::FailValue(const FailValue&) */
 	inline GenericError(const GenericError &old): Failable<GenericError, int>(old) {}
 
-	/** @copydoc ubiq::FailableBase::FailableBase() */
+	/** @copydoc pet::FailableBase::FailableBase() */
 	inline GenericError(int value): Failable<GenericError, int>(value) {}
 
 	/**

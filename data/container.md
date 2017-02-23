@@ -1,5 +1,3 @@
-@namespace container
-
 @brief Intrusive containers.
 
 These containers take a completely different route than the STL containers, and are supposed to

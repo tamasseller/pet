@@ -25,14 +25,14 @@
 
 class HeapInternalsTest;
 
-namespace mm {
+namespace pet {
 
 /**
  * Trace tag.
  *
  * Use this class as an identifier to enable tracing of heap events.
  */
-class AllHeapsTrace: public ubiq::Trace<AllHeapsTrace> {};
+class AllHeapsTrace: public pet::Trace<AllHeapsTrace> {};
 
 /**
  * Common base for the heap host and the policies.
@@ -384,7 +384,7 @@ protected:
 template<class Policy, class SizeType, unsigned int alignmentBits, bool useChecksum = false>
 class Heap:	public Policy,
 			protected HeapHostBase<SizeType, alignmentBits, useChecksum>,
-			protected ubiq::Trace<AllHeapsTrace>
+			protected pet::Trace<AllHeapsTrace>
 
 {
 	friend HeapInternalsTest;
@@ -451,7 +451,7 @@ class Heap:	public Policy,
     	 * @param	size The amount (in bytes) to be allocated.
     	 * @return	A pointer to the start of the allocated region or NULL on failure.
     	 */
-    	ubiq::FailPointer<void> alloc(unsigned int size);
+    	pet::FailPointer<void> alloc(unsigned int size);
 
     	/**
     	 * Release used memory.
@@ -498,7 +498,7 @@ inline Heap<Policy, SizeType, alignmentBits, useChecksum>::Heap(void* start, uns
 }
 
 template<class Policy, class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline ubiq::FailPointer<void> Heap<Policy, SizeType, alignmentBits, useChecksum>::alloc(unsigned int sizeParam)
+inline pet::FailPointer<void> Heap<Policy, SizeType, alignmentBits, useChecksum>::alloc(unsigned int sizeParam)
 {
     unsigned int size = sizeParam;
 

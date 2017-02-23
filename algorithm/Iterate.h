@@ -23,7 +23,7 @@
 #include "ubiquitous/Compiler.h"
 #include "meta/FieldAccessor.h"
 
-namespace algorithm{
+namespace pet {
 
 /**
  * Find by value.
@@ -54,10 +54,10 @@ public:
 	 * @see		The unit test of this class provides some examples of the usage.
 	 */
 	template<class... T>
-	really inline static Element* findByFields(Container* container, meta::finalTypeOf<T...> value, const T&... fields)
+	really inline static Element* findByFields(Container* container, pet::finalTypeOf<T...> value, const T&... fields)
 	{
 		for(typename Container::Iterator it = container->iterator(); it.current(); it.step())
-			if(meta::access(*it.current(), fields...) == value)
+			if(pet::access(*it.current(), fields...) == value)
 				return it.current();
 
 		return 0;
@@ -81,7 +81,7 @@ public:
 		 * @see For details see IterativeSearch.
 		 */
 		template<class... T>
-		really inline Element* findByFields(meta::finalTypeOf<T...> value, const T&... fields) const
+		really inline Element* findByFields(pet::finalTypeOf<T...> value, const T&... fields) const
 		{
 			return IterativeSearch<Container, Element>::findByFields((Container*) this, value, fields...);
 		}

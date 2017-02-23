@@ -25,7 +25,7 @@
 #include "ubiquitous/General.h"
 #include <cstdlib>
 
-using namespace mm;
+using namespace pet;
 
 TEST_GROUP(DynamicPool) {
 	constexpr static unsigned int NALLOC = 30;

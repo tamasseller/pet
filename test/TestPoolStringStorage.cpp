@@ -25,7 +25,7 @@
 
 #include "MockAllocator.h"
 
-using namespace mm;
+using namespace pet;
 
 TEST_GROUP(StringStorageInstrumented) {
 	template<unsigned int ss>

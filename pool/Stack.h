@@ -24,7 +24,7 @@
 
 #undef new
 
-namespace mm {
+namespace pet {
 
 /**
  * Dynamic, framed stack like storage (immutable part).
@@ -190,7 +190,7 @@ public:
 /**
  * Dynamic, framed stack like, mutable storage.
  *
- * @copydetails mm::ImmutableDynamicStack
+ * @copydetails pet::ImmutableDynamicStack
  *
  * @note	This is the class that is supposed to be used by the end user.
  */
@@ -233,7 +233,7 @@ public:
 	 * @param	other The stack whose content is to be copied.
 	 * @return	The new top of stack or NULL on allocation error.
 	 */
-	inline ubiq::FailPointer<Element> copyFrom(const DynamicStack& other);
+	inline pet::FailPointer<Element> copyFrom(const DynamicStack& other);
 
 	/**
 	 * Destroy current content and take over another.
@@ -253,7 +253,7 @@ public:
 	 *
 	 * @return	The new slot acquired or NULL on allocation failure.
 	 */
-	inline ubiq::FailPointer<Element> acquire();
+	inline pet::FailPointer<Element> acquire();
 
 	/**
 	 * Zero-copy pop.
@@ -374,7 +374,7 @@ inline typename ImmutableDynamicStack<Element, frameSize>::BottomUpIterator Immu
 }
 
 template<class Element, class Allocator, unsigned int frameSize>
-inline ubiq::FailPointer<Element> DynamicStack<Element, Allocator, frameSize>::acquire(){
+inline pet::FailPointer<Element> DynamicStack<Element, Allocator, frameSize>::acquire(){
 	if((!Base::currFrame) || (Base::pos == (frameSize-1))){
 		Frame *newFrame = (Frame *)Allocator::alloc(sizeof(Frame));
 
@@ -431,7 +431,7 @@ inline DynamicStack<Element, Allocator, frameSize>::~DynamicStack(){
 }
 
 template<class Element, class Allocator, unsigned int frameSize>
-inline ubiq::FailPointer<Element> DynamicStack<Element, Allocator, frameSize>::copyFrom(const DynamicStack& other) {
+inline pet::FailPointer<Element> DynamicStack<Element, Allocator, frameSize>::copyFrom(const DynamicStack& other) {
 	cleanup();
 	Base::pos = other.pos;
 	Base::currFrame = other.currFrame;

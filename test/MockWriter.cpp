@@ -28,7 +28,7 @@ void MockWriter::write(const char* val)
 	if(writerMocked)
 		mock("MockWriter").actualCall("write<const char*>").withStringParameter("val", val);
 	else
-		ubiq::PrintfWriter::write(val);
+		pet::PrintfWriter::write(val);
 }
 
 void MockWriter::write(void* val)
@@ -36,7 +36,7 @@ void MockWriter::write(void* val)
 	if(writerMocked)
 		mock("MockWriter").actualCall("write<void*>").withPointerParameter("val", val);
 	else
-		ubiq::PrintfWriter::write(val);
+		pet::PrintfWriter::write(val);
 }
 
 void MockWriter::write(short val)
@@ -44,7 +44,7 @@ void MockWriter::write(short val)
 	if(writerMocked)
 		mock("MockWriter").actualCall("write<short>").withIntParameter("val", val);
 	else
-		ubiq::PrintfWriter::write(val);
+		pet::PrintfWriter::write(val);
 }
 
 void MockWriter::write(unsigned short val)
@@ -52,7 +52,7 @@ void MockWriter::write(unsigned short val)
 	if(writerMocked)
 		mock("MockWriter").actualCall("write<unsigned short>").withIntParameter("val", val);
 	else
-		ubiq::PrintfWriter::write(val);
+		pet::PrintfWriter::write(val);
 }
 
 void MockWriter::write(int val)
@@ -60,7 +60,7 @@ void MockWriter::write(int val)
 	if(writerMocked)
 		mock("MockWriter").actualCall("write<int>").withIntParameter("val", val);
 	else
-		ubiq::PrintfWriter::write(val);
+		pet::PrintfWriter::write(val);
 }
 
 void MockWriter::write(unsigned int val)
@@ -68,7 +68,7 @@ void MockWriter::write(unsigned int val)
 	if(writerMocked)
 		mock("MockWriter").actualCall("write<unsigned int>").withIntParameter("val", val);
 	else
-		ubiq::PrintfWriter::write(val);
+		pet::PrintfWriter::write(val);
 }
 
 void MockWriter::write(long val)
@@ -76,7 +76,7 @@ void MockWriter::write(long val)
 	if(writerMocked)
 		mock("MockWriter").actualCall("write<long>").withIntParameter("val", val);
 	else
-		ubiq::PrintfWriter::write(val);
+		pet::PrintfWriter::write(val);
 }
 
 void MockWriter::write(unsigned long val)
@@ -84,7 +84,7 @@ void MockWriter::write(unsigned long val)
 	if(writerMocked)
 		mock("MockWriter").actualCall("write<unsigned long>").withIntParameter("val", val);
 	else
-		ubiq::PrintfWriter::write(val);
+		pet::PrintfWriter::write(val);
 }
 
 void MockWriter::write(float val)
@@ -92,7 +92,7 @@ void MockWriter::write(float val)
 	if(writerMocked)
 		mock("MockWriter").actualCall("write<float>").withDoubleParameter("val", val);
 	else
-		ubiq::PrintfWriter::write(val);
+		pet::PrintfWriter::write(val);
 }
 
 void MockWriter::write(double val)
@@ -100,7 +100,7 @@ void MockWriter::write(double val)
 	if(writerMocked)
 		mock("MockWriter").actualCall("write<double>").withDoubleParameter("val", val);
 	else
-		ubiq::PrintfWriter::write(val);
+		pet::PrintfWriter::write(val);
 }
 
 void MockWriter::write(long double val)
@@ -108,5 +108,5 @@ void MockWriter::write(long double val)
 	if(writerMocked)
 		mock("MockWriter").actualCall("write<long double>").withDoubleParameter("val", val);
 	else
-		ubiq::PrintfWriter::write(val);
+		pet::PrintfWriter::write(val);
 }

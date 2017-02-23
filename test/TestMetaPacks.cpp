@@ -21,7 +21,7 @@
 
 #include "meta/Packs.h"
 
-using namespace meta;
+using namespace pet;
 
 TEST_GROUP(LastOf) {};
 

@@ -22,7 +22,7 @@
 
 #include "meta/Packs.h"
 
-namespace meta {
+namespace pet {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 namespace detail {
 	/**
@@ -87,6 +87,6 @@ using baseTypeOf = typename detail::PointerToMemberTypeExtractorPublisher<T>::Ba
 template <class... T>
 using finalTypeOf = valueTypeOf<lastOf<T...>>;
 
-} // namespace meta
+}
 
 #endif /* MEMBERPOINTERS_H_ */

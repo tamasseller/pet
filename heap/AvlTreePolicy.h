@@ -24,7 +24,7 @@
 
 class AvlPolicyInternalsTest;
 
-namespace mm {
+namespace pet {
 
 /**
  * Balanced binary search tree based best-fit allocator policy.
@@ -35,7 +35,7 @@ namespace mm {
  */
 
 template <class SizeType, unsigned int alignmentBits>
-class AvlTreePolicy: protected HeapBase<SizeType, alignmentBits>, protected container::AvlTree
+class AvlTreePolicy: protected HeapBase<SizeType, alignmentBits>, protected pet::AvlTree
 {
 	using typename HeapBase<SizeType, alignmentBits>::Block;
 
@@ -44,19 +44,19 @@ class AvlTreePolicy: protected HeapBase<SizeType, alignmentBits>, protected cont
 	}
 
 protected:
-	/** @copydoc mm::TlsfPolicy::freeHeaderSize */
+	/** @copydoc pet::TlsfPolicy::freeHeaderSize */
 	static constexpr unsigned int freeHeaderSize = sizeof(AvlTree::Node);
 
-	/** @copydoc mm::TlsfPolicy::add */
+	/** @copydoc pet::TlsfPolicy::add */
 	inline void add(Block block);
 
-	/** @copydoc mm::TlsfPolicy::remove */
+	/** @copydoc pet::TlsfPolicy::remove */
 	inline void remove(Block block);
 
-	/** @copydoc mm::TlsfPolicy::findAndRemove */
+	/** @copydoc pet::TlsfPolicy::findAndRemove */
 	inline Block findAndRemove(unsigned int size);
 
-	/** @copydoc mm::TlsfPolicy::update */
+	/** @copydoc pet::TlsfPolicy::update */
 	inline void update(unsigned int oldSize, Block block);
 };
 

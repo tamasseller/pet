@@ -21,7 +21,7 @@
 
 #include "data/DoubleList.h"
 
-using namespace container;
+using namespace pet;
 
 namespace {
 	class SimpleElement {

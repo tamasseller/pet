@@ -24,7 +24,7 @@
 
 #include "MockAllocator.h"
 
-using namespace mm;
+using namespace pet;
 
 TEST_GROUP(Arena) {
 	TEST_TEARDOWN() {

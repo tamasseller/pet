@@ -26,7 +26,7 @@
 
 #include <initializer_list>
 
-using namespace mm;
+using namespace pet;
 
 TEST_GROUP(DynamicStack) {
 	struct InstrumentedDynamicStack: public DynamicStack<int, FailableAllocator, 4> {

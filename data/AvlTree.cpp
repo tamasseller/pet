@@ -19,7 +19,7 @@
 
 #include "data/AvlTree.h"
 
-using namespace container;
+using namespace pet;
 
 AvlTree::AvlTree() {
 	root = 0;

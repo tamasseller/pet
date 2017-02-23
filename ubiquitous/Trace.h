@@ -22,7 +22,7 @@
 
 #include "ubiquitous/ConfigHelper.h"
 
-namespace ubiq {
+namespace pet {
 
 /** @cond */
 

@@ -23,7 +23,7 @@
 #include "ubiquitous/Compiler.h"
 #include "meta/MemberPointers.h"
 
-namespace meta {
+namespace pet {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 namespace detail {
 	/**
@@ -75,6 +75,6 @@ really inline static constexpr valueTypeOf<lastOf<T...>> &access(baseTypeOf<firs
 	return detail::AccessorHelper<T...>::access(b, fields...);
 }
 
-} // namespace meta
+}
 
 #endif /* FIELDACCESSOR_H_ */

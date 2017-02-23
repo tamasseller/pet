@@ -25,7 +25,7 @@
 #include "algorithm/Str.h"
 #include "pool/StringCollector.h"
 
-namespace container {
+namespace pet {
 
 /**
  * Definition order and visibility workaround.
@@ -107,8 +107,8 @@ namespace IdentifierRegistryInternals{
  * @see IdenteifierRegistryBase for the fully usable implementation.
  */
 
-class IdentifierRegistryBase: 	protected container::AvlTree,
-								protected algorithm::IterativeSearch<
+class IdentifierRegistryBase: 	protected pet::AvlTree,
+								protected pet::IterativeSearch<
 									IdentifierRegistryBase,
 									IdentifierRegistryInternals::Node>::Decorator{
 protected:
@@ -128,12 +128,12 @@ public:
 	 * 			This condition is not checked, because there is no zero-overhead way to do it, so avoiding
 	 * 			this usage is entirely up to the user.
 	 */
-	class Iterator: public container::BinaryTree::Iterator {
-		typedef container::BinaryTree Tree;
+	class Iterator: public pet::BinaryTree::Iterator {
+		typedef pet::BinaryTree Tree;
 		friend IdentifierRegistryBase;
 		inline Iterator(const Tree::Iterator& it): Tree::Iterator(it) {}
 	public:
-		/** @copydoc container::BinaryTree::Iterator::current() const */
+		/** @copydoc pet::BinaryTree::Iterator::current() const */
 		inline Node* current() const {
 			if(Tree::Node* ret = Tree::Iterator::current())
 				return (Node*) ret;
@@ -141,13 +141,13 @@ public:
 			return 0;
 		}
 
-		/** @copydoc container::BinaryTree::Iterator::step() */
+		/** @copydoc pet::BinaryTree::Iterator::step() */
 		inline void step() {
 			Tree::Iterator::step();
 		}
 	};
 
-	/** @copydoc container::BinaryTree::iterator() */
+	/** @copydoc pet::BinaryTree::iterator() */
 	inline Iterator iterator() const;
 };
 
@@ -175,12 +175,12 @@ public:
  */
 template <class Allocator, unsigned int avgStrLen=8, unsigned int countPerFrame=8>
 class IdentifierRegistry: 	private IdentifierRegistryBase,
-							private mm::StringCollector<
+							private pet::StringCollector<
 								(sizeof(IdentifierRegistryBase::Node)+avgStrLen)*countPerFrame,
 								sizeof(IdentifierRegistryBase::Node),
 								Allocator>
 {
-	typedef mm::StringCollector<(sizeof(IdentifierRegistryBase::Node)+8)*8, sizeof(IdentifierRegistryBase::Node), Allocator> Store;
+	typedef pet::StringCollector<(sizeof(IdentifierRegistryBase::Node)+8)*8, sizeof(IdentifierRegistryBase::Node), Allocator> Store;
 
 	unsigned int lastId = 0;
 public:
@@ -242,7 +242,7 @@ public:
 inline IdentifierRegistryInternals::Hstring::Hstring(): hashres(-1) {}
 
 inline IdentifierRegistryInternals::Hstring::Hstring(const char* str){
-	hashres = algorithm::Fnv::hash(str);
+	hashres = pet::Fnv::hash(str);
 }
 
 inline const char* IdentifierRegistryInternals::Hstring::str() const{
@@ -254,7 +254,7 @@ inline int IdentifierRegistryInternals::Hstring::operator - (const Hstring& o) c
 	if(int ret = o.hashres - hashres)
 		return ret;
 
-	return algorithm::Str::cmp(str(), o.str());
+	return pet::Str::cmp(str(), o.str());
 }
 
 inline void* IdentifierRegistryInternals::Hstring::operator new(unsigned int u, void* ret){
@@ -262,7 +262,7 @@ inline void* IdentifierRegistryInternals::Hstring::operator new(unsigned int u, 
 }
 
 inline IdentifierRegistryBase::Iterator IdentifierRegistryBase::iterator() const {
-	return container::AvlTree::iterator();
+	return pet::AvlTree::iterator();
 }
 
 inline int IdentifierRegistryBase::comparator(BinaryTree::Node* node, const IdentifierRegistryInternals::Hstring &key) {

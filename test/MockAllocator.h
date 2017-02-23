@@ -26,7 +26,7 @@
 #include "ubiquitous/Error.h"
 #include "ubiquitous/Trace.h"
 
-class MockAllocatorTrace: public ubiq::Trace<MockAllocatorTrace> {};
+class MockAllocatorTrace: public pet::Trace<MockAllocatorTrace> {};
 
 struct Allocator {
 	static unsigned int count;

@@ -1,8 +1,6 @@
-@namespace ubiq
-
 @brief Mixed utilities that can come in handy in any context.
 
-The _ubiq_ namespace contains several completely seperate tools:
+More or less unrelated tools:
 
  - The Failable class end its descendants, usable for ensuring the presence of error checking code, in test builds.
  - The Trace class, which implements a compile time parametrizable filter and router for debugging info.

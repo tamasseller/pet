@@ -20,7 +20,7 @@
 #ifndef PACKS_H_
 #define PACKS_H_
 
-namespace meta {
+namespace pet {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 namespace detail {
 	/**

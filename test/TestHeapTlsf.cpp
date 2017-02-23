@@ -22,7 +22,7 @@
 #include "heap/Heap.h"
 #include "heap/TlsfPolicy.h"
 
-using namespace mm;
+using namespace pet;
 
 typedef TlsfPolicy<uint32_t, 2> Policy;
 typedef Heap<Policy, uint32_t, 2> TestHeap;

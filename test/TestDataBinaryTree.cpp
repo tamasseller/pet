@@ -21,7 +21,7 @@
 
 #include "data/BinaryTree.h"
 
-using namespace container;
+using namespace pet;
 
 struct TestTree: BinaryTree {
 	struct Node: BinaryTree::Node {

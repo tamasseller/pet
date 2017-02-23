@@ -24,7 +24,7 @@
 
 #include <stddef.h>
 
-namespace container {
+namespace pet {
 
 /**
  * Self balancing in-memory binary search tree.

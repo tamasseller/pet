@@ -17,7 +17,7 @@
 class HeapStressTestTraceTag;
 
 template <class Heap, unsigned int heapSize, unsigned int rounds, unsigned int minAlloc, unsigned int maxAlloc>
-class HeapStress: ubiq::Trace<HeapStressTestTraceTag> {
+class HeapStress: pet::Trace<HeapStressTestTraceTag> {
 	Heap heap;
 	uint32_t data[heapSize / sizeof(uint32_t)];
 

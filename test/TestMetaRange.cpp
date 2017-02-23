@@ -21,7 +21,7 @@
 
 #include "meta/Range.h"
 
-using namespace meta;
+using namespace pet;
 
 TEST_GROUP(Range) {};
 

@@ -21,7 +21,7 @@
 
 #include "meta/FieldAccessor.h"
 
-using namespace meta;
+using namespace pet;
 
 struct C {
 	int x = 12, y = 23;

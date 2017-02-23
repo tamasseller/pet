@@ -21,7 +21,7 @@
 
 #include "ubiquitous/Trace.h"
 
-using namespace container;
+using namespace pet;
 
 void BinaryTree::Iterator::step() {
 	if(!currentNode)

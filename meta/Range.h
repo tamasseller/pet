@@ -20,7 +20,7 @@
 #ifndef RANGE_H_
 #define RANGE_H_
 
-namespace meta {
+namespace pet {
 namespace detail {
 	template<template <unsigned int> class F, unsigned int Min>
 	struct Range {

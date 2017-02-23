@@ -22,7 +22,7 @@
 #include "meta/Range.h"
 #include "meta/ExpLog.h"
 
-using namespace meta;
+using namespace pet;
 
 TEST_GROUP(ExpRange) {};
 

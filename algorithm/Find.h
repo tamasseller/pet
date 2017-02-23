@@ -20,9 +20,7 @@
 #ifndef FIND_H_
 #define FIND_H_
 
-
-
-namespace algorithm {
+namespace pet {
 
 /**
  * Binary search.

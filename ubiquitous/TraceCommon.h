@@ -20,7 +20,7 @@
 #ifndef TRACECOMMON_H_
 #define TRACECOMMON_H_
 
-namespace ubiq {
+namespace pet {
 
 /**
  * Log levels.
@@ -51,7 +51,7 @@ template<class>
 class TraceWriter;
 
 #define TRACE_WRITER(X) 							\
-namespace ubiq {									\
+namespace pet {										\
 	template<> struct TraceWriter<Global>: X {		\
 		using X::write;								\
 	};												\
@@ -59,7 +59,7 @@ namespace ubiq {									\
 
 
 #define __TRACE_POLICY(X, Y, Z)						\
-namespace ubiq {									\
+namespace pet {										\
 	template<>										\
 	struct Z<X> {									\
 		constexpr static Level level = Level::Y;	\
