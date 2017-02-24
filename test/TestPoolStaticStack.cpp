@@ -91,6 +91,13 @@ TEST(StaticStack, Iterator) {
 	CHECK(!it.current());
 }
 
+TEST(StaticStack, IteratorOnEmpty) {
+	Uut::Iterator it = uut.iterator();
+	CHECK(!it.current());
+	it.step(uut);
+	CHECK(!it.current());
+}
+
 TEST(StaticStack, Clear) {
 	CHECK(uut.push(1));
 	CHECK(uut.push(2));

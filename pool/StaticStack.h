@@ -64,7 +64,7 @@ inline void StaticStack<T, size>::clear()
 template<class T, unsigned int size>
 inline typename StaticStack<T, size>::Iterator StaticStack<T, size>::iterator()
 {
-	return data;
+	return idx ? data : 0;
 }
 
 template<class T, unsigned int size>
