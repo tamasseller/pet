@@ -75,7 +75,6 @@ TEST(StaticStack, Iterator) {
 	CHECK(uut.push(1));
 	CHECK(uut.push(2));
 	CHECK(uut.push(3));
-	CHECK(uut.push(4));
 
 	Uut::Iterator it = uut.iterator();
 	CHECK(it.current() && *it.current() == 1);
@@ -83,8 +82,6 @@ TEST(StaticStack, Iterator) {
 	CHECK(it.current() && *it.current() == 2);
 	it.step(uut);
 	CHECK(it.current() && *it.current() == 3);
-	it.step(uut);
-	CHECK(it.current() && *it.current() == 4);
 	it.step(uut);
 	CHECK(!it.current());
 	it.step(uut);

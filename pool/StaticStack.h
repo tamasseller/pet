@@ -76,7 +76,7 @@ inline T* StaticStack<T, size>::Iterator::current()
 template<class T, unsigned int size>
 inline void StaticStack<T, size>::Iterator::step(StaticStack& stack)
 {
-	if(state && state - stack.data < size - 1)
+	if(state && state - stack.data < stack.idx - 1)
 		state++;
 	else
 		state = 0;
