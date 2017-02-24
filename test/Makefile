@@ -36,6 +36,7 @@ SOURCES +=  TestPoolArena.cpp
 SOURCES +=  TestPoolFifo.cpp
 SOURCES +=  TestPoolPool.cpp
 SOURCES +=  TestPoolStack.cpp
+SOURCES +=  TestPoolStaticStack.cpp
 SOURCES +=  TestPoolStringStorage.cpp
 SOURCES +=  TestUbiqFailable.cpp
 SOURCES +=  TestUbiqError.cpp
