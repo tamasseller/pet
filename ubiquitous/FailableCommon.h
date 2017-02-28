@@ -52,7 +52,9 @@ public:
 	inline void cooperates();
 	inline ~Police();
 	inline Police();
-	inline Police(const Police& old);
+	inline Police(bool);
+	inline Police(const Police&);
+	inline Police& operator =(const Police&);
 };
 
 }
@@ -63,6 +65,9 @@ public:
 #define UNCHECKED_ERROR_REPORT()											\
 namespace pet { template<> struct ErrorReporter<Global>: public Police {	\
 	inline static void reportError();										\
+    inline ErrorReporter(): Police() {}                                     \
+    inline ErrorReporter(bool x): Police(x) {}                              \
+    inline ErrorReporter(const ErrorReporter& x): Police(x) {}              \
 };}																			\
 																			\
 inline void pet::ErrorReporter<pet::Global>::reportError()
