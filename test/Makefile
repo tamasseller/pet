@@ -8,45 +8,46 @@ SOURCES += ../ubiquitous/PrintfWriter.cpp
 
 # Test code
 
-#SOURCES +=  TestAlgoInline.cpp
-SOURCES +=  TestAlgoIterate.cpp
-SOURCES +=  TestAlgoStr.cpp
-SOURCES +=  TestDataBinaryTree.cpp
-SOURCES +=  TestDataDoubleList.cpp
-SOURCES +=  TestDataLinkedList.cpp
-SOURCES +=  TestHeapAvlStress.cpp
-SOURCES +=  TestHeapBestFitStress.cpp
-SOURCES +=  TestHeapHost1.cpp
-SOURCES +=  TestHeapHost2.cpp
-SOURCES +=  TestHeapHost3.cpp
-SOURCES +=  TestHeapHost4.cpp
-SOURCES +=  TestHeapHost5.cpp
-SOURCES +=  TestHeapHost6.cpp
-SOURCES +=  TestHeapTlsfStress.cpp
-SOURCES +=  TestHeapTlsf.cpp
-SOURCES +=  TestManagedHstring.cpp
-SOURCES +=  TestManagedRegistry.cpp
-SOURCES +=  TestManagedTreeMap.cpp
-SOURCES +=  TestMetaExpLog.cpp
-SOURCES +=  TestMetaExpRange.cpp
-SOURCES +=  TestMetaFieldAccessor.cpp
-SOURCES +=  TestMetaPacks.cpp
-SOURCES +=  TestMetaRange.cpp
-SOURCES +=  TestPoolArena.cpp
-SOURCES +=  TestPoolFifo.cpp
-SOURCES +=  TestPoolPool.cpp
-SOURCES +=  TestPoolStack.cpp
-SOURCES +=  TestPoolStaticStack.cpp
-SOURCES +=  TestPoolStringStorage.cpp
-SOURCES +=  TestUbiqFailable.cpp
-SOURCES +=  TestUbiqError.cpp
-SOURCES +=  TestUbiqTrace.cpp
+#SOURCES += TestAlgoInline.cpp
+SOURCES += TestAlgoIterate.cpp
+SOURCES += TestAlgoStr.cpp
+SOURCES += TestDataFifo.cpp
+SOURCES += TestDataBinaryTree.cpp
+SOURCES += TestDataDoubleList.cpp
+SOURCES += TestDataLinkedList.cpp
+SOURCES += TestHeapAvlStress.cpp
+SOURCES += TestHeapBestFitStress.cpp
+SOURCES += TestHeapHost1.cpp
+SOURCES += TestHeapHost2.cpp
+SOURCES += TestHeapHost3.cpp
+SOURCES += TestHeapHost4.cpp
+SOURCES += TestHeapHost5.cpp
+SOURCES += TestHeapHost6.cpp
+SOURCES += TestHeapTlsfStress.cpp
+SOURCES += TestHeapTlsf.cpp
+SOURCES += TestManagedHstring.cpp
+SOURCES += TestManagedRegistry.cpp
+SOURCES += TestManagedTreeMap.cpp
+SOURCES += TestMetaExpLog.cpp
+SOURCES += TestMetaExpRange.cpp
+SOURCES += TestMetaFieldAccessor.cpp
+SOURCES += TestMetaPacks.cpp
+SOURCES += TestMetaRange.cpp
+SOURCES += TestPoolArena.cpp
+SOURCES += TestPoolFifo.cpp
+SOURCES += TestPoolPool.cpp
+SOURCES += TestPoolStack.cpp
+SOURCES += TestPoolStaticStack.cpp
+SOURCES += TestPoolStringStorage.cpp
+SOURCES += TestUbiqFailable.cpp
+SOURCES += TestUbiqError.cpp
+SOURCES += TestUbiqTrace.cpp
 
 # Test support
 
-SOURCES +=  MockWriter.cpp
-SOURCES +=  MockAllocator.cpp
-SOURCES +=  DebugConfig.cpp
+SOURCES += MockWriter.cpp
+SOURCES += MockAllocator.cpp
+SOURCES += DebugConfig.cpp
 SOURCES += TestMain.cpp
 
 # Failure injector
@@ -84,5 +85,7 @@ LIBS += CppUTestExt
 TEST_CMD_PREFIX=LD_LIBRARY_PATH=/opt/gcc-5.3.0/lib32/
 CXX=/opt/gcc-5.3.0/bin/g++
 LD=$(CXX) 
+
+#CPPUTEST_FLAGS = 
 
 include ultimate-makefile/Makefile.ultimate	
