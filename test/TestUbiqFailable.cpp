@@ -20,7 +20,7 @@
 #include "CppUTest/TestHarness.h"
 #include "CppUTestExt/MockSupport.h"
 
-#include "ubiquitous/Error.h"
+#include "ubiquitous/Failable.h"
 
 using namespace pet;
 
@@ -29,6 +29,7 @@ using namespace pet;
  */
 struct ExpResult: public Failable<ExpResult, int> {
 	inline constexpr ExpResult(const int &value): Failable<ExpResult, int>(value) {}
+	inline constexpr ExpResult(): Failable<ExpResult, int>() {}
 
 	enum ErrorValues {
 		error = -1
@@ -119,6 +120,44 @@ TEST(Failable, PorpagateHappy)
 
     int value = result;
     CHECK(value == 4);
+}
+
+TEST(Failable, AssignHappy)
+{
+    mock().expectNCalls(0, "uncheckedErrorReport");
+
+    ExpResult result;
+    result = testExpTimesTwo(1);
+
+    bool failure = result.failed();
+    CHECK(!failure);
+
+    int value = result;
+    CHECK(value == 4);
+}
+
+TEST(Failable, ReAssignNoCheck)
+{
+    mock().expectOneCall("uncheckedErrorReport");
+
+    ExpResult result = testExpTimesTwo(1);
+
+    // No failure check
+
+    result = testExpTimesTwo(1);
+    CHECK(!result.failed());
+}
+
+TEST(Failable, ReAssignResultCorrect)
+{
+    mock().expectNCalls(0, "uncheckedErrorReport");
+
+    ExpResult result = testExpTimesTwo(1);
+    CHECK(!result.failed());
+    CHECK(result == 4);
+    result = testExpTimesTwo(2);
+    CHECK(!result.failed());
+    CHECK(result == 8);
 }
 
 TEST(Failable, NoErrorNoCheck)

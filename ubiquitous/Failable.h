@@ -32,13 +32,17 @@ struct ErrorReporter {
 	inline void cooperates() {}
 	inline void outAndOver() {}
 	inline static void reportError() {}
+	inline ErrorReporter() {}
+	inline ErrorReporter(bool) {}
+	//inline ErrorReporter(const ErrorReporter&) {}
 };
 
 inline Police::ErrorHandle::ErrorHandle(): good(false), counter(1) {}
+inline Police::Police(bool dummy): errorHandle(0) {}
 inline Police::Police(): errorHandle(new ErrorHandle) {}
 
 inline void Police::inspect() {
-	if(!errorHandle->good) {
+	if(errorHandle && !errorHandle->good) {
 		ErrorReporter<Global>::reportError();
 		errorHandle->good = true;
 	}
@@ -49,7 +53,7 @@ inline void Police::cooperates() {
 }
 
 inline Police::~Police() {
-	if(!--errorHandle->counter) {
+	if(errorHandle && !--errorHandle->counter) {
 		inspect();
 		delete errorHandle;
 	}
@@ -58,6 +62,14 @@ inline Police::~Police() {
 inline Police::Police(const Police& old): errorHandle(old.errorHandle) {
 	errorHandle->counter++;
 }
+
+inline Police& Police::operator =(const Police& old) {
+    inspect();
+    errorHandle = old.errorHandle;
+    errorHandle->counter++;
+    return *this;
+}
+
 
 /** @endcond */
 
@@ -106,6 +118,13 @@ public:
 	 * method to introduce this class into an existing codebase.
 	 */
 	inline constexpr FailableBase(const Value &value): value(value) {}
+
+	/**
+     * Default constructor.
+     *
+     * Initializes the ErrorReporter to be in the state that it does not require checking.
+     */
+    inline constexpr FailableBase(): ErrorReporter(false) {}
 
 	/**
 	 * Convert to value.
