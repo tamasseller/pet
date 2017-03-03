@@ -303,6 +303,9 @@ public:
 	/** @copydoc pet::FailableBase::FailableBase() */
 	inline GenericError(int value): Failable<GenericError, int>(value) {}
 
+	/** @copydoc pet::FailableBase::FailableBase() */
+    inline GenericError() {}
+
 	/**
 	 * Check if not zero.
 	 *

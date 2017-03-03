@@ -22,6 +22,8 @@
 
 #include <stdint.h>
 
+#include "ubiquitous/Error.h"
+
 namespace pet {
 
 /**
@@ -69,7 +71,7 @@ public:
 	 * @param buff A reference to the pointer into which the address of the block is stored.
 	 * @return The amount of data available for reading in bytes (or zero if none).
 	 */
-	inline uint32_t nextReadable(char* &buff);
+	inline pet::GenericError nextReadable(char* &buff);
 
 	/**
 	 * Obtain a writable block.
@@ -81,7 +83,7 @@ public:
 	 * @param buff A reference to the pointer into which the address of the block is stored.
 	 * @return The amount of space available for writing in bytes (or zero if none).
 	 */
-	inline uint32_t nextWritable(char* &buff);
+	inline pet::GenericError nextWritable(char* &buff);
 
 	/**
 	 * Release a readable block.
@@ -91,7 +93,7 @@ public:
 	 *
 	 * @param length The number of bytes of data consumed by the user.
 	 */
-	inline void doneReading(uint16_t length);
+	inline pet::GenericError doneReading(char* buffer, uint16_t length);
 
 	/**
 	 * Release a written block.
@@ -101,11 +103,11 @@ public:
 	 *
 	 * @param length The number of bytes of data produced by the user.
 	 */
-	inline void doneWriting(uint16_t length);
+	inline pet::GenericError doneWriting(char* buffer, uint16_t length);
 };
 
 template<class Child, uint16_t size>
-inline uint32_t FifoBase<Child, size>::nextReadable(char* &buff)
+inline pet::GenericError FifoBase<Child, size>::nextReadable(char* &buff)
 {
 	/*
 	 * If the reader and writer are at the same index, the FIFO is empty.
@@ -142,7 +144,7 @@ inline uint32_t FifoBase<Child, size>::nextReadable(char* &buff)
 }
 
 template<class Child, uint16_t size>
-inline uint32_t FifoBase<Child, size>::nextWritable(char* &buff)
+inline pet::GenericError FifoBase<Child, size>::nextWritable(char* &buff)
 {
 	/*
 	 * The writer is ahead of the reader by the
@@ -179,13 +181,15 @@ inline uint32_t FifoBase<Child, size>::nextWritable(char* &buff)
 }
 
 template<class Child, uint16_t size>
-inline void FifoBase<Child, size>::doneReading(uint16_t length) {
+inline pet::GenericError FifoBase<Child, size>::doneReading(char* buffer, uint16_t length) {
 	readIdx = (readIdx + length) % (2 * size);
+	return 0;
 }
 
 template<class Child, uint16_t size>
-inline void FifoBase<Child, size>::doneWriting(uint16_t length) {
+inline pet::GenericError FifoBase<Child, size>::doneWriting(char* buffer, uint16_t length) {
 	writeIdx = (writeIdx + length) % (2 * size);
+	return 0;
 }
 
 
