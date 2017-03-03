@@ -1,8 +1,21 @@
-/*
- * TestStreamStream.cpp
+/*******************************************************************************
  *
- *      Author: tamas.seller
- */
+ * Copyright (c) 2017 Tamás Seller. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *******************************************************************************/
 
 #include "stream/Stream.h"
 #include "data/Fifo.h"
@@ -18,7 +31,7 @@ TEST_GROUP(FifoStreamIntegration) {
     Uut uut;
 
     void flush() {
-
+    	CHECK(!uut.flush().failed());
     }
 
     void write(const char* what) {
@@ -57,21 +70,17 @@ TEST(FifoStreamIntegration, BlockAccessSane)
     r = uut.read(temp, sizeof(temp));
     CHECK(!r.failed() && r == 0);
 
-    r = uut.write(str, strlen(str));
-    CHECK(!r.failed() && r == strlen(str));
-
-    CHECK(!uut.flush().failed());
-
-    r = uut.read(temp, sizeof(temp));
-    CHECK(!r.failed() && r == sizeof(temp));
-
-    CHECK(memcmp(temp, str, strlen(str)) == 0);
+    for(int i = 0; i < 12; i++) {
+    	write(str);
+    	flush();
+    	read(str);
+    }
 }
 
 TEST(FifoStreamIntegration, Segmented)
 {
     write("foobar");
-    CHECK(!uut.flush().failed());
+    flush();
     read("foo");
     read("bar");
 }
@@ -79,17 +88,17 @@ TEST(FifoStreamIntegration, Segmented)
 TEST(FifoStreamIntegration, FunnyFlushing)
 {
     write("88888888");
-    CHECK(!uut.flush().failed());
+    flush();
 
     read("8888");
 
     write("aaaaaaaaaa");
-    CHECK(!uut.flush().failed());
+    flush();
 
     read("8888aaaaaaaaa");
 
     write("cc");
-    CHECK(!uut.flush().failed());
+    flush();
 
     read("acc");
 }

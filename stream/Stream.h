@@ -1,8 +1,21 @@
-/*
- * Stream.h
+/*******************************************************************************
  *
- *      Author: tamas.seller
- */
+ * Copyright (c) 2017 Tamás Seller. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *******************************************************************************/
 
 #ifndef STREAM_H_
 #define STREAM_H_
@@ -49,34 +62,45 @@ inline pet::GenericError InputStream<Child>::read(void* output, uint32_t toBeRea
     uint32_t done = 0;
 
     while(done < toBeRead) {
-        if(idx == length) {
-            idx = 0;
-
+        if(idx == length || !buffer) {
             if(buffer) {
-                pet::GenericError r = ((Child*)this)->doneReading(buffer, length);
+                pet::GenericError r = ((Child*)this)->doneReading(buffer, idx);
 
                 if(r.failed())
                     return r.rethrow();
 
+				length = r;
             }
 
-            pet::GenericError r = ((Child*)this)->nextReadable(buffer);
+            if(!buffer) {
+            	pet::GenericError r = ((Child*)this)->nextReadable(buffer, toBeRead - done);
 
-            if(r.failed())
-                return r.rethrow();
+				if(r.failed())
+					return r.rethrow();
 
-            if(!(length = r))
-                return done;
+				if(!(length = r))
+					return done;
+            }
         }
 
+        const uint32_t yetToBeRead = toBeRead - done;
         const uint32_t available = length - idx;
 
-        uint32_t currentBurstSize = (toBeRead <= available) ? toBeRead : available;
+        uint32_t currentBurstSize = (yetToBeRead <= available) ? yetToBeRead : available;
 
         memcpy((char*)output + done, buffer + idx, currentBurstSize);
 
         idx += currentBurstSize;
         done += currentBurstSize;
+    }
+
+    if(idx == length && buffer) {
+		pet::GenericError r = ((Child*)this)->doneReading(buffer, idx);
+
+		if(r.failed())
+			return r.rethrow();
+
+		length = r;
     }
 
     return done;
@@ -111,27 +135,30 @@ inline pet::GenericError OutputStream<Child>::write(const void* input, uint32_t 
 
     while(done < toBeWritten) {
         if(idx == length || !buffer) {
-            idx = 0;
-
             if(buffer) {
-                pet::GenericError r = ((Child*)this)->doneWriting(buffer, length);
+                pet::GenericError r = ((Child*)this)->doneWriting(buffer, idx);
 
                 if(r.failed())
                     return r.rethrow();
+
+                length = r;
             }
 
-            pet::GenericError r = ((Child*)this)->nextWritable(buffer);
+            if(!buffer) {
+				pet::GenericError r = ((Child*)this)->nextWritable(buffer, toBeWritten - done);
 
-            if(r.failed())
-                return r.rethrow();
+				if(r.failed())
+					return r.rethrow();
 
-            if(!(length = r))
-                return done;
+				if(!(length = r))
+					return done;
+            }
         }
 
+        const uint32_t yetToBeWritten = toBeWritten - done;
         const uint32_t available = length - idx;
 
-        uint32_t currentBurstSize = (toBeWritten <= available) ? toBeWritten : available;
+        uint32_t currentBurstSize = (yetToBeWritten <= available) ? yetToBeWritten : available;
 
         memcpy(buffer + idx, (char*)input + done, currentBurstSize);
 
@@ -170,11 +197,10 @@ inline pet::GenericError OutputStream<Child>::flush()
 {
     pet::GenericError r = ((Child*)this)->doneWriting(buffer, idx);
 
-    buffer = 0;
-
     if(r.failed())
         return r.rethrow();
 
+    length = r;
     return 0;
 }
 

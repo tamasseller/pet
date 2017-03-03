@@ -20,9 +20,10 @@
 #ifndef FIFO_H_
 #define FIFO_H_
 
-#include <stdint.h>
-
 #include "ubiquitous/Error.h"
+
+#include <stdint.h>
+#include <limits.h>
 
 namespace pet {
 
@@ -60,54 +61,114 @@ namespace pet {
 template<class Child, uint16_t size>
 class FifoBase{
 	uint16_t readIdx = 0, writeIdx = 0;
+
+	inline uint16_t getOccupied() const {
+		return ((uint16_t)(writeIdx - readIdx) % (2 * size));
+	};
+
+	inline uint16_t getFree() const {
+		return size - getOccupied();
+	};
+
+	inline uint16_t getRealReadedIdx() const {
+		return readIdx % size;
+	};
+
+	inline uint16_t getRealWriterIdx() const {
+		return writeIdx % size;
+	};
+
+	/**
+	 * Buffer access helper.
+	 *
+	 * @param realIdx The actual index in the buffer.
+	 * @param nItems Number data items intended and possible to access.
+	 */
+	inline pet::GenericError access(char* &buff, uint16_t realIdx, uint16_t nItems) const {
+		/*
+		 * The actual space left until the end of buffer,
+		 * if the reader is at the end, the whole buffer.
+		 */
+		const uint16_t space = size - realIdx;
+
+		buff = ((Child*)this)->getBuffer() + realIdx;
+
+		/*
+		 * Amount of data before the end of buffer or the
+		 * writer pointer, whichever is encountered first.
+		 */
+		return  (space > nItems) ? nItems : space;
+	}
+
 public:
 	/**
-	 * Obtain a readable block.
+	 * Obtain a readable block, compatibly with the StreamBackend concept.
 	 *
 	 * The application can request a block of the FIFO buffer for
 	 * reading by utilizing this function. When done it needs to be
 	 * released with the _doneReading_ method.
 	 *
 	 * @param buff A reference to the pointer into which the address of the block is stored.
+	 * @param length The length of the block of the intended read operation (hint).
 	 * @return The amount of data available for reading in bytes (or zero if none).
 	 */
-	inline pet::GenericError nextReadable(char* &buff);
+	inline pet::GenericError nextReadable(char* &buff, uint16_t length = USHRT_MAX) const;
 
 	/**
-	 * Obtain a writable block.
+	 * Obtain a writable block, compatibly with the StreamBackend concept.
 	 *
 	 * The application can request a block of the FIFO buffer for
 	 * writing by utilizing this function. When done it needs to be
 	 * released with the _doneWriting_ method.
 	 *
 	 * @param buff A reference to the pointer into which the address of the block is stored.
+	 * @param length The length of the block of the intended read operation (hint).
 	 * @return The amount of space available for writing in bytes (or zero if none).
 	 */
-	inline pet::GenericError nextWritable(char* &buff);
+	inline pet::GenericError nextWritable(char* &buff, uint16_t length = USHRT_MAX) const;
 
 	/**
-	 * Release a readable block.
+	 * Release a readable block, compatible with the StreamBackend concept.
+	 *
+	 *
+	 * @param buff A pointer to the block acquired via the nextReadable call, gets reset to zero.
+	 * @param offset The number of bytes used up, gets reset to zero.
+	 * @return Zero on success, the error code otherwise.
+	 */
+	inline pet::GenericError doneReading(char* &buff, uint32_t &offset);
+
+	/**
+	 * Release a readable block, simplified.
 	 *
 	 * The user can release the block previously acquired by the nextWritable method as
 	 * fully or partially read in case of the whole available data was not used.
 	 *
-	 * @param length The number of bytes of data consumed by the user.
+	 * @param offset The number of bytes used up, gets reset to zero.
 	 */
-	inline pet::GenericError doneReading(char* buffer, uint16_t length);
+	inline void doneReading(uint16_t offset);
 
 	/**
-	 * Release a written block.
+	 * Release a written block, compatibly with the StreamBackend concept.
+	 *
+	 * @param buff A pointer to the block acquired via the nextWritable call, gets reset to null.
+	 * @param offset The number of bytes used up, gets reset to zero.
+	 * @return Zero on success, the errorcode otherwise.
+	 */
+	inline pet::GenericError doneWriting(char* &buff, uint32_t &offset);
+
+	/**
+	 * Release a written block, simplified.
 	 *
 	 * The user can release the block previously acquired by the nextWritable method as
 	 * fully or partially written in case of the whole available space was not used.
 	 *
-	 * @param length The number of bytes of data produced by the user.
+	 * @param offset The number of bytes used up, gets reset to zero.
 	 */
-	inline pet::GenericError doneWriting(char* buffer, uint16_t length);
+	inline void doneWriting(uint16_t offset);
 };
 
 template<class Child, uint16_t size>
-inline pet::GenericError FifoBase<Child, size>::nextReadable(char* &buff)
+inline pet::GenericError FifoBase<Child, size>::nextReadable(char* &buff, uint16_t length) const
 {
 	/*
 	 * If the reader and writer are at the same index, the FIFO is empty.
@@ -115,36 +176,11 @@ inline pet::GenericError FifoBase<Child, size>::nextReadable(char* &buff)
 	if(writeIdx == readIdx)
 		return 0;
 
-	/*
-	 * The actual index in the buffer.
-	 */
-	const uint32_t realIdx = (readIdx % size);
-
-	/*
-	 * The actual space left until the end of buffer,
-	 * if the reader is at the end, the whole buffer.
-	 */
-	const uint32_t space = size - realIdx;
-
-	/*
-	 * Pointer to the start of the data.
-	 */
-	buff = ((Child*)this)->getBuffer() + realIdx;
-
-	/*
-	 * Number of data items before the writer pointer.
-	 */
-	const uint32_t nData = (writeIdx - readIdx) % (2 * size);
-
-	/*
-	 * Amount of data before the end of buffer or the
-	 * writer pointer, whichever is encountered first.
-	 */
-	return  (space > nData) ? nData : space;
+	return access(buff, getRealReadedIdx(), (length > getOccupied()) ? getOccupied() : length);
 }
 
 template<class Child, uint16_t size>
-inline pet::GenericError FifoBase<Child, size>::nextWritable(char* &buff)
+inline pet::GenericError FifoBase<Child, size>::nextWritable(char* &buff, uint16_t length) const
 {
 	/*
 	 * The writer is ahead of the reader by the
@@ -152,46 +188,35 @@ inline pet::GenericError FifoBase<Child, size>::nextWritable(char* &buff)
 	 */
 	if(writeIdx == (readIdx + size) % (2 * size))
 		return 0;
-	/*
-	 * The actual index in the buffer.
-	 */
-	const uint32_t realIdx = writeIdx % size;
 
-	/*
-	 * The actual space left until the end of buffer,
-	 * if the writer is at the end, the whole buffer.
-	 */
-	const uint32_t space = size - realIdx;
-
-	/*
-	 * Pointer to the start of the data.
-	 */
-	buff = ((Child*)this)->getBuffer() + realIdx;
-
-	/*
-	 * Number of data items before the reader pointer.
-	 */
-	const uint32_t nData = size - (2 * size + writeIdx - readIdx) % size;
-
-	/*
-	 * Amount of data before the end of buffer or the
-	 * reader pointer, whichever is encountered first.
-	 */
-	return  (space > nData) ? nData : space;
+	return access(buff, getRealWriterIdx(), (length > getFree()) ? getFree() : length);
 }
 
 template<class Child, uint16_t size>
-inline pet::GenericError FifoBase<Child, size>::doneReading(char* buffer, uint16_t length) {
-	readIdx = (readIdx + length) % (2 * size);
+inline pet::GenericError FifoBase<Child, size>::doneReading(char* &buffer, uint32_t &offset) {
+	doneReading(offset);
+	offset = 0;
+	buffer = 0;
 	return 0;
 }
 
 template<class Child, uint16_t size>
-inline pet::GenericError FifoBase<Child, size>::doneWriting(char* buffer, uint16_t length) {
-	writeIdx = (writeIdx + length) % (2 * size);
+inline void FifoBase<Child, size>::doneReading(uint16_t offset) {
+	readIdx = (readIdx + offset) % (2 * size);
+}
+
+template<class Child, uint16_t size>
+inline pet::GenericError FifoBase<Child, size>::doneWriting(char* &buffer, uint32_t &offset) {
+	doneWriting(offset);
+	offset = 0;
+	buffer = 0;
 	return 0;
 }
 
+template<class Child, uint16_t size>
+inline void FifoBase<Child, size>::doneWriting(uint16_t offset) {
+	writeIdx = (writeIdx + offset) % (2 * size);
+}
 
 /**
  * FIFO with embedded storage.

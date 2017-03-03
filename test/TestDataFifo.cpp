@@ -35,15 +35,15 @@ TEST(StaticFifo, Sanity)
 
     r = uut.nextReadable(buff1);
     CHECK(!r.failed() && r == 0);
-	CHECK(!uut.doneReading(buff1, 0).failed());
+	uut.doneReading(0);
 
     r = uut.nextWritable(buff1);
     CHECK(!r.failed() && r == 16);
-	CHECK(!uut.doneWriting(buff1, 8).failed());
+	uut.doneWriting(8);
 
     r = uut.nextReadable(buff2);
     CHECK(!r.failed() && r == 8);
-	CHECK(!uut.doneReading(buff2, 8).failed());
+	uut.doneReading(8);
 
     CHECK(buff2 == buff1);
 }
@@ -55,7 +55,7 @@ TEST(StaticFifo, Fill)
 
 	r = uut.nextWritable(buff);
     CHECK(!r.failed() && r == 16);
-    CHECK(!uut.doneWriting(buff, 16).failed());
+    uut.doneWriting(16);
 
     r = uut.nextWritable(buff);
     CHECK(!r.failed() && r == 0);
@@ -68,11 +68,11 @@ TEST(StaticFifo, FillThenConsume)
 
     r = uut.nextWritable(buff);
     CHECK(!r.failed() && r == 16);
-	CHECK(!uut.doneWriting(buff, 16).failed());
+	uut.doneWriting(16);
 
     r = uut.nextReadable(buff);
     CHECK(!r.failed() && r == 16);
-	CHECK(!uut.doneReading(buff, 8).failed());
+	uut.doneReading(8);
 
     r = uut.nextWritable(buff);
     CHECK(!r.failed() && r == 8);
@@ -83,17 +83,17 @@ TEST(StaticFifo, FillEmptyThenRefill)
 	char* buff;
     GenericError r;
 
-	r = uut.nextWritable(buff);
+	r = uut.nextWritable(buff, 16);
 	CHECK(!r.failed() &&  r == 16);
-	CHECK(!uut.doneWriting(buff, 16).failed());
+	uut.doneWriting(16);
 
-	r = uut.nextReadable(buff);
+	r = uut.nextReadable(buff, 16);
     CHECK(!r.failed() && r == 16);
-	CHECK(!uut.doneReading(buff, 16).failed());
+	uut.doneReading(16);
 
-	r = uut.nextWritable(buff);
+	r = uut.nextWritable(buff, 16);
 	CHECK(!r.failed() && r == 16);
-	CHECK(!uut.doneWriting(buff, 16).failed());
+	uut.doneWriting(16);
 }
 
 TEST(StaticFifo, Exercise)
@@ -114,7 +114,7 @@ TEST(StaticFifo, Exercise)
 				written++;
 			}
 
-			CHECK(!uut.doneWriting(buff, written).failed());
+			uut.doneWriting(written);
 		}
 
 		for(uint32_t readSize = 7; readSize;) {
@@ -128,7 +128,7 @@ TEST(StaticFifo, Exercise)
 				read++;
 			}
 
-			CHECK(!uut.doneReading(buff, read).failed());
+			uut.doneReading(read);
 		}
 
         r = uut.nextReadable(buff);
@@ -172,11 +172,11 @@ TEST(IndirectFifo, ExerciseFull) {
 			for(int i=0; i < space; i++)
 				buff[i] = writeCounter++;
 
-			CHECK(!uut->doneWriting(buff, space).failed());
+			uut->doneWriting(space);
 		}
 
 		for(uint32_t readSize = readAmount; readSize;) {
-            r = uut->nextReadable(buff);
+            r = uut->nextReadable(buff, readSize);
             CHECK(!r.failed());
             const uint32_t space = r;
 
@@ -187,7 +187,7 @@ TEST(IndirectFifo, ExerciseFull) {
 			}
 
 			readSize -= read;
-			CHECK(!uut->doneReading(buff, read).failed());
+			uut->doneReading(read);
 		}
 	}
 }
@@ -201,7 +201,7 @@ TEST(IndirectFifo, ExerciseEmpty) {
 	for(uint32_t witeAmount = prime2; witeAmount; witeAmount = (witeAmount + prime2) % prime1) {
 		char* buff;
 		for(uint32_t writeSize = witeAmount; writeSize;) {
-            r = uut->nextWritable(buff);
+            r = uut->nextWritable(buff, writeSize);
             CHECK(!r.failed());
             const uint32_t space = r;
 
@@ -213,7 +213,7 @@ TEST(IndirectFifo, ExerciseEmpty) {
 
 			writeSize -= written;
 
-			CHECK(!uut->doneWriting(buff, written).failed());
+			uut->doneWriting(written);
 		}
 
 		while(1) {
@@ -227,7 +227,7 @@ TEST(IndirectFifo, ExerciseEmpty) {
 			for(int i=0; i < space; i++)
 				CHECK(buff[i] == readCounter++);
 
-			CHECK(!uut->doneReading(buff, space).failed());
+			uut->doneReading(space);
 		}
 	}
 }
