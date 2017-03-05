@@ -18,7 +18,7 @@
  *******************************************************************************/
 
 #include "stream/Stream.h"
-#include "data/Fifo.h"
+#include "stream/FifoStream.h"
 
 #include "CppUTest/TestHarness.h"
 
@@ -27,7 +27,7 @@
 using namespace pet;
 
 TEST_GROUP(FifoStreamIntegration) {
-    class Uut: public StaticFifo<16>, public InputStream<Uut>, public OutputStream<Uut> {};
+    typedef StaticFifoStream<16> Uut;
     Uut uut;
 
     void flush() {
@@ -83,6 +83,40 @@ TEST(FifoStreamIntegration, Segmented)
     flush();
     read("foo");
     read("bar");
+}
+
+TEST(FifoStreamIntegration, Fill)
+{
+    write("sixteencharshere");
+
+    GenericError r = uut.write("can't write", 12);
+    CHECK(!r.failed() && r == 0);
+
+    int neitherThisCanBeWritten = 1;
+    CHECK(uut.write(neitherThisCanBeWritten).failed());
+
+    flush();
+    read("sixteen");
+	read("chars");
+	read("here");
+}
+
+TEST(FifoStreamIntegration, NotEnough)
+{
+	char temp[8];
+    write("foobar");
+    flush();
+    GenericError r = uut.read(temp, 8);
+    CHECK(!r.failed() && r == 6);
+}
+
+TEST(FifoStreamIntegration, TooMuch)
+{
+    write("foobar");
+    write("foobar");
+
+    GenericError r = uut.write("foobar", 6);
+    CHECK(!r.failed() && r == 4);
 }
 
 TEST(FifoStreamIntegration, FunnyFlushing)

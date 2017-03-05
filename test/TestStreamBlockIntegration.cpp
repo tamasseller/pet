@@ -17,7 +17,8 @@
  *
  *******************************************************************************/
 
-#include "stream/Stream.h"
+#include "stream/VirtualizedStream.h"
+#include "stream/VirtualStream.h"
 #include "data/Fifo.h"
 
 #include "CppUTest/TestHarness.h"
@@ -29,103 +30,137 @@
 using namespace pet;
 
 TEST_GROUP(BlockStreamIntegration) {
-    class Uut: public InputStream<Uut>, public OutputStream<Uut> {
-    	friend InputStream<Uut>;
-    	friend OutputStream<Uut>;
+	struct TestBlockDevice {
+		static constexpr const uint32_t numberOfBlocks = 16;
     	static constexpr const uint32_t blockSize = 16;
-    	std::list<char*> data;
-    	unsigned int lastSize;
-    	char* unfinished = 0;
+    	char data[numberOfBlocks*blockSize];
+    	unsigned int dataLength;
+	};
 
-        inline pet::GenericError nextReadable(char* &buff, uint32_t length) {
-        	if(data.empty())
-        		return 0;
+	struct InpUut;
+	struct OutpUut;
+	struct IoUut;
 
-        	buff = data.front();
+    struct TestDataAccessor {
+    	TestBlockDevice* device;
+    	unsigned int blockIdx;
 
-    		return (buff == unfinished) ? lastSize : blockSize;
-        }
-
-    	inline pet::GenericError doneReading(char* &buff, uint32_t &offset) {
-    		if(offset == blockSize) {
-           		data.pop_front();
-           		unfinished = data.back();
-        		delete[] buff;
-        		buff = 0;
-        		offset = 0;
-        		return 0;
-    		}
-
-    		return (buff == unfinished) ? lastSize : blockSize;
+    	bool isLastBlock() const {
+    		return blockIdx == device->dataLength / TestBlockDevice::blockSize;
     	}
 
-    	inline pet::GenericError nextWritable(char* &buff, uint32_t length) {
-        	buff = new char[blockSize];
-        	return blockSize;
+    	uint32_t readLength() const {
+    		if(isLastBlock())
+    			return device->dataLength % TestBlockDevice::blockSize;
+    		else
+    			return TestBlockDevice::blockSize;
     	}
 
-    	inline pet::GenericError doneWriting(char* &buff, uint32_t &offset) {
-    		if(data.back() != buff) {
-        		data.push_back(buff);
-        		unfinished = data.back();
-    		}
-
-    		if(offset == blockSize) {
-    			unfinished = 0;
-    			lastSize = 0;
-        		buff = 0;
-        		offset = 0;
-        		return 0;
-    		} else {
-    			CHECK(lastSize <= offset);
-    			lastSize = offset;
-    		}
-
-    		return blockSize;
+    	inline pet::GenericError nextBlock(ReadLength* actLen, char* &buff, uint16_t length) const {
+    		buff = &device->data[blockIdx*TestBlockDevice::blockSize];
+    		actLen->length = readLength();
+    		return 0;
     	}
+
+    	inline pet::GenericError nextBlock(WriteLength* actLen, char* &buff, uint16_t length) const {
+    		buff = &device->data[blockIdx*TestBlockDevice::blockSize];
+    		actLen->length = TestBlockDevice::blockSize;
+    		return 0;
+    	}
+
+    	inline pet::GenericError blockDone(ReadLength* actLen, char* &buffer, uint32_t &offset) {
+    		if(offset == TestBlockDevice::blockSize) {
+    			actLen->length = 0;
+    			buffer = 0;
+    			offset = 0;
+    			blockIdx++;
+    		} else
+    			actLen->length = readLength();
+
+    		return 0;
+    	}
+
+    	inline pet::GenericError blockDone(WriteLength* actLen, char* &buffer, uint32_t &offset) {
+    		if(isLastBlock() && offset > readLength())
+    			device->dataLength = blockIdx*TestBlockDevice::blockSize + offset;
+
+    		if(offset == TestBlockDevice::blockSize) {
+    			actLen->length = 0;
+    			buffer = 0;
+    			offset = 0;
+    			blockIdx++;
+    		}
+
+    		return 0;
+    	}
+
+    public:
+    	inline TestDataAccessor(TestBlockDevice* device): device(device), blockIdx(0) {}
     };
 
-    void flush() {
-    	CHECK(!uut.flush().failed());
+    typedef VirtualizedStream<TestDataAccessor> Uut;
+
+    TestBlockDevice dut;
+    Uut inpUut = Uut(&dut);
+    Uut outpUut = Uut(&dut);
+    Uut ioUut = Uut(&dut);
+
+    void flush(VirtualStream *where = 0) {
+    	if(!where) where = &outpUut;
+    	CHECK(!where->flush().failed());
     }
 
-    void write(const char* what) {
-        GenericError r = uut.write(what, strlen(what));
+    void write(const char* what, VirtualStream *where = 0) {
+    	if(!where) where = &outpUut;
+        GenericError r = where->write(what, strlen(what));
         CHECK(!r.failed() && r == strlen(what));
     }
 
-    void read(const char* what) {
+    void read(const char* what, VirtualStream *where = 0) {
+    	if(!where) where = &inpUut;
         char temp[256];
-        GenericError r = uut.read(temp, strlen(what));
+        GenericError r = where->read(temp, strlen(what));
         CHECK(!r.failed() && r == strlen(what));
         CHECK(memcmp(temp, what, strlen(what)) == 0);
     }
-
-    Uut uut;
 };
 
 TEST(BlockStreamIntegration, ItemAccessSane)
 {
     int x = 123;
-    CHECK(uut.read(x).failed());
+    CHECK(inpUut.read(x).failed());
 
-    CHECK(!uut.write(x).failed());
-    CHECK(!uut.flush().failed());
+    CHECK(!outpUut.write(x).failed());
+    CHECK(!outpUut.flush().failed());
 
     x = 345;
-    CHECK(!uut.read(x).failed());
+    CHECK(!inpUut.read(x).failed());
 
     CHECK(x == 123);
 }
+
+TEST(BlockStreamIntegration, FastForwardAccess)
+{
+    int x = 123;
+    CHECK(!outpUut.write(x).failed());
+    x = 234;
+    CHECK(!outpUut.write(x).failed());
+    CHECK(!outpUut.flush().failed());
+
+    x = 345;
+    CHECK(!inpUut.read(x).failed());
+    CHECK(x == 123);
+    x = 345;
+    CHECK(!inpUut.read(x).failed());
+    CHECK(x == 234);
+}
+
 
 TEST(BlockStreamIntegration, BlockAccessSane)
 {
     const char *str = "foobar";
     char temp[strlen(str)];
     GenericError r;
-
-    r = uut.read(temp, sizeof(temp));
-    CHECK(!r.failed() && r == 0);
 
     for(int i = 0; i < 12; i++) {
     	write(str);
@@ -144,18 +179,18 @@ TEST(BlockStreamIntegration, Segmented)
 
 TEST(BlockStreamIntegration, FunnyFlushing)
 {
-    write("88888888");
-    flush();
+    write("88888888", &ioUut);
+    flush(&ioUut);
 
     read("8888");
 
-    write("aaaaaaaaaa");
-    flush();
+    write("aaaaaaaaaa", &ioUut);
+    flush(&ioUut);
 
     read("8888aaaaaaaaa");
 
-    write("cc");
-    flush();
+    write("cc", &ioUut);
+    flush(&ioUut);
 
     read("acc");
 }
@@ -164,7 +199,7 @@ TEST(BlockStreamIntegration, MultipleBlock)
 {
     write("0123456789abcdef0123456789abcd");
     flush();
-    read("0123456789abcdef0123456789abcd");
+    read("0123456789abcdef0123456789abcd", &ioUut);
 }
 
 TEST(BlockStreamIntegration, MultipleBlockSegmentedRead)

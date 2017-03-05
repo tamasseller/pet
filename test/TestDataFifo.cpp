@@ -31,18 +31,14 @@ TEST_GROUP(StaticFifo) {
 TEST(StaticFifo, Sanity)
 {
 	char* buff1, *buff2;
-    GenericError r;
 
-    r = uut.nextReadable(buff1);
-    CHECK(!r.failed() && r == 0);
+    CHECK(uut.nextReadable(buff1) == 0);
 	uut.doneReading(0);
 
-    r = uut.nextWritable(buff1);
-    CHECK(!r.failed() && r == 16);
+    CHECK(uut.nextWritable(buff1) == 16);
 	uut.doneWriting(8);
 
-    r = uut.nextReadable(buff2);
-    CHECK(!r.failed() && r == 8);
+    CHECK(uut.nextReadable(buff2) == 8);
 	uut.doneReading(8);
 
     CHECK(buff2 == buff1);
@@ -51,48 +47,37 @@ TEST(StaticFifo, Sanity)
 TEST(StaticFifo, Fill)
 {
 	char* buff;
-	GenericError r;
 
-	r = uut.nextWritable(buff);
-    CHECK(!r.failed() && r == 16);
+    CHECK(uut.nextWritable(buff) == 16);
     uut.doneWriting(16);
 
-    r = uut.nextWritable(buff);
-    CHECK(!r.failed() && r == 0);
+    CHECK(uut.nextWritable(buff) == 0);
 }
 
 TEST(StaticFifo, FillThenConsume)
 {
 	char* buff;
-    GenericError r;
 
-    r = uut.nextWritable(buff);
-    CHECK(!r.failed() && r == 16);
+    CHECK(uut.nextWritable(buff) == 16);
 	uut.doneWriting(16);
 
-    r = uut.nextReadable(buff);
-    CHECK(!r.failed() && r == 16);
+    CHECK(uut.nextReadable(buff) == 16);
 	uut.doneReading(8);
 
-    r = uut.nextWritable(buff);
-    CHECK(!r.failed() && r == 8);
+    CHECK(uut.nextWritable(buff) == 8);
 }
 
 TEST(StaticFifo, FillEmptyThenRefill)
 {
 	char* buff;
-    GenericError r;
 
-	r = uut.nextWritable(buff, 16);
-	CHECK(!r.failed() &&  r == 16);
+	CHECK(uut.nextWritable(buff) == 16);
 	uut.doneWriting(16);
 
-	r = uut.nextReadable(buff, 16);
-    CHECK(!r.failed() && r == 16);
+    CHECK(uut.nextReadable(buff) == 16);
 	uut.doneReading(16);
 
-	r = uut.nextWritable(buff, 16);
-	CHECK(!r.failed() && r == 16);
+	CHECK(uut.nextWritable(buff) == 16);
 	uut.doneWriting(16);
 }
 
@@ -100,13 +85,9 @@ TEST(StaticFifo, Exercise)
 {
 	char* buff;
 
-    GenericError r;
-
 	for(int i=0; i<16; i++) {
 		for(uint32_t writeSize = 7; writeSize;) {
-		    r = uut.nextWritable(buff);
-		    CHECK(!r.failed());
-			const uint32_t space = r;
+			const uint32_t space = uut.nextWritable(buff);
 
 			uint32_t written = 0;
 			for(int j=0; j < space && writeSize; j++) {
@@ -118,9 +99,7 @@ TEST(StaticFifo, Exercise)
 		}
 
 		for(uint32_t readSize = 7; readSize;) {
-            r = uut.nextReadable(buff);
-            CHECK(!r.failed());
-            const uint32_t space = r;
+            const uint32_t space = uut.nextReadable(buff);
 
 			uint32_t read = 0;
 			for(int j=0; j < space && readSize; j++) {
@@ -131,8 +110,7 @@ TEST(StaticFifo, Exercise)
 			uut.doneReading(read);
 		}
 
-        r = uut.nextReadable(buff);
-        CHECK(!r.failed() && r == 0);
+        CHECK(uut.nextReadable(buff) == 0);
 	}
 }
 
@@ -157,14 +135,11 @@ TEST(IndirectFifo, ExerciseFull) {
 	static constexpr const uint32_t prime1 = 13, prime2 = 7;
 	uint32_t writeCounter = 0;
 	uint32_t readCounter = 0;
-    GenericError r;
 
 	for(uint32_t readAmount = prime2; readAmount; readAmount = (readAmount + prime2) % prime1) {
 		char* buff;
 		while(1) {
-            r = uut->nextWritable(buff);
-            CHECK(!r.failed());
-            const uint32_t space = r;
+            const uint32_t space = uut->nextWritable(buff);
 
             if(!space)
                 break;
@@ -176,9 +151,7 @@ TEST(IndirectFifo, ExerciseFull) {
 		}
 
 		for(uint32_t readSize = readAmount; readSize;) {
-            r = uut->nextReadable(buff, readSize);
-            CHECK(!r.failed());
-            const uint32_t space = r;
+            const uint32_t space = uut->nextReadable(buff);
 
 			uint32_t read = 0;
 			for(int j=0; j < space && read < readSize; j++) {
@@ -196,14 +169,11 @@ TEST(IndirectFifo, ExerciseEmpty) {
 	static constexpr const uint32_t prime1 = 13, prime2 = 7;
 	uint32_t writeCounter = 0;
 	uint32_t readCounter = 0;
-    GenericError r;
 
 	for(uint32_t witeAmount = prime2; witeAmount; witeAmount = (witeAmount + prime2) % prime1) {
 		char* buff;
 		for(uint32_t writeSize = witeAmount; writeSize;) {
-            r = uut->nextWritable(buff, writeSize);
-            CHECK(!r.failed());
-            const uint32_t space = r;
+            const uint32_t space = uut->nextWritable(buff);
 
 			uint32_t written = 0;
 			for(int j=0; j < space && written < writeSize; j++) {
@@ -217,9 +187,7 @@ TEST(IndirectFifo, ExerciseEmpty) {
 		}
 
 		while(1) {
-            r = uut->nextReadable(buff);
-            CHECK(!r.failed());
-            const uint32_t space = r;
+            const uint32_t space = uut->nextReadable(buff);
 
             if(!space)
                 break;

@@ -8,52 +8,32 @@
 #ifndef VIRTUALIZEDSTREAM_H_
 #define VIRTUALIZEDSTREAM_H_
 
-#include "IndirectStream.h"
+#include "VirtualStream.h"
 
 namespace pet {
 
 template<class Backend>
-class Renamer: public Backend {};
+class VirtualizedStream: public VirtualStream, public Backend {
 
-template<class Backend>
-class VirtualizedInputStream: public IndirectInputStream, public Renamer<Backend> {
-	virtual pet::GenericError nextReadable(char* &buff, uint32_t length) {
-		return Renamer<Backend>::nextReadable(buff, length);
+	virtual pet::GenericError nextBlock(ReadLength* actLen, char* &buff, uint16_t reqLen) {
+		return Backend::nextBlock(actLen, buff, reqLen);
 	}
 
-	virtual pet::GenericError doneReading(char* &buff, uint32_t &offset) {
-		return Renamer<Backend>::doneReading(buff, offset);
-	}
-};
-
-template<class Backend>
-class VirtualizedOutputStream: public IndirectOutputStream, public Renamer<Backend> {
-	virtual pet::GenericError nextWritable(char* &buff, uint32_t length) {
-		return Renamer<Backend>::nextWritable(buff, length);
+	virtual pet::GenericError nextBlock(WriteLength* actLen, char* &buff, uint16_t reqLen) {
+		return Backend::nextBlock(actLen, buff, reqLen);
 	}
 
-	virtual pet::GenericError doneWriting(char* &buff, uint32_t &offset) {
-		return Renamer<Backend>::doneWriting(buff, offset);
-	}
-};
-
-template<class Backend>
-class VirtualizedIOStream: public IndirectIOStream, public Renamer<Backend> {
-	virtual pet::GenericError nextReadable(char* &buff, uint32_t length) {
-		return Renamer<Backend>::nextReadable(buff, length);
+	virtual pet::GenericError blockDone(ReadLength* actLen, char* &buff, uint32_t &offset) {
+		return Backend::blockDone(actLen, buff, offset);
 	}
 
-	virtual pet::GenericError doneReading(char* &buff, uint32_t &offset) {
-		return Renamer<Backend>::doneReading(buff, offset);
+	virtual pet::GenericError blockDone(WriteLength* actLen, char* &buff, uint32_t &offset) {
+		return Backend::blockDone(actLen, buff, offset);
 	}
 
-	virtual pet::GenericError nextWritable(char* &buff, uint32_t length) {
-		return Renamer<Backend>::nextWritable(buff, length);
-	}
-
-	virtual pet::GenericError doneWriting(char* &buff, uint32_t &offset) {
-		return Renamer<Backend>::doneWriting(buff, offset);
-	}
+public:
+	template<class... T>
+	inline VirtualizedStream(T... args): Backend(args...) {}
 };
 
 }

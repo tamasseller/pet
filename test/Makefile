@@ -41,7 +41,6 @@ SOURCES += TestPoolStaticStack.cpp
 SOURCES += TestPoolStringStorage.cpp
 SOURCES += TestStreamFifoIntegration.cpp
 SOURCES += TestStreamBlockIntegration.cpp
-SOURCES += TestStreamVirtual.cpp
 SOURCES += TestUbiqFailable.cpp
 SOURCES += TestUbiqError.cpp
 SOURCES += TestUbiqTrace.cpp
@@ -89,6 +88,6 @@ TEST_CMD_PREFIX=LD_LIBRARY_PATH=/opt/gcc-5.3.0/lib32/
 CXX=/opt/gcc-5.3.0/bin/g++
 LD=$(CXX) 
 
-CPPUTEST_FLAGS = -c -g Fifo 
+CPPUTEST_FLAGS = -c
 
 include ultimate-makefile/Makefile.ultimate	
