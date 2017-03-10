@@ -12,18 +12,10 @@
 
 namespace pet {
 
-class VirtualStream: public IoStream<VirtualStream> {
-	template<class, class>
-	friend class ::InputStreamLogic;
-
-	template<class, class>
-	friend class ::OutputStreamLogic;
-
-	friend IoStream<VirtualStream>;
-	virtual pet::GenericError nextBlock(ReadLength* actLen, char* &buff, uint16_t length) = 0;
-	virtual pet::GenericError nextBlock(WriteLength* actLen, char* &buff, uint16_t length) = 0;
-	virtual pet::GenericError blockDone(ReadLength* actLen, char* &buffer, uint32_t &offset) = 0;
-	virtual pet::GenericError blockDone(WriteLength* actLen, char* &buffer, uint32_t &offset) = 0;
+class VirtualStream: public Stream<VirtualStream> {
+	friend Stream<VirtualStream>;
+	virtual pet::GenericError nextBlock(StreamState* state, uint16_t lengthHint, bool growAsNeeded) = 0;
+	virtual pet::GenericError blockDone(StreamState* state) = 0;
 public:
 	inline virtual ~VirtualStream () {}
 };

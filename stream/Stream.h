@@ -25,135 +25,128 @@
 #include <stdint.h>
 #include <string.h>
 
-struct ReadLength {
-	uint32_t length = 0;
-};
+template<class Child>
+class Stream;
 
-struct WriteLength {
-	uint32_t length = 0;
-};
+class StreamBackend;
 
-class CommonStreamState {
-protected:
+class StreamState {
+	template<class Child>
+	friend class Stream;
+
+	friend StreamBackend;
+
     char* buffer = 0;
-    uint32_t idx = 0;
+    uint16_t idx = 0;
+    uint16_t readableLength = 0;
+    uint16_t writableLength = 0;
+    bool isDirty;
+
+    inline uint16_t availableBytesForWriting();
+    inline bool fullyWritten();
+
+    inline uint16_t availableBytesForReading();
+    inline bool fullyRead();
+
+    inline bool isValid();
+    inline char* accessAndAdvance(uint16_t length);
 };
 
-class InputStreamState:
-	public CommonStreamState,
-	public ReadLength {
-	bool isDirty() const;
-};
-
-class OutputStreamState:
-	public CommonStreamState,
-	public WriteLength {
-	bool isDirty() const;
-	void setDirty(bool);
-};
-
-class IoStreamState:
-	public CommonStreamState,
-	public ReadLength,
-	public WriteLength {
-	bool isDirty() const;
-	void setDirty(bool);
-};
-
-template<class Child, class State>
-class InputStreamLogic {
+template<class Child>
+class Stream: public StreamState {
     public:
         inline pet::GenericError read(void* buffer, uint32_t length);
+        inline pet::GenericError write(const void* buffer, uint32_t length);
+        inline pet::GenericError flush();
 
         template<class T>
         inline pet::GenericError read(T& item);
-};
-
-template<class Child, class State>
-class OutputStreamLogic {
-    public:
-        inline pet::GenericError write(const void* buffer, uint32_t length);
 
         template<class T>
         inline pet::GenericError write(const T& item);
-
-        inline pet::GenericError flush();
 };
 
-template<class Child>
-class OutputStream:
-		protected OutputStreamState,
-		public OutputStreamLogic<Child, OutputStreamState> {
-	friend OutputStreamLogic<Child, OutputStreamState>;
-};
-
-template<class Child>
-class InputStream:
-		public InputStreamState,
-		public InputStreamLogic<Child, InputStreamState> {
-	friend InputStreamLogic<Child, InputStreamState>;
-};
-
-template<class Child>
-class IoStream:
-		protected IoStreamState,
-		public InputStreamLogic<Child, IoStreamState>,
-		public OutputStreamLogic<Child, IoStreamState> {
-	friend InputStreamLogic<Child, IoStreamState>;
-	friend OutputStreamLogic<Child, IoStreamState>;
+class StreamBackend {
+protected:
+	template<class T, T StreamState::* member>
+	static T& accessState(StreamState* subject) {
+		return subject->*member;
+	}
 };
 
 //////////////////////////////////////////////////////////////////////
 
-template<class Child, class State>
-inline pet::GenericError InputStreamLogic<Child, State>::read(void* output, uint32_t toBeRead)
+inline uint16_t StreamState::availableBytesForWriting()
 {
+	return writableLength - idx;
+}
+
+inline bool StreamState::fullyWritten()
+{
+	return idx >= writableLength;
+}
+
+inline uint16_t StreamState::availableBytesForReading()
+{
+	return readableLength - idx;
+}
+
+inline bool StreamState::fullyRead()
+{
+	return idx >= readableLength;
+}
+
+inline bool StreamState::isValid()
+{
+	return buffer;
+}
+
+inline char* StreamState::accessAndAdvance(uint16_t length)
+{
+	char* ret = buffer + idx;
+	idx += length;
+	return ret;
+}
+
+template<class Child>
+inline pet::GenericError Stream<Child>::read(void* output, uint32_t toBeRead)
+{
+	StreamState* state = static_cast<StreamState*>(this);
 	Child* self = static_cast<Child*>(this);
     uint32_t done = 0;
 
     while(done < toBeRead) {
-        if(self->State::idx == self->State::ReadLength::length || !self->State::buffer) {
-            if(self->State::buffer) {
-                pet::GenericError r = self->blockDone(
-                		static_cast<ReadLength*>(self),
-                		self->State::buffer,
-                		self->State::idx);
+        const uint32_t yetToBeRead = toBeRead - done;
+
+        if(!state->isValid() || state->fullyRead()) {
+            if(state->isValid()) {
+                pet::GenericError r = self->blockDone(state);
 
                 if(r.failed())
                     return r.rethrow();
             }
 
-            if(!self->State::buffer) {
-            	pet::GenericError r = self->nextBlock(
-            			static_cast<ReadLength*>(self),
-            			self->State::buffer,
-            			toBeRead - done);
+            if(!state->isValid()) {
+            	pet::GenericError r = self->nextBlock(state, yetToBeRead, false);
 
 				if(r.failed())
 					return r.rethrow();
-
             }
 
-			if(self->State::idx == self->State::ReadLength::length)
+			if(state->fullyRead())
 				return done;
         }
 
-        const uint32_t yetToBeRead = toBeRead - done;
-        const uint32_t available = self->State::ReadLength::length - self->State::idx;
+        const uint32_t available = state->availableBytesForReading();
 
         uint32_t currentBurstSize = (yetToBeRead <= available) ? yetToBeRead : available;
 
-        memcpy((char*)output + done, self->State::buffer + self->State::idx, currentBurstSize);
-
-        self->State::idx += currentBurstSize;
+        memcpy((char*)output + done, state->accessAndAdvance(currentBurstSize), currentBurstSize);
         done += currentBurstSize;
     }
 
-    if(self->State::idx == self->State::ReadLength::length && self->State::buffer) {
-		pet::GenericError r = self->blockDone(
-				static_cast<ReadLength*>(self),
-				self->State::buffer,
-				self->State::idx);
+    if(state->fullyRead() && self->isValid()) {
+		pet::GenericError r = self->blockDone(state);
 
 		if(r.failed())
 			return r.rethrow();
@@ -162,16 +155,16 @@ inline pet::GenericError InputStreamLogic<Child, State>::read(void* output, uint
     return done;
 }
 
-template<class Child, class State>
+template<class Child>
 template<class T>
-inline pet::GenericError InputStreamLogic<Child, State>::read(T& item)
+inline pet::GenericError Stream<Child>::read(T& item)
 {
+	StreamState* state = static_cast<StreamState*>(this);
 	Child* self = static_cast<Child*>(this);
     static constexpr const uint32_t size = sizeof(T);
 
-    if(self->State::ReadLength::length - self->State::idx >= size) {
-        memcpy(&item, self->State::buffer + self->State::idx, size);
-        self->State::idx += size;
+    if(self->availableBytesForReading() >= size) {
+        memcpy(&item, state->accessAndAdvance(size), size);
         return size;
     } else {
         pet::GenericError r = read(&item, size);
@@ -185,62 +178,57 @@ inline pet::GenericError InputStreamLogic<Child, State>::read(T& item)
     }
 }
 
-template<class Child, class State>
-inline pet::GenericError OutputStreamLogic<Child, State>::write(const void* input, uint32_t toBeWritten)
+template<class Child>
+inline pet::GenericError Stream<Child>::write(const void* input, uint32_t toBeWritten)
 {
+	StreamState* state = static_cast<StreamState*>(this);
 	Child* self = static_cast<Child*>(this);
     uint32_t done = 0;
 
     while(done < toBeWritten) {
-        if(self->State::idx == self->State::WriteLength::length || !self->State::buffer) {
-            if(self->State::buffer) {
-                pet::GenericError r = self->blockDone(
-                		static_cast<WriteLength*>(self),
-                		self->State::buffer,
-                		self->State::idx);
+        const uint32_t yetToBeWritten = toBeWritten - done;
+
+    	if(!state->isValid() || state->fullyWritten()) {
+            if(state->isValid()) {
+                pet::GenericError r = self->blockDone(state);
 
                 if(r.failed())
                     return r.rethrow();
             }
 
-            if(!self->State::buffer) {
-				pet::GenericError r = self->nextBlock(
-						static_cast<WriteLength*>(self),
-						self->State::buffer,
-						toBeWritten - done);
+            if(!state->isValid()) {
+				pet::GenericError r = self->nextBlock( state, yetToBeWritten, true);
 
 				if(r.failed())
 					return r.rethrow();
             }
 
-            if(self->State::idx == self->State::WriteLength::length)
+            if(state->fullyWritten())
             	return done;
         }
 
-        const uint32_t yetToBeWritten = toBeWritten - done;
-        const uint32_t available = self->State::WriteLength::length - self->State::idx;
+        const uint32_t available = state->availableBytesForWriting();
 
         uint32_t currentBurstSize = (yetToBeWritten <= available) ? yetToBeWritten : available;
 
-        memcpy(self->State::buffer + self->State::idx, (char*)input + done, currentBurstSize);
-
-        self->State::idx += currentBurstSize;
+        memcpy(state->accessAndAdvance(currentBurstSize), (char*)input + done, currentBurstSize);
         done += currentBurstSize;
     }
 
     return done;
 }
 
-template<class Child, class State>
+template<class Child>
 template<class T>
-inline pet::GenericError OutputStreamLogic<Child, State>::write(const T& item)
+inline pet::GenericError Stream<Child>::write(const T& item)
 {
+	StreamState* state = static_cast<StreamState*>(this);
 	Child* self = static_cast<Child*>(this);
+
     static constexpr const uint32_t size = sizeof(T);
 
-    if(self->State::WriteLength::length - self->State::idx >= size) {
-        memcpy(self->State::buffer + self->State::idx, &item, size);
-        self->State::idx += size;
+    if(state->availableBytesForWriting() >= size) {
+        memcpy(state->accessAndAdvance(size), &item, size);
         return size;
     } else {
         pet::GenericError r = write(&item, size);
@@ -254,14 +242,13 @@ inline pet::GenericError OutputStreamLogic<Child, State>::write(const T& item)
     }
 }
 
-template<class Child, class State>
-inline pet::GenericError OutputStreamLogic<Child, State>::flush()
+template<class Child>
+inline pet::GenericError Stream<Child>::flush()
 {
+	StreamState* state = static_cast<StreamState*>(this);
 	Child* self = static_cast<Child*>(this);
-    pet::GenericError r = self->blockDone(
-    		static_cast<WriteLength*>(self),
-    		self->State::buffer,
-    		self->State::idx);
+
+    pet::GenericError r = self->blockDone(state);
 
     if(r.failed())
         return r.rethrow();

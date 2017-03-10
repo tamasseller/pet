@@ -27,6 +27,10 @@
 
 namespace pet {
 
+template<class T> class ReadableFifoStreamBackend;
+template<class T> class WritableFifoStreamBackend;
+
+
 /**
  * Lock-free circular buffer index manager.
  *
@@ -62,6 +66,10 @@ template<class Child, uint16_t size>
 class FifoBase{
 	uint16_t readIdx = 0, writeIdx = 0;
 
+	template<class T>
+	friend class ReadableFifoStreamBackend;
+	template<class T>
+	friend class WritableFifoStreamBackend;
 protected:
 	inline uint16_t getOccupied() const {
 		return ((uint16_t)(writeIdx - readIdx) % (2 * size));

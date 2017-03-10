@@ -27,21 +27,24 @@
 using namespace pet;
 
 TEST_GROUP(FifoStreamIntegration) {
-    typedef StaticFifoStream<16> Uut;
+    typedef StaticFifoStream<16, true> Uut;
     Uut uut;
 
+    Uut::ReadableFifoStream &in = uut;
+    VirtualStream &out = uut;
+
     void flush() {
-    	CHECK(!uut.flush().failed());
+    	CHECK(!out.flush().failed());
     }
 
     void write(const char* what) {
-        GenericError r = uut.write(what, strlen(what));
+        GenericError r = out.write(what, strlen(what));
         CHECK(!r.failed() && r == strlen(what));
     }
 
     void read(const char* what) {
         char temp[256];
-        GenericError r = uut.read(temp, strlen(what));
+        GenericError r = in.read(temp, strlen(what));
         CHECK(!r.failed() && r == strlen(what));
         CHECK(memcmp(temp, what, strlen(what)) == 0);
     }
@@ -50,13 +53,13 @@ TEST_GROUP(FifoStreamIntegration) {
 TEST(FifoStreamIntegration, ItemAccessSane)
 {
     int x = 123;
-    CHECK(uut.read(x).failed());
+    CHECK(in.read(x).failed());
 
-    CHECK(!uut.write(x).failed());
-    CHECK(!uut.flush().failed());
+    CHECK(!out.write(x).failed());
+    CHECK(!out.flush().failed());
 
     x = 345;
-    CHECK(!uut.read(x).failed());
+    CHECK(!in.read(x).failed());
 
     CHECK(x == 123);
 }
@@ -67,7 +70,7 @@ TEST(FifoStreamIntegration, BlockAccessSane)
     char temp[strlen(str)];
     GenericError r;
 
-    r = uut.read(temp, sizeof(temp));
+    r = in.read(temp, sizeof(temp));
     CHECK(!r.failed() && r == 0);
 
     for(int i = 0; i < 12; i++) {
@@ -89,11 +92,11 @@ TEST(FifoStreamIntegration, Fill)
 {
     write("sixteencharshere");
 
-    GenericError r = uut.write("can't write", 12);
+    GenericError r = out.write("can't write", 12);
     CHECK(!r.failed() && r == 0);
 
     int neitherThisCanBeWritten = 1;
-    CHECK(uut.write(neitherThisCanBeWritten).failed());
+    CHECK(out.write(neitherThisCanBeWritten).failed());
 
     flush();
     read("sixteen");
@@ -106,7 +109,7 @@ TEST(FifoStreamIntegration, NotEnough)
 	char temp[8];
     write("foobar");
     flush();
-    GenericError r = uut.read(temp, 8);
+    GenericError r = in.read(temp, 8);
     CHECK(!r.failed() && r == 6);
 }
 
@@ -115,7 +118,7 @@ TEST(FifoStreamIntegration, TooMuch)
     write("foobar");
     write("foobar");
 
-    GenericError r = uut.write("foobar", 6);
+    GenericError r = out.write("foobar", 6);
     CHECK(!r.failed() && r == 4);
 }
 

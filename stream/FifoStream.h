@@ -10,103 +10,145 @@
 
 #include "data/Fifo.h"
 #include "stream/Stream.h"
+#include "stream/VirtualizedStream.h"
 
 #include "ubiquitous/Error.h"
 
 namespace pet {
 
 template<class Base>
-class FifoStreamifier: public Base {
-public:
-	/**
-	 * Obtain a readable block, compatibly with the StreamBackend concept.
-	 *
-	 * @param buff A reference to the pointer into which the address of the block is stored.
-	 * @param reqLen The length of the block of the intended read operation (hint).
-	 * @return The amount of data available for reading in bytes (or zero if none).
-	 */
-	inline pet::GenericError nextBlock(ReadLength* actLen, char* &buff, uint16_t reqLen) const;
+class ReadableFifoStreamBackend: private StreamBackend {
+	template<class T>
+	friend class Stream;
+
+	template<class T>
+	friend class VirtualizedStream;
 
 	/**
-	 * Obtain a writable block, compatibly with the StreamBackend concept.
-	 *
-	 * @param buff A reference to the pointer into which the address of the block is stored.
-	 * @param reqLen The length of the block of the intended read operation (hint).
-	 * @return The amount of space available for writing in bytes (or zero if none).
+	 * Obtain a readable block, compatibly with the StreamBackend concept.
 	 */
-	inline pet::GenericError nextBlock(WriteLength* actLen, char* &buff, uint16_t reqLen) const;
+	pet::GenericError nextBlock(StreamState* state, uint16_t lengthHint, bool growAsNeeded)
+	{
+		if(growAsNeeded)
+			return pet::GenericError::writeError();
+
+		Base* base = static_cast<Base*>(this);
+
+		if(base->isEmpty())
+			return 0;
+
+		return accessState<uint16_t, &StreamState::readableLength>(state) = base->access(
+				accessState<char*, &StreamState::buffer>(state),
+				base->getRealReadedIdx(),
+				(lengthHint > base->getOccupied()) ? base->getOccupied() : lengthHint);
+	}
 
 	/**
 	 * Release a readable block, compatibly with the StreamBackend concept.
-	 *
-	 * @param buff A pointer to the block acquired via the nextReadable call, gets reset to zero.
-	 * @param offset The number of bytes used up, gets reset to zero.
-	 * @return Zero on success, the error code otherwise.
 	 */
-	inline pet::GenericError blockDone(ReadLength* actLen, char* &buff, uint32_t &offset);
+	pet::GenericError blockDone(StreamState* state) {
+		Base* base = static_cast<Base*>(this);
 
-	/**
-	 * Release a written block, compatibly with the StreamBackend concept.
-	 *
-	 * @param buff A pointer to the block acquired via the nextWritable call, gets reset to null.
-	 * @param offset The number of bytes used up, gets reset to zero.
-	 * @return Zero on success, the errorcode otherwise.
-	 */
-	inline pet::GenericError blockDone(WriteLength* actLen, char* &buff, uint32_t &offset);
+		uint16_t &idx = accessState<uint16_t, &StreamState::idx>(state);
 
+		base->Base::doneReading(idx);
+		accessState<uint16_t, &StreamState::readableLength>(state) = 0;
+		accessState<char*, &StreamState::buffer>(state) = 0;
+		idx = 0;
+		return 0;
+	}
 };
 
 template<class Base>
-inline pet::GenericError FifoStreamifier<Base>::nextBlock(ReadLength* actLen, char* &buff, uint16_t length) const
-{
-	if(this->isEmpty())
+class WritableFifoStreamBackend: private StreamBackend {
+	template<class T>
+	friend class Stream;
+
+	template<class T>
+	friend class VirtualizedStream;
+
+	/**
+	 * Obtain a writable block, compatibly with the StreamBackend concept.
+	 */
+	pet::GenericError nextBlock(StreamState* state, uint16_t lengthHint, bool growAsNeeded)
+	{
+		if(!growAsNeeded)
+			return pet::GenericError::readError();
+
+		Base* base = static_cast<Base*>(this);
+
+		if(base->isFull())
+			return 0;
+
+		return accessState<uint16_t, &StreamState::writableLength>(state) = base->access(
+				accessState<char*, &StreamState::buffer>(state),
+				base->getRealWriterIdx(),
+				(lengthHint > base->getFree()) ? base->getFree() : lengthHint);
+	}
+
+	/**
+	 * Release a writable block, compatibly with the StreamBackend concept.
+	 */
+	pet::GenericError blockDone(StreamState* state) {
+		Base* base = static_cast<Base*>(this);
+
+		uint16_t &idx = accessState<uint16_t, &StreamState::idx>(state);
+
+		base->Base::doneWriting(idx);
+		accessState<uint16_t, &StreamState::writableLength>(state) = 0;
+		accessState<char*, &StreamState::buffer>(state) = 0;
+		idx = 0;
 		return 0;
-
-	return actLen->length = this->access(buff,
-			this->getRealReadedIdx(),
-			(length > this->getOccupied()) ? this->getOccupied() : length);
-}
+	}
+};
 
 template<class Base>
-inline pet::GenericError FifoStreamifier<Base>::nextBlock(WriteLength* actLen, char* &buff, uint16_t length) const
-{
-	if(this->isFull())
-		return 0;
-
-	return actLen->length = this->access(buff,
-			this->getRealWriterIdx(),
-			(length > this->getFree()) ? this->getFree() : length);
-}
+class WritableFifoStream:
+		public WritableFifoStreamBackend<Base>,
+		public Stream<WritableFifoStream<Base>> {};
 
 template<class Base>
-inline pet::GenericError FifoStreamifier<Base>::blockDone(ReadLength* actLen, char* &buffer, uint32_t &offset) {
-	this->Base::doneReading((uint16_t)offset);
-	offset = 0;
-	buffer = 0;
-	actLen->length = 0;
-	return 0;
-}
+class ReadableFifoStream:
+		public ReadableFifoStreamBackend<Base>,
+		public Stream<ReadableFifoStream<Base>> {};
 
 template<class Base>
-inline pet::GenericError FifoStreamifier<Base>::blockDone(WriteLength* actLen, char* &buffer, uint32_t &offset) {
-	this->Base::doneWriting((uint16_t)offset);
-	offset = 0;
-	buffer = 0;
-	actLen->length = 0;
-	return 0;
-}
+using VirtualReadableFifoStream = VirtualizedStream<ReadableFifoStreamBackend<Base>>;
 
-template<uint16_t size>
+template<class Base>
+using VirtualWritableFifoStream = VirtualizedStream<WritableFifoStreamBackend<Base>>;
+
+template<class Base, bool virtualize> struct RBaseSelector;
+
+template<class Base> struct RBaseSelector<Base, true> {
+	typedef VirtualReadableFifoStream<Base> ReadableStream;
+};
+
+template<class Base> struct RBaseSelector<Base, false> {
+	typedef ReadableFifoStream<Base> ReadableStream;
+};
+
+template<class Base, bool virtualize> struct WBaseSelector;
+
+template<class Base> struct WBaseSelector<Base, true> {
+	typedef VirtualWritableFifoStream<Base> WritableStream;
+};
+
+template<class Base> struct WBaseSelector<Base, false> {
+	typedef WritableFifoStream<Base> WritableStream;
+};
+
+template<uint16_t size, bool virtualizeWriteable = false, bool virtualizeReadable = false>
 class StaticFifoStream:
-		public FifoStreamifier<StaticFifo<size>>,
-		public InputStream<StaticFifoStream<size>>,
-		public OutputStream<StaticFifoStream<size>> {};
+		public StaticFifo<size>,
+		public WBaseSelector<StaticFifoStream<size>, virtualizeWriteable>::WritableStream,
+		public RBaseSelector<StaticFifoStream<size>, virtualizeReadable>::ReadableStream {};
 
-template<uint16_t size>
+template<uint16_t size, bool virtualizeWriteable = false, bool virtualizeReadable = false>
 class IndirectFifoStream:
-		public FifoStreamifier<IndirectFifo<size>>,
-		public InputStream<IndirectFifoStream<size>>,
-		public OutputStream<IndirectFifoStream<size>> {};
+		public IndirectFifo<size>,
+		public WBaseSelector<IndirectFifo<size>, virtualizeWriteable>::WritableStream,
+		public RBaseSelector<IndirectFifo<size>, virtualizeReadable>::ReadableStream {};
 }
 
 

@@ -14,21 +14,12 @@ namespace pet {
 
 template<class Backend>
 class VirtualizedStream: public VirtualStream, public Backend {
-
-	virtual pet::GenericError nextBlock(ReadLength* actLen, char* &buff, uint16_t reqLen) {
-		return Backend::nextBlock(actLen, buff, reqLen);
+	virtual pet::GenericError nextBlock(StreamState* state, uint16_t lengthHint, bool growAsNeeded) {
+		return Backend::nextBlock(state, lengthHint, growAsNeeded);
 	}
 
-	virtual pet::GenericError nextBlock(WriteLength* actLen, char* &buff, uint16_t reqLen) {
-		return Backend::nextBlock(actLen, buff, reqLen);
-	}
-
-	virtual pet::GenericError blockDone(ReadLength* actLen, char* &buff, uint32_t &offset) {
-		return Backend::blockDone(actLen, buff, offset);
-	}
-
-	virtual pet::GenericError blockDone(WriteLength* actLen, char* &buff, uint32_t &offset) {
-		return Backend::blockDone(actLen, buff, offset);
+	virtual pet::GenericError blockDone(StreamState* state) {
+		return Backend::blockDone(state);
 	}
 
 public:
