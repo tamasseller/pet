@@ -17,8 +17,8 @@
  *
  *******************************************************************************/
 
-#ifndef FIFO_H_
-#define FIFO_H_
+#ifndef FIFO_IN_POOL_H_
+#define FIFO_IN_POOL_H_
 
 #include "ubiquitous/Error.h"
 
@@ -208,4 +208,4 @@ inline DynamicFifo<Element, Allocator, frameSize>::~DynamicFifo()
 
 }
 
-#endif /* FIFO_H_ */
+#endif /* FIFO_IN_POOL_H_ */

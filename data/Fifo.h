@@ -69,7 +69,7 @@ public:
 	 * @param buff A reference to the pointer into which the address of the block is stored.
 	 * @return The amount of data available for reading in bytes (or zero if none).
 	 */
-	inline uint32_t nextReadable(char* &buff);
+	inline uint32_t nextReadable(char* &buff) const;
 
 	/**
 	 * Obtain a writable block.
@@ -81,7 +81,7 @@ public:
 	 * @param buff A reference to the pointer into which the address of the block is stored.
 	 * @return The amount of space available for writing in bytes (or zero if none).
 	 */
-	inline uint32_t nextWritable(char* &buff);
+	inline uint32_t nextWritable(char* &buff) const;
 
 	/**
 	 * Release a readable block.
@@ -105,7 +105,7 @@ public:
 };
 
 template<class Child, uint16_t size>
-inline uint32_t FifoBase<Child, size>::nextReadable(char* &buff)
+inline uint32_t FifoBase<Child, size>::nextReadable(char* &buff) const
 {
 	/*
 	 * If the reader and writer are at the same index, the FIFO is empty.
@@ -142,7 +142,7 @@ inline uint32_t FifoBase<Child, size>::nextReadable(char* &buff)
 }
 
 template<class Child, uint16_t size>
-inline uint32_t FifoBase<Child, size>::nextWritable(char* &buff)
+inline uint32_t FifoBase<Child, size>::nextWritable(char* &buff) const
 {
 	/*
 	 * The writer is ahead of the reader by the
