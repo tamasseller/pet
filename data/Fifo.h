@@ -102,15 +102,50 @@ public:
 	 * @param length The number of bytes of data produced by the user.
 	 */
 	inline void doneWriting(uint16_t length);
+
+	/**
+	 * Is there data to be read?
+	 *
+	 * Checks whether the fifo is empty.
+	 *
+	 * @return True if there is no data to be read.
+	 */
+	inline bool isEmpty() const;
+
+	/**
+	 * Is there free space to be written?
+	 *
+	 * Checks whether the fifo is full.
+	 *
+	 * @return True if there is no more free space that can be written to.
+	 */
+	inline bool isFull() const;
+
 };
+
+template<class Child, uint16_t size>
+inline bool FifoBase<Child, size>::isFull() const
+{
+	/*
+	 * The writer is ahead of the reader by the
+	 * size of the buffer, the FIFO is full.
+	 */
+	return writeIdx == (readIdx + size) % (2 * size);
+}
+
+template<class Child, uint16_t size>
+inline bool FifoBase<Child, size>::isEmpty() const{
+	/*
+	 * If the reader and writer are at the same index, the FIFO is empty.
+	 */
+	return writeIdx == readIdx;
+}
+
 
 template<class Child, uint16_t size>
 inline uint32_t FifoBase<Child, size>::nextReadable(char* &buff) const
 {
-	/*
-	 * If the reader and writer are at the same index, the FIFO is empty.
-	 */
-	if(writeIdx == readIdx)
+	if(isEmpty())
 		return 0;
 
 	/*

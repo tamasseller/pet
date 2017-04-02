@@ -31,36 +31,66 @@ TEST_GROUP(StaticFifo) {
 TEST(StaticFifo, Sanity)
 {
 	char* buff1, *buff2;
+	CHECK(uut.isEmpty());
+	CHECK(!uut.isFull());
 	CHECK(!uut.nextReadable(buff1));
 	uut.doneReading(0);
 
 	CHECK(uut.nextWritable(buff1) == 16);
 	uut.doneWriting(8);
+	CHECK(!uut.isEmpty());
+	CHECK(!uut.isFull());
 
 	CHECK(uut.nextReadable(buff2) == 8);
 	CHECK(buff2 == buff1);
 	uut.doneReading(8);
+	CHECK(uut.isEmpty());
+	CHECK(!uut.isFull());
 }
 
 TEST(StaticFifo, Fill)
 {
 	char* buff;
+
+	CHECK(uut.isEmpty());
+	CHECK(!uut.isFull());
+
 	CHECK(uut.nextWritable(buff) == 16);
 	uut.doneWriting(16);
 
+	CHECK(!uut.isEmpty());
+	CHECK(uut.isFull());
+
 	CHECK(!uut.nextWritable(buff));
+
+	CHECK(!uut.isEmpty());
+	CHECK(uut.isFull());
 }
 
 TEST(StaticFifo, FillThenConsume)
 {
 	char* buff;
+
+	CHECK(uut.isEmpty());
+	CHECK(!uut.isFull());
+
 	CHECK(uut.nextWritable(buff) == 16);
 	uut.doneWriting(16);
+
+	CHECK(!uut.isEmpty());
+	CHECK(uut.isFull());
 
 	CHECK(uut.nextReadable(buff) == 16);
 	uut.doneReading(8);
 
+	CHECK(!uut.isEmpty());
+	CHECK(!uut.isFull());
+
 	CHECK(uut.nextWritable(buff) == 8);
+	uut.doneReading(8);
+
+	CHECK(uut.isEmpty());
+	CHECK(!uut.isFull());
 }
 
 TEST(StaticFifo, FillEmptyThenRefill)
@@ -122,14 +152,13 @@ TEST_GROUP(IndirectFifo) {
 	}
 };
 
-#include <iostream>
-
 TEST(IndirectFifo, ExerciseFull) {
 	static constexpr const uint32_t prime1 = 13, prime2 = 7;
 	uint32_t writeCounter = 0;
 	uint32_t readCounter = 0;
 	for(uint32_t readAmount = prime2; readAmount; readAmount = (readAmount + prime2) % prime1) {
 		char* buff;
+
 		while(const uint32_t space = uut->nextWritable(buff)) {
 			for(int i=0; i < space; i++)
 				buff[i] = writeCounter++;
