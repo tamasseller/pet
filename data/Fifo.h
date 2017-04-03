@@ -32,9 +32,21 @@ namespace pet {
  * **single writer** concurrently without any locking.
  * Locking is not required due to the fact that:
  *
- *  - a. the _reader index_ is only modified by the reader,
- *  - b. the _writer index_ is only modified by the writer,
+ *  - a. the _reader index_ is only modified (owned) by the reader,
+ *  - b. the _writer index_ is only modified (owned) by the writer,
  *  - c. both only modify their side atomically as seen by the other.
+ *
+ *  In cases when the _fifo_ is more than one element further from being empty
+ *  or full there is no contention, both sides can progress without affecting
+ *  the other in any way.
+ *
+ *  However, in the specific corner cases, when the _fifo_ is being free/empty
+ *  or one element away from that, and both the reader and writer sides
+ *  manipulate the _fifo_ at the same time the result is nondeterministic.
+ *  But for the above mentioned reasons it can be easily seen that if there
+ *  are concurrent modifications even in these corner cases the state of the
+ *  _fifo_ is kept consistent. In other words, under any reading or writing
+ *  will atomically fail or succeed.
  *
  *  Circular buffers, that represent their state in the form of reader and
  *  writer pointers (as opposed to start pointer and size) bear that property
@@ -51,11 +63,11 @@ namespace pet {
  *  instead the interval is doubled. Whenever the data elements are required
  *  to be addressed the reader/writer indices are modulo reduced by the size
  *  of the array. By enabling them to use the doubled intervals the empty
- *  and full states can easily be differentiated. The FIFO buffer is
+ *  and full states can easily be differentiated. The _fifo_ buffer is
  *  empty when the indices are equal, and it is full when the writer is
  *  ahead of the reader by exactly the size of the buffer.
  */
-template<class Child, uint16_t size>
+template<uint16_t size>
 class FifoBase{
 	uint16_t readIdx = 0, writeIdx = 0;
 public:
@@ -69,7 +81,7 @@ public:
 	 * @param buff A reference to the pointer into which the address of the block is stored.
 	 * @return The amount of data available for reading in bytes (or zero if none).
 	 */
-	inline uint32_t nextReadable(char* &buff) const;
+	inline uint16_t nextReadableIdx(uint16_t &idx) const;
 
 	/**
 	 * Obtain a writable block.
@@ -78,10 +90,10 @@ public:
 	 * writing by utilizing this function. When done it needs to be
 	 * released with the _doneWriting_ method.
 	 *
-	 * @param buff A reference to the pointer into which the address of the block is stored.
-	 * @return The amount of space available for writing in bytes (or zero if none).
+	 * @param idx A reference to variable into which the index of the block is stored.
+	 * @return The amount of space available for writing (or zero if none).
 	 */
-	inline uint32_t nextWritable(char* &buff) const;
+	inline uint16_t nextWritableIdx(uint16_t &idx) const;
 
 	/**
 	 * Release a readable block.
@@ -123,8 +135,8 @@ public:
 
 };
 
-template<class Child, uint16_t size>
-inline bool FifoBase<Child, size>::isFull() const
+template<uint16_t size>
+inline bool FifoBase<size>::isFull() const
 {
 	/*
 	 * The writer is ahead of the reader by the
@@ -133,8 +145,8 @@ inline bool FifoBase<Child, size>::isFull() const
 	return writeIdx == (readIdx + size) % (2 * size);
 }
 
-template<class Child, uint16_t size>
-inline bool FifoBase<Child, size>::isEmpty() const{
+template<uint16_t size>
+inline bool FifoBase<size>::isEmpty() const{
 	/*
 	 * If the reader and writer are at the same index, the FIFO is empty.
 	 */
@@ -142,8 +154,8 @@ inline bool FifoBase<Child, size>::isEmpty() const{
 }
 
 
-template<class Child, uint16_t size>
-inline uint32_t FifoBase<Child, size>::nextReadable(char* &buff) const
+template<uint16_t size>
+inline uint16_t FifoBase<size>::nextReadableIdx(uint16_t &idx) const
 {
 	if(isEmpty())
 		return 0;
@@ -162,7 +174,7 @@ inline uint32_t FifoBase<Child, size>::nextReadable(char* &buff) const
 	/*
 	 * Pointer to the start of the data.
 	 */
-	buff = ((Child*)this)->getBuffer() + realIdx;
+	idx = realIdx;
 
 	/*
 	 * Number of data items before the writer pointer.
@@ -176,8 +188,8 @@ inline uint32_t FifoBase<Child, size>::nextReadable(char* &buff) const
 	return  (space > nData) ? nData : space;
 }
 
-template<class Child, uint16_t size>
-inline uint32_t FifoBase<Child, size>::nextWritable(char* &buff) const
+template<uint16_t size>
+inline uint16_t FifoBase<size>::nextWritableIdx(uint16_t &idx) const
 {
 	/*
 	 * The writer is ahead of the reader by the
@@ -199,7 +211,7 @@ inline uint32_t FifoBase<Child, size>::nextWritable(char* &buff) const
 	/*
 	 * Pointer to the start of the data.
 	 */
-	buff = ((Child*)this)->getBuffer() + realIdx;
+	idx = realIdx;
 
 	/*
 	 * Number of data items before the reader pointer.
@@ -213,51 +225,68 @@ inline uint32_t FifoBase<Child, size>::nextWritable(char* &buff) const
 	return  (space > nData) ? nData : space;
 }
 
-template<class Child, uint16_t size>
-inline void FifoBase<Child, size>::doneReading(uint16_t length) {
+template<uint16_t size>
+inline void FifoBase<size>::doneReading(uint16_t length) {
 	readIdx = (readIdx + length) % (2 * size);
 }
 
-template<class Child, uint16_t size>
-inline void FifoBase<Child, size>::doneWriting(uint16_t length) {
+template<uint16_t size>
+inline void FifoBase<size>::doneWriting(uint16_t length) {
 	writeIdx = (writeIdx + length) % (2 * size);
 }
-
 
 /**
  * FIFO with embedded storage.
  *
- * This FIFO buffer variant contains the buffer-space used for
+ * This _fifo_ buffer variant contains the buffer-space used for
  * storing the business data, mainly for convenience but also to
  * avoid storing an additional pointer to the space next to it.
+ *
+ * @see This _fifo_ is based on the FifoBase lock-free index manager.
  */
-template<uint32_t size>
-class StaticFifo: public FifoBase<StaticFifo<size>, size> {
-	typedef FifoBase<StaticFifo, size> Base;
+template<uint32_t size, class DataType = char>
+class StaticFifo: protected FifoBase<size> {
+	typedef FifoBase<size> Base;
 	friend Base;
 
-	char buffer[size];
+	DataType buffer[size];
 
-	inline char* getBuffer() {
-		return buffer;
+public:
+	uint16_t nextReadable(DataType* &buff) {
+		uint16_t idx, ret = this->nextReadableIdx(idx);
+		buff = buffer + idx;
+		return ret;
 	}
+
+	uint16_t nextWritable(DataType* &buff) {
+		uint16_t idx, ret = this->nextWritableIdx(idx);
+		buff = buffer + idx;
+		return ret;
+	}
+
+	using Base::doneReading;
+	using Base::doneWriting;
+	using Base::isEmpty;
+	using Base::isFull;
 };
 
 /**
  * FIFO with externals storage.
  *
- * This FIFO buffer variant does not contain the buffer-space
+ * This _fifo_ buffer variant does not contain the buffer-space
  * used for storing the business data but only a pointer to it.
  * It is mainly targeted at solutions requiring the buffer-space
  * to be placed in a specific memory range (because of DMA access
  * for example).
+ *
+ * @see This _fifo_ is based on the FifoBase lock-free index manager.
  */
-template<uint32_t size>
-class IndirectFifo: public FifoBase<IndirectFifo<size>, size> {
-	typedef FifoBase<IndirectFifo, size> Base;
+template<uint32_t size, class DataType = char>
+class IndirectFifo: protected FifoBase<size> {
+	typedef FifoBase<size> Base;
 	friend Base;
 
-	char* buffer;
+	DataType* buffer;
 
 	inline char* getBuffer() {
 		return buffer;
@@ -269,7 +298,24 @@ public:
 	 * The address of the external buffer needs to be specified here,
 	 * right at construction time.
 	 */
-	inline IndirectFifo(char* buffer): buffer(buffer) {}
+	inline IndirectFifo(DataType* buffer): buffer(buffer) {}
+
+	uint16_t nextReadable(DataType* &buff) {
+		uint16_t idx, ret = this->nextReadableIdx(idx);
+		buff = buffer + idx;
+		return ret;
+	}
+
+	uint16_t nextWritable(DataType* &buff) {
+		uint16_t idx, ret = this->nextWritableIdx(idx);
+		buff = buffer + idx;
+		return ret;
+	}
+
+	using Base::doneReading;
+	using Base::doneWriting;
+	using Base::isEmpty;
+	using Base::isFull;
 };
 
 
