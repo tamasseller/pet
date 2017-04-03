@@ -78,8 +78,8 @@ public:
 	 * reading by utilizing this function. When done it needs to be
 	 * released with the _doneReading_ method.
 	 *
-	 * @param buff A reference to the pointer into which the address of the block is stored.
-	 * @return The amount of data available for reading in bytes (or zero if none).
+	 * @param idx A reference to variable into which the index of the block is stored.
+	 * @return The number of data items available (or zero if none).
 	 */
 	inline uint16_t nextReadableIdx(uint16_t &idx) const;
 
@@ -91,7 +91,7 @@ public:
 	 * released with the _doneWriting_ method.
 	 *
 	 * @param idx A reference to variable into which the index of the block is stored.
-	 * @return The amount of space available for writing (or zero if none).
+	 * @return The number of data items available (or zero if none).
 	 */
 	inline uint16_t nextWritableIdx(uint16_t &idx) const;
 
@@ -236,6 +236,90 @@ inline void FifoBase<size>::doneWriting(uint16_t length) {
 }
 
 /**
+ * Type injection helper.
+ */
+template<uint32_t size, class DataType, class Child>
+class TypedFifoBase: protected FifoBase<size> {
+
+	typedef FifoBase<size> Base;
+
+public:
+	/**
+	 * Obtain a readable block.
+	 *
+	 * Sets the provided pointer to the address of the block containing the data to be read.
+	 * See FifoBase::nextReadableIdx for details.
+	 *
+	 * @param buff A reference to the pointer into which the address of the block is stored.
+	 * @return The number of data items available (or zero if none).
+	 * @see FifoBase::nextReadableIdx
+	 */
+	uint16_t nextReadable(DataType* &buff) {
+		uint16_t idx, ret = this->nextReadableIdx(idx);
+		buff = static_cast<Child*>(this)->getBuffer() + idx;
+		return ret;
+	}
+
+	/**
+	 * Obtain a writable block.
+	 *
+	 * Sets the provided pointer to the address of the free block where the data is to be written.
+	 * See FifoBase::nextWritableIdx for details.
+	 *
+	 * @param buff A reference to the pointer into which the address of the block is stored.
+	 * @return The number of data items available (or zero if none).
+	 * @see FifoBase::nextWritableIdx
+	 */
+	uint16_t nextWritable(DataType* &buff) {
+		uint16_t idx, ret = this->nextWritableIdx(idx);
+		buff = static_cast<Child*>(this)->getBuffer() + idx;
+		return ret;
+	}
+
+	using Base::doneReading;
+	using Base::doneWriting;
+	using Base::isEmpty;
+	using Base::isFull;
+
+	/**
+	 * Read single data element.
+	 *
+	 * Convenience method that wraps the next/done sequence of reading one element from the _fifo_.
+	 *
+ 	 * @param data The variable into which element is read.
+	 * @return True on success, false if already empty.
+	 */
+	bool readOne(DataType &data) {
+		DataType *from;
+		if(!nextReadable(from))
+			return false;
+
+		data = *from;
+		doneReading(1);
+		return true;
+	}
+
+	/**
+	 * Write single data element.
+	 *
+	 * Convenience method that wraps the next/done sequence of writing one element into the _fifo_.
+	 *
+ 	 * @param data The element to be stored.
+	 * @return True on success, false if already full.
+	 */
+	bool writeOne(const DataType &data) {
+		DataType *to;
+		if(!nextWritable(to))
+			return false;
+
+		*to = data;
+		doneWriting(1);
+		return true;
+	}
+
+};
+
+/**
  * FIFO with embedded storage.
  *
  * This _fifo_ buffer variant contains the buffer-space used for
@@ -245,29 +329,15 @@ inline void FifoBase<size>::doneWriting(uint16_t length) {
  * @see This _fifo_ is based on the FifoBase lock-free index manager.
  */
 template<uint32_t size, class DataType = char>
-class StaticFifo: protected FifoBase<size> {
-	typedef FifoBase<size> Base;
+class StaticFifo: public TypedFifoBase<size, DataType, StaticFifo<size, DataType>> {
+	typedef TypedFifoBase<size, DataType, StaticFifo> Base;
 	friend Base;
 
 	DataType buffer[size];
 
-public:
-	uint16_t nextReadable(DataType* &buff) {
-		uint16_t idx, ret = this->nextReadableIdx(idx);
-		buff = buffer + idx;
-		return ret;
+	inline DataType* getBuffer() {
+		return buffer;
 	}
-
-	uint16_t nextWritable(DataType* &buff) {
-		uint16_t idx, ret = this->nextWritableIdx(idx);
-		buff = buffer + idx;
-		return ret;
-	}
-
-	using Base::doneReading;
-	using Base::doneWriting;
-	using Base::isEmpty;
-	using Base::isFull;
 };
 
 /**
@@ -282,13 +352,13 @@ public:
  * @see This _fifo_ is based on the FifoBase lock-free index manager.
  */
 template<uint32_t size, class DataType = char>
-class IndirectFifo: protected FifoBase<size> {
-	typedef FifoBase<size> Base;
+class IndirectFifo: public TypedFifoBase<size, DataType, IndirectFifo<size, DataType>> {
+	typedef TypedFifoBase<size, DataType, IndirectFifo> Base;
 	friend Base;
 
 	DataType* buffer;
 
-	inline char* getBuffer() {
+	inline DataType* getBuffer() {
 		return buffer;
 	}
 public:
@@ -299,23 +369,6 @@ public:
 	 * right at construction time.
 	 */
 	inline IndirectFifo(DataType* buffer): buffer(buffer) {}
-
-	uint16_t nextReadable(DataType* &buff) {
-		uint16_t idx, ret = this->nextReadableIdx(idx);
-		buff = buffer + idx;
-		return ret;
-	}
-
-	uint16_t nextWritable(DataType* &buff) {
-		uint16_t idx, ret = this->nextWritableIdx(idx);
-		buff = buffer + idx;
-		return ret;
-	}
-
-	using Base::doneReading;
-	using Base::doneWriting;
-	using Base::isEmpty;
-	using Base::isFull;
 };
 
 

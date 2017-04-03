@@ -106,6 +106,29 @@ TEST(StaticFifo, FillEmptyThenRefill)
 	uut.doneWriting(16);
 }
 
+TEST(StaticFifo, Helpers)
+{
+	char c;
+	CHECK(!uut.readOne(c));
+
+	CHECK(uut.writeOne('f'));
+	CHECK(uut.writeOne('o'));
+	CHECK(uut.writeOne('o'));
+
+	char* dummy;
+	uut.doneWriting(uut.nextWritable(dummy));
+
+	CHECK(!uut.writeOne('x'));
+
+	CHECK(uut.readOne(c));
+	CHECK(c == 'f');
+	CHECK(uut.readOne(c));
+	CHECK(c == 'o');
+	CHECK(uut.readOne(c));
+	CHECK(c == 'o');
+}
+
+
 TEST(StaticFifo, Exercise)
 {
 	char* buff;
@@ -138,12 +161,12 @@ TEST(StaticFifo, Exercise)
 }
 
 TEST_GROUP(IndirectFifo) {
-	typedef IndirectFifo<16> Uut;
-	char *buffer;
+	typedef IndirectFifo<16, int> Uut;
+	int *buffer;
 	Uut *uut;
 
 	TEST_SETUP() {
-		uut = new Uut(buffer = new char[16]);
+		uut = new Uut(buffer = new int[16]);
 	}
 
 	TEST_TEARDOWN() {
@@ -157,7 +180,7 @@ TEST(IndirectFifo, ExerciseFull) {
 	uint32_t writeCounter = 0;
 	uint32_t readCounter = 0;
 	for(uint32_t readAmount = prime2; readAmount; readAmount = (readAmount + prime2) % prime1) {
-		char* buff;
+		int* buff;
 
 		while(const uint32_t space = uut->nextWritable(buff)) {
 			for(int i=0; i < space; i++)
@@ -185,7 +208,7 @@ TEST(IndirectFifo, ExerciseEmpty) {
 	uint32_t writeCounter = 0;
 	uint32_t readCounter = 0;
 	for(uint32_t witeAmount = prime2; witeAmount; witeAmount = (witeAmount + prime2) % prime1) {
-		char* buff;
+		int* buff;
 		for(uint32_t writeSize = witeAmount; writeSize;) {
 			uint32_t space = uut->nextWritable(buff);
 			uint32_t written = 0;
