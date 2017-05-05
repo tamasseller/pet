@@ -25,8 +25,12 @@
 #include "Addr2lineBacktrace.h"
 #include "MockWriter.h"
 
+#include <string>
+
 extern bool assertMocked;
 extern bool writerMocked;
+extern bool writerRecords;
+extern std::string recorded;
 
 UNCHECKED_ERROR_REPORT() {
 	if(assertMocked) {
@@ -39,7 +43,9 @@ UNCHECKED_ERROR_REPORT() {
 
 TRACE_WRITER(MockWriter);
 GLOBAL_TRACE_POLICY(Failure);
-CLIENT_TRACE_POLICY(B, All)
+CLIENT_TRACE_POLICY(B, All);
 CLIENT_TRACE_POLICY_NS(ns, C, Warning);
+
+CLIENT_TRACE_POLICY(TestTraceTag, All);
 
 #endif /* DEBUGCONFIG_H_ */

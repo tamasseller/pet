@@ -2,6 +2,7 @@ OUTPUT = pet-test
 
 # Library sources
 
+SOURCES += ../1test/TestRunner.cpp
 SOURCES += ../data/AvlTree.cpp
 SOURCES += ../data/BinaryTree.cpp
 SOURCES += ../ubiquitous/PrintfWriter.cpp
@@ -9,6 +10,7 @@ SOURCES += ../ubiquitous/PrintfWriter.cpp
 # Test code
 
 #SOURCES += TestAlgoInline.cpp
+SOURCES += Test1test.cpp
 SOURCES += TestAlgoIterate.cpp
 SOURCES += TestAlgoStr.cpp
 SOURCES += TestDataFifo.cpp
@@ -45,6 +47,8 @@ SOURCES += TestUbiqTrace.cpp
 
 # Test support
 
+SOURCES += MetaTest1.cpp
+SOURCES += MetaTest2.cpp
 SOURCES += MockWriter.cpp
 SOURCES += MockAllocator.cpp
 SOURCES += DebugConfig.cpp

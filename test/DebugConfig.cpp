@@ -5,5 +5,9 @@
  *      Author: tooma
  */
 
+#include <string>
+
 bool assertMocked;
 bool writerMocked;
+bool writerRecords;
+std::string recorded;
