@@ -20,11 +20,11 @@
 #ifndef TESTFWD_H_
 #define TESTFWD_H_
 
+namespace pet {
+
 class TestRunner;
 
-namespace pet {
 template<class> class LinkedList;
-}
 
 class TestHandle
 {
@@ -41,5 +41,7 @@ protected:
 public:
 	inline virtual ~TestHandle() {}
 };
+
+}
 
 #endif /* TESTFWD_H_ */

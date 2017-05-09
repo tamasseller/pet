@@ -22,6 +22,18 @@
 
 #include "TestBase.h"
 #include "TestRunner.h"
+#include "Mock.h"
+
+#define TEST_SETUP() inline void testSetup()
+#define TEST_TEARDOWN() inline void testTeardown()
+
+namespace pet {
+class TestGroupBase {
+    protected:
+        TEST_SETUP() {}
+        TEST_TEARDOWN() {}
+};
+}
 
 #define TEST_CLASS_NAME_HELPER(name, group)     Test ## name ## In ## group ## Handle
 #define INTERNAL_TEST_CLASS_NAME(name, group)   TEST_CLASS_NAME_HELPER(name, group)
@@ -36,7 +48,7 @@
 #define INTERNAL_TEST(name, group, parent, gName)    							        \
 																						\
 class INTERNAL_TEST_CLASS_NAME(name, group):                                            \
-    public TestBase<INTERNAL_TEST_CLASS_NAME(name, group)>,                             \
+    public pet::TestBase<INTERNAL_TEST_CLASS_NAME(name, group)>,                        \
     public INTERNAL_TEST_GROUP_NAME(parent) {           	                            \
 	virtual const char* getName() {														\
 		return INTERNAL_STRINGIFY(name) gName;       	    							\
@@ -59,17 +71,8 @@ class INTERNAL_TEST_CLASS_NAME(name, group):                                    
 																						\
 void INTERNAL_TEST_CLASS_NAME(name, group)::testBody() 								    \
 
-#define TEST_SETUP() inline void testSetup()
-#define TEST_TEARDOWN() inline void testTeardown()
-
-class TestGroupBase {
-    protected:
-        TEST_SETUP() {}
-        TEST_TEARDOWN() {}
-};
-
 #define TEST_GROUP(name)                                                                \
-struct INTERNAL_TEST_GROUP_NAME(name): protected TestGroupBase
+struct INTERNAL_TEST_GROUP_NAME(name): protected pet::TestGroupBase
 
 TEST_GROUP(_dummy_) {};
 
@@ -78,7 +81,7 @@ TEST_GROUP(_dummy_) {};
 #define TEST_SWITCH_HELPER(dummy1, dummy2, real, ...) real
 #define TEST(...) TEST_SWITCH_HELPER(__VA_ARGS__, TEST_WITH_GROUP, TEST_WITHOUT_GROUP)(__VA_ARGS__)
 
-#define FAIL(...)						TestRunner::failTest(INTERNAL_AT())
+#define FAIL(...)						pet::TestRunner::failTest(INTERNAL_AT())
 #define CHECK(x) 						{if(!(x)) FAIL(); }
 
 

@@ -19,23 +19,24 @@
 
 #include "TestRunner.h"
 
-#include "ubiquitous/Trace.h"
-
 #include <setjmp.h>
 
-pet::LinkedList<TestHandle> TestRunner::tests;
+namespace pet {
 
-typedef pet::Trace<TestTraceTag> trace;
+LinkedList<TestHandle> TestRunner::tests;
 
 static jmp_buf jmpBuff;
-static TestHandle* currentTest;
 
-int TestRunner::runAllTests()
+TestHandle* TestRunner::currentTest;
+TestOutput* TestRunner::output;
+
+int TestRunner::runAllTests(TestOutput* output)
 {
+	TestRunner::output = output;
 	unsigned int run = 0, failed = 0;
 
 	for(auto it = tests.iterator(); it.current(); it.step()) {
-		trace::info << ".";
+		output->reportProgress();
 		currentTest = it.current();
 
 		if(setjmp(jmpBuff))
@@ -47,20 +48,21 @@ int TestRunner::runAllTests()
 	}
 
 	currentTest = 0;
+	TestRunner::output = 0;
 
 	if(failed) {
-		trace::info << "\nERROR (" << failed << " of " << run << " tests failed)\n";
+		output->reportFinalFailure(run, failed);
 		return -1;
 	} else {
-		trace::info << "\nOK (all " << run << " tests have been ran successfully)\n";
+		output->reportFinalSuccess(run);
 		return 0;
 	}
 }
 
 int TestRunner::failTest(const char* srcInfo)
 {
-	trace::warn 	<< "\nTest '" << currentTest->getName()
-					<< "' (" << currentTest->getSourceInfo() <<  ")\n\n\tfailed at " << srcInfo << "\n\n";
-
+	output->reportTestFailure(currentTest->getName(), currentTest->getSourceInfo(), srcInfo);
 	longjmp(jmpBuff,1);
+}
+
 }

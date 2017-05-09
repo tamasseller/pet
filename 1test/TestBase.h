@@ -22,6 +22,8 @@
 
 #include "TestHandle.h"
 
+namespace pet {
+
 template<class Child>
 class TestBase: public TestHandle {
 protected:
@@ -29,15 +31,17 @@ protected:
 	static Child instance;
 };
 
+}
+
 ////////////////////////////////////////////////////////////////
 
 #include "TestRunner.h"
 
 template<class Child>
-Child TestBase<Child>::instance;
+Child pet::TestBase<Child>::instance;
 
 template<class Child>
-TestBase<Child>::TestBase()
+pet::TestBase<Child>::TestBase()
 {
 	TestRunner::registerTest(&instance);
 }

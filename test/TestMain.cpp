@@ -27,7 +27,7 @@
 
 int main(int ac, char** av)
 {
-    int ret = TestRunner::runAllTests();
+    int ret = pet::TestRunner::runAllTests();
     if(ret)
         return ret;
 

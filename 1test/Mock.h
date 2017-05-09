@@ -9,7 +9,11 @@
 
 #include <stdint.h>
 
-#define EXPECT_POOL_SIZE    64
+#ifndef EXPECT_POOL_SIZE
+#define EXPECT_POOL_SIZE		64
+#endif
+
+namespace pet {
 
 constexpr uintptr_t javaHash(const char* str = "") {
     return *str ? (*str + 31 * javaHash(str + 1)) : 1;
@@ -174,7 +178,8 @@ inline void Mock<hash>::clear()
     return Pool::clear();
 }
 
+}
 
-#define MOCK(name) Mock<javaHash(#name)>
+#define MOCK(name) pet::Mock<pet::javaHash(#name)>
 
 #endif /* MOCK_H_ */

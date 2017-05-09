@@ -20,10 +20,12 @@
 #ifndef TESTRUNNER_H_
 #define TESTRUNNER_H_
 
-#include "TestHandle.h"
 #include "data/LinkedList.h"
 
-class TestTraceTag;
+#include "TestHandle.h"
+#include "TraceOutput.h"
+
+namespace pet {
 
 class TestRunner {
 	template<class>
@@ -33,8 +35,10 @@ class TestRunner {
 
 	static pet::LinkedList<TestHandle> tests;
 
+	static TestHandle* currentTest;
+	static TestOutput* output;
 public:
-	static int runAllTests();
+	static int runAllTests(TestOutput* output = &TraceOutput::instance);
 	static int failTest(const char* sourceInfo);
 };
 
@@ -42,6 +46,8 @@ public:
 
 inline void TestRunner::registerTest(TestHandle* test) {
 	tests.add(test);
+}
+
 }
 
 #endif /* TESTRUNNER_H_ */
