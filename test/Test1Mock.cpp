@@ -143,3 +143,22 @@ TEST(MockParamsPointerWrong) {
     MOCK()::clear();
 }
 
+TEST_GROUP(Group) {
+    bool x = false;
+    bool y = false;
+
+    TEST_SETUP() {
+        x = true;
+    }
+
+    TEST_TEARDOWN() {
+        CHECK(x && y);
+    }
+};
+
+TEST(Group, Test1) {
+};
+
+TEST(Group, Test2) {
+    y = true;
+};
