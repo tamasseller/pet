@@ -52,7 +52,7 @@ int TestRunner::runAllTests()
 		trace::info << "\nERROR (" << failed << " of " << run << " tests failed)\n";
 		return -1;
 	} else {
-		trace::info << "\nOK (all " << run << "tests have been ran successfully)\n";
+		trace::info << "\nOK (all " << run << " tests have been ran successfully)\n";
 		return 0;
 	}
 }
