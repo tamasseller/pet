@@ -17,11 +17,12 @@
  *
  *******************************************************************************/
 
-#include "CppUTest/TestHarness.h"
+#include "1test/Test.h"
 
 #include "algorithm/Str.h"
 
 #include <string.h>
+#include <stdint.h>
 
 using namespace pet;
 

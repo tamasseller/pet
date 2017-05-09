@@ -142,7 +142,7 @@ TEST(MockParamsPointerWrong) {
     CHECK(!MOCK("params")::call("method").withParam(&obj2));
     MOCK()::clear();
 }
-
+/*
 TEST_GROUP(Group) {
     bool x = false;
     bool y = false;
@@ -162,3 +162,4 @@ TEST(Group, Test1) {
 TEST(Group, Test2) {
     y = true;
 };
+*/
