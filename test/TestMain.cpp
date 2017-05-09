@@ -23,8 +23,14 @@
 
 #include "FailureInjectorPlugin.h"
 
+#include "1test/TestRunner.h"
+
 int main(int ac, char** av)
 {
+    int ret = TestRunner::runAllTests();
+    if(ret)
+        return ret;
+
     MemoryLeakWarningPlugin::destroyGlobalDetector();
 	TestRegistry::getCurrentRegistry()->installPlugin(FailureInjectorPlugin::instance());
     return CommandLineTestRunner::RunAllTests(ac, av);

@@ -10,7 +10,13 @@ SOURCES += ../ubiquitous/PrintfWriter.cpp
 # Test code
 
 #SOURCES += TestAlgoInline.cpp
-SOURCES += Test1test.cpp
+
+#SOURCES += Test1test.cpp
+#SOURCES += MetaTest1.cpp
+#SOURCES += MetaTest2.cpp
+
+SOURCES += Test1Mock.cpp
+
 SOURCES += TestAlgoIterate.cpp
 SOURCES += TestAlgoStr.cpp
 SOURCES += TestDataFifo.cpp
@@ -47,8 +53,6 @@ SOURCES += TestUbiqTrace.cpp
 
 # Test support
 
-SOURCES += MetaTest1.cpp
-SOURCES += MetaTest2.cpp
 SOURCES += MockWriter.cpp
 SOURCES += MockAllocator.cpp
 SOURCES += DebugConfig.cpp
@@ -86,8 +90,8 @@ CXXFLAGS += -DCPPUTEST_USE_MEM_LEAK_DETECTION=0
 LIBS += CppUTest
 LIBS += CppUTestExt
 
-TEST_CMD_PREFIX=LD_LIBRARY_PATH=/opt/gcc-5.3.0/lib32/
-CXX=/opt/gcc-5.3.0/bin/g++
+#TEST_CMD_PREFIX=LD_LIBRARY_PATH=/opt/gcc-5.3.0/lib32/
+#CXX=/opt/gcc-5.3.0/bin/g++
 LD=$(CXX) 
 
 #CPPUTEST_FLAGS = 
