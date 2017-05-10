@@ -20,7 +20,7 @@
 #include "managed/IdentifierRegistry.h"
 #include "MockAllocator.h"
 
-#include "CppUTest/TestHarness.h"
+#include "1test/Test.h"
 
 #include <cstring>
 

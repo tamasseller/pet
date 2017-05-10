@@ -17,8 +17,8 @@
  *
  *******************************************************************************/
 
-#include "CppUTest/TestHarness.h"
-#include "CppUTestExt/MockSupport.h"
+#include "1test/Test.h"
+#include "1test/Mock.h"
 
 #include "ubiquitous/Error.h"
 
@@ -52,8 +52,6 @@ TEST_GROUP(FailPointer) {
 	}
 	TEST_TEARDOWN() {
 		assertMocked = false;
-	    mock().checkExpectations();
-		mock().clear();
 	}
 };
 
@@ -61,34 +59,28 @@ TEST(FailPointer, Sanity) {
 	CHECK(returnNull<int>().failed());
 	CHECK(!returnNonNull<void>().failed());
 
-    mock().expectOneCall("uncheckedErrorReport");
+    MOCK()::EXPECT(uncheckedErrorReport);
 	CHECK(returnNonNull<void>());
 }
 
 TEST(FailPointer, ReturnUnchecked) {
-    mock().expectOneCall("uncheckedErrorReport");
+    MOCK()::EXPECT(uncheckedErrorReport);
 
 	FailPointer<void> ret = returnUnchecked<void, &returnNonNull<void> >();
 	CHECK(ret != 0);
 }
 
 TEST(FailPointer, ReturnChecked) {
-    mock().expectNCalls(0, "uncheckedErrorReport");
-
 	FailPointer<void> ret = returnChecked<void, &returnNonNull<void> >();
 	CHECK(ret != 0);
 }
 
 TEST(FailPointer, ReturnCheckedUnchecked) {
-    mock().expectNCalls(0, "uncheckedErrorReport");
-
 	FailPointer<int> ret = returnChecked<int, &returnUnchecked<int, &returnNull<int> > >();
 	CHECK(ret == 0);
 }
 
 TEST(FailPointer, ReturnUncheckedChecked) {
-    mock().expectNCalls(0, "uncheckedErrorReport");
-
 	FailPointer<int> ret = returnUnchecked<int, &returnChecked<int, &returnNonNull<int> > >();
 	CHECK(ret != 0);
 }
@@ -122,8 +114,6 @@ TEST_GROUP(FailValue) {
 	}
 	TEST_TEARDOWN() {
 		assertMocked = false;
-	    mock().checkExpectations();
-		mock().clear();
 	}
 };
 
@@ -131,34 +121,28 @@ TEST(FailValue, Sanity) {
 	CHECK(returnError<int>().failed());
 	CHECK(!returnNonError<short>().failed());
 
-    mock().expectOneCall("uncheckedErrorReport");
+    MOCK()::EXPECT(uncheckedErrorReport);
 	CHECK(returnError<long long>());
 }
 
 TEST(FailValue, ReturnUnchecked) {
-    mock().expectOneCall("uncheckedErrorReport");
+    MOCK()::EXPECT(uncheckedErrorReport);
 
     FailValue<char, 123> ret = returnUnchecked<char, &returnError<char> >();
 	CHECK(ret == 123);
 }
 
 TEST(FailValue, ReturnChecked) {
-    mock().expectNCalls(0, "uncheckedErrorReport");
-
     FailValue<short, 123> ret = returnChecked<short, &returnNonError<short> >();
 	CHECK(ret != 123);
 }
 
 TEST(FailValue, ReturnCheckedUnchecked) {
-    mock().expectNCalls(0, "uncheckedErrorReport");
-
     FailValue<int, 123> ret = returnChecked<int, &returnUnchecked<int, &returnError<int> > >();
 	CHECK(ret == 123);
 }
 
 TEST(FailValue, ReturnUncheckedChecked) {
-    mock().expectNCalls(0, "uncheckedErrorReport");
-
     FailValue<long, 123> ret = returnUnchecked<long, &returnChecked<long, &returnNonError<long> > >();
 	CHECK(ret != 123);
 }

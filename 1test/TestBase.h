@@ -17,21 +17,24 @@
  *
  *******************************************************************************/
 
-#ifndef TEST_H_
-#define TEST_H_
+#ifndef TESTBASE_H_
+#define TESTBASE_H_
 
 #include "TestHandle.h"
 #include "Mock.h"
 
 namespace pet {
 
+
+
 template<class Child>
-class TestBase: public TestHandle {
+class TestBase: public Registry<TestInterface>::StaticElement<Child> {
 protected:
     inline void run();
-    inline TestBase();
+    inline void dummy() {}
+//    inline TestBase();
 
-	static Child instance;
+//	static Child instance;
 };
 
 class TestGroupBase {
@@ -46,14 +49,14 @@ class TestGroupBase {
 
 #include "TestRunner.h"
 
-template<class Child>
+/*template<class Child>
 Child pet::TestBase<Child>::instance;
 
 template<class Child>
 inline pet::TestBase<Child>::TestBase()
 {
 	TestRunner::registerTest(&instance);
-}
+}*/
 
 template<class Child>
 inline void pet::TestBase<Child>::run()
@@ -66,4 +69,4 @@ inline void pet::TestBase<Child>::run()
 }
 
 
-#endif /* TEST_H_ */
+#endif /* TESTBASE_H_ */

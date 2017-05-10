@@ -15,6 +15,8 @@ class TestTraceTag;
 namespace pet {
 
 class TraceOutput: public TestOutput {
+    int nDots = 0;
+
 	virtual void reportProgress();
 	virtual void reportTestFailure(const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text);
 	virtual void reportFinalFailure(uint32_t total, uint32_t failure);

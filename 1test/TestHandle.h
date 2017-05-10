@@ -20,26 +20,22 @@
 #ifndef TESTFWD_H_
 #define TESTFWD_H_
 
+#include "Registry.h"
+
 namespace pet {
 
 class TestRunner;
 
 template<class> class LinkedList;
 
-class TestHandle
+class TestInterface
 {
-	friend TestRunner;
-	virtual void runTest() = 0;
-	virtual const char* getName() = 0;
-	virtual const char* getSourceInfo() = 0;
-
-	friend pet::LinkedList<TestHandle>;
-	TestHandle* next;
-protected:
-	inline void dummy() {}
-
-public:
-	inline virtual ~TestHandle() {}
+        friend TestRunner;
+        virtual void runTest() = 0;
+        virtual const char* getName() = 0;
+        virtual const char* getSourceInfo() = 0;
+    public:
+        inline virtual ~TestInterface() {}
 };
 
 }

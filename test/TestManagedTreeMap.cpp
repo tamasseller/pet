@@ -17,10 +17,10 @@
  *
  *******************************************************************************/
 
+#include "1test/Test.h"
+
 #include "managed/TreeMap.h"
 #include "MockAllocator.h"
-
-#include "CppUTest/TestHarness.h"
 
 using namespace pet;
 
@@ -349,7 +349,7 @@ TEST(TreeMapSquares, Iteratate) {
 		idx++;
 	}
 
-	CHECK_EQUAL(100, idx);
+	CHECK(100 == idx);
 
 	CHECK(it.currentValue() == 0);
 	it.step();

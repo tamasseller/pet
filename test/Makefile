@@ -55,12 +55,12 @@ SOURCES += TestMain.cpp
 
 # Failure injector
 
-SOURCES += failure-injector/Addr2lineBacktrace.cpp
-SOURCES += failure-injector/FailureInjectorPlugin.cpp
-SOURCES += failure-injector/FailureInjectorShell.cpp
-SOURCES += failure-injector/FailureSource.cpp
-SOURCES += failure-injector/SimpleStringHelper.cpp
-SOURCES += failure-injector/SourceRecord.cpp
+#SOURCES += failure-injector/Addr2lineBacktrace.cpp
+#SOURCES += failure-injector/FailureInjectorPlugin.cpp
+#SOURCES += failure-injector/FailureInjectorShell.cpp
+#SOURCES += failure-injector/FailureSource.cpp
+#SOURCES += failure-injector/SimpleStringHelper.cpp
+#SOURCES += failure-injector/SourceRecord.cpp
 
 # Includes
 
@@ -82,8 +82,8 @@ CXXFLAGS += -fno-exceptions
 CXXFLAGS += -fdelete-null-pointer-checks
 CXXFLAGS += -DCPPUTEST_USE_MEM_LEAK_DETECTION=0
 
-LIBS += CppUTest
-LIBS += CppUTestExt
+#LIBS += CppUTest
+#LIBS += CppUTestExt
 
 #TEST_CMD_PREFIX=LD_LIBRARY_PATH=/opt/gcc-5.3.0/lib32/
 #CXX=/opt/gcc-5.3.0/bin/g++

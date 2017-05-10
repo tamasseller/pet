@@ -25,9 +25,8 @@
 #include <climits>
 #include <cstring>
 
-#include "CppUTest/CommandLineTestRunner.h"
-#include "CppUTest/TestHarness.h"
-#include "CppUTestExt/MockSupport.h"
+#include "1test/Test.h"
+#include "1test/Mock.h"
 
 #undef new
 
@@ -44,13 +43,13 @@ class MockPolicy: HeapBase<SizeType, alignmentBits> {
 
         void add(typename Base::Block block)
         {
-            mock("heapPolicy").actualCall("add").withPointerParameter("block", block.ptr);
+            MOCK(heapPolicy)::CALL(add).withParam(block.ptr);
             this->freeBlocks.insert(this->freeBlocks.begin(), block);
         }
 
         void remove(typename Base::Block block)
         {
-            mock("heapPolicy").actualCall("remove").withPointerParameter("block", block.ptr);
+            MOCK(heapPolicy)::CALL(remove).withParam(block.ptr);
             for(auto it = freeBlocks.begin(); it != freeBlocks.end(); it++) {
                 if((*it).ptr == block.ptr) {
                     this->freeBlocks.erase(it);
@@ -60,7 +59,7 @@ class MockPolicy: HeapBase<SizeType, alignmentBits> {
         }
 
         typename Base::Block findAndRemove(unsigned int size) {
-            mock("heapPolicy").actualCall("findAndRemove").withUnsignedIntParameter("size", size);
+            MOCK(heapPolicy)::CALL(findAndRemove).withParam(size);
             for(auto it = freeBlocks.begin(); it != freeBlocks.end(); it++) {
                 if((*it).getSize() >= size) {
                     typename Base::Block ret = *it;
@@ -73,7 +72,7 @@ class MockPolicy: HeapBase<SizeType, alignmentBits> {
         }
 
         void update(unsigned int size, typename Base::Block block) {
-            mock("heapPolicy").actualCall("update").withPointerParameter("block", block.ptr);
+            MOCK(heapPolicy)::CALL(update).withParam(block.ptr);
         }
 };
 
@@ -114,7 +113,7 @@ class HeapTest: HeapHostBase<SizeType, alignmentBits, false> {
 		static constexpr auto minSize = Base::align(Policy::freeHeaderSize ? Policy::freeHeaderSize : 1);
 
         HeapTest(void* start, unsigned int size):  base((char*)start + Block::headerSize), start(start) {
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base);
+            MOCK(heapPolicy)::EXPECT(add).withParam(base);
             heap = new TestHeap(start, size);
             maxAlloc = size - Block::headerSize;
         }
@@ -129,164 +128,164 @@ class HeapTest: HeapHostBase<SizeType, alignmentBits, false> {
         }
 
         void normalAlloc() {
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(100));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(100));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(100));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(100));
             void *r = alloc(100);
             CHECK(r != 0);
         }
 
         void smallAlloc() {
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(1));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(1));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(1));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(1));
             void *r = alloc(1);
             CHECK(r != 0);
         }
 
         void bigAlloc() {
         	const unsigned int userSize = 2048 - 2 * sizeof(SizeType) - spare;
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(userSize));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(userSize));
             void *r = alloc(userSize);
             CHECK(r != 0);
         }
 
         void twoAlloc() {
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(4));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(4));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(4));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(4));
             void *r = alloc(4);
             CHECK(r != 0);
 
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(4));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(4) + off(4));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(4));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(4) + off(4));
             void *r2 = alloc(4);
             CHECK(r2 != 0);
         }
 
         void allocFree() {
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(4));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(4));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(4));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(4));
             void *r = alloc(4);
             CHECK(r != 0);
 
-            mock("heapPolicy").expectOneCall("remove").withPointerParameter("block", base + off(4));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base);
+            MOCK(heapPolicy)::EXPECT(remove).withParam(base + off(4));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base);
             heap->free(r);
         }
 
         void allocFreeForwardMerge() {
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(4));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(4));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(4));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(4));
             void *r = alloc(4);
             CHECK(r != 0);
 
-            mock("heapPolicy").expectOneCall("remove").withPointerParameter("block", base + off(4));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base);
+            MOCK(heapPolicy)::EXPECT(remove).withParam(base + off(4));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base);
             heap->free(r);
 
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(4));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(4));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(4));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(4));
             void *r2 = alloc(4);
-            CHECK_EQUAL(r, r2);
+            CHECK(r == r2);
         }
 
         void allocFreeNoMerge() {
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(4));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(4));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(4));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(4));
             void *r = alloc(4);
             CHECK(r != 0);
 
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(4));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(4) + off(4));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(4));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(4) + off(4));
             void *r2 = alloc(4);
             CHECK(r2 != 0);
             CHECK(r2 != r);
 
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base);
+            MOCK(heapPolicy)::EXPECT(add).withParam(base);
             heap->free(r);
         }
 
         void allocSplitMerge() {
             const unsigned int twoMinSize = Base::align(Block::headerSize) + 2 * Base::align(Policy::freeHeaderSize ? Policy::freeHeaderSize : 1);
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(twoMinSize));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(twoMinSize));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(twoMinSize));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(twoMinSize));
             void *r = alloc(twoMinSize);
             CHECK(r != 0);
 
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(4));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(twoMinSize) + off(4));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(4));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(twoMinSize) + off(4));
             void *r2 = alloc(4);
             CHECK(r2 != 0);
             CHECK(r2 != r);
 
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base);
+            MOCK(heapPolicy)::EXPECT(add).withParam(base);
             heap->free(r);
 
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(1));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(1));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(1));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(1));
             r = alloc(1);
             CHECK(r != 0);
         }
 
         void allocFreeReverseMerge() {
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(4));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(4));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(4));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(4));
             void *r = alloc(4);
             CHECK(r != 0);
 
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(4));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(4) + off(4));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(4));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(4) + off(4));
             void *r2 = alloc(4);
             CHECK(r2 != 0);
             CHECK(r2 != r);
 
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(4));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(4) + off(4) + off(4));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(4));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(4) + off(4) + off(4));
             void *r3 = alloc(4);
             CHECK(r3 != 0);
             CHECK(r3 != r);
             CHECK(r3 != r2);
 
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base);
+            MOCK(heapPolicy)::EXPECT(add).withParam(base);
             heap->free(r);
 
-            mock("heapPolicy").expectOneCall("update").withPointerParameter("block", base);
+            MOCK(heapPolicy)::EXPECT(update).withParam(base);
             heap->free(r2);
         }
 
-        void allocFreeBothMerge() {
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(4));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(4));
+        void allocFreeBothMerge() { // 1214757793  278144579
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(4));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(4));
             void *r = alloc(4);
             CHECK(r != 0);
 
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(4));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(4) + off(4));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(4));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(4) + off(4));
             void *r2 = alloc(4);
             CHECK(r2 != 0);
             CHECK(r2 != r);
 
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(4));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(4) + off(4) + off(4));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(4));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(4) + off(4) + off(4));
             void *r3 = alloc(4);
             CHECK(r3 != 0);
             CHECK(r3 != r);
             CHECK(r3 != r2);
 
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(4));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(4) + off(4) + off(4) + off(4));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(4));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(4) + off(4) + off(4) + off(4));
             void *r4 = alloc(4);
             CHECK(r4 != 0);
             CHECK(r4 != r);
             CHECK(r4 != r2);
             CHECK(r4 != r3);
 
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base);
+            MOCK(heapPolicy)::EXPECT(add).withParam(base);
             heap->free(r);
 
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(4) + off(4));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(4) + off(4));
             heap->free(r3);
 
-            mock("heapPolicy").expectOneCall("update").withPointerParameter("block", base);
-            mock("heapPolicy").expectOneCall("remove").withPointerParameter("block", base + off(4) + off(4));
+            MOCK(heapPolicy)::EXPECT(remove).withParam(base + off(4) + off(4));
+            MOCK(heapPolicy)::EXPECT(update).withParam(base);
             heap->free(r2);
         }
 
@@ -295,70 +294,70 @@ class HeapTest: HeapHostBase<SizeType, alignmentBits, false> {
         	unsigned int big = maxAlloc - 128;
         	unsigned int small = maxAlloc - off(big);
 
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(big));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(big));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(big));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(big));
         	CHECK((d[0] = alloc(big)) != 0);
 
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(small));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(small));
         	CHECK((d[1] = alloc(small)) != 0);
 
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(1));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(1));
         	CHECK((alloc(1, true)) == 0);
 
-        	mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base);
+        	MOCK(heapPolicy)::EXPECT(add).withParam(base);
         	heap->free(d[0]);
 
-        	mock("heapPolicy").expectOneCall("update").withPointerParameter("block", base);
+        	MOCK(heapPolicy)::EXPECT(update).withParam(base);
         	heap->free(d[1]);
         }
 
         void deplete() {
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(1024));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(1024));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(1024));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(1024));
             void *r = alloc(1024);
             CHECK(r != 0);
 
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(1024));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(1024));
             void *r2 = alloc(1024, true);
             CHECK(r2 == 0);
         }
 
         void shrink() {
         	void *d[5];
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(128));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(128));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(128));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(128));
         	CHECK((d[0] = alloc(128))  != 0);
 
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(128));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(128) + off(128));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(128));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(128) + off(128));
         	CHECK((d[1] = alloc(128))  != 0);
 
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(128));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(128) + off(128) + off(128));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(128));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(128) + off(128) + off(128));
         	CHECK((d[2] = alloc(128))  != 0);
 
         	CHECK(heap->shrink(d[0], 256) == 128); // Too big not
 
-        	mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(minSize));
+        	MOCK(heapPolicy)::EXPECT(add).withParam(base + off(minSize));
         	CHECK(heap->shrink(d[0], 1) == Base::align(minSize));
 
-        	mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(128) + off(32));
+        	MOCK(heapPolicy)::EXPECT(add).withParam(base + off(128) + off(32));
         	CHECK(heap->shrink(d[1], 32) == 32);
 
-        	mock("heapPolicy").expectOneCall("remove").withPointerParameter("block", base + off(128) + off(128) + off(128));
-        	mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(128) + off(128) + off(64));
+        	MOCK(heapPolicy)::EXPECT(remove).withParam(base + off(128) + off(128) + off(128));
+        	MOCK(heapPolicy)::EXPECT(add).withParam(base + off(128) + off(128) + off(64));
         	CHECK(heap->shrink(d[2], 64) == 64);
 
-        	mock("heapPolicy").expectOneCall("remove").withPointerParameter("block", base + off(minSize));
-        	mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base);
+        	MOCK(heapPolicy)::EXPECT(remove).withParam(base + off(minSize));
+        	MOCK(heapPolicy)::EXPECT(add).withParam(base);
         	heap->free(d[0]);
 
-        	mock("heapPolicy").expectOneCall("remove").withPointerParameter("block", base + off(128) + off(32));
-        	mock("heapPolicy").expectOneCall("update").withPointerParameter("block", base);
+        	MOCK(heapPolicy)::EXPECT(remove).withParam(base + off(128) + off(32));
+        	MOCK(heapPolicy)::EXPECT(update).withParam(base);
         	heap->free(d[1]);
 
-        	mock("heapPolicy").expectOneCall("remove").withPointerParameter("block", base + off(128) + off(128) + off(64));
-        	mock("heapPolicy").expectOneCall("update").withPointerParameter("block", base);
+        	MOCK(heapPolicy)::EXPECT(remove).withParam(base + off(128) + off(128) + off(64));
+        	MOCK(heapPolicy)::EXPECT(update).withParam(base);
         	heap->free(d[2]);
         }
 
@@ -366,26 +365,26 @@ class HeapTest: HeapHostBase<SizeType, alignmentBits, false> {
         	void *d[5];
         	unsigned int big = maxAlloc - 128;
         	unsigned int small = maxAlloc - off(big);
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(big));
-            mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(big));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(big));
+            MOCK(heapPolicy)::EXPECT(add).withParam(base + off(big));
         	CHECK((d[0] = alloc(big)) != 0);
 
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(small));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(small));
         	CHECK((d[1] = alloc(small)) != 0);
 
-            mock("heapPolicy").expectOneCall("findAndRemove").withUnsignedIntParameter("size", size(1));
+            MOCK(heapPolicy)::EXPECT(findAndRemove).withParam(size(1));
         	CHECK((alloc(1, true)) == 0);
 
-        	mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(128));
+        	MOCK(heapPolicy)::EXPECT(add).withParam(base + off(128));
         	CHECK(heap->shrink(d[0], 128) == 128);
 
-        	mock("heapPolicy").expectOneCall("remove").withPointerParameter("block", base + off(128));
-        	mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(64));
+        	MOCK(heapPolicy)::EXPECT(remove).withParam(base + off(128));
+        	MOCK(heapPolicy)::EXPECT(add).withParam(base + off(64));
         	CHECK(heap->shrink(d[0], 64) == 64);
 
         	CHECK(heap->shrink(d[1], small) == small);
 
-        	mock("heapPolicy").expectOneCall("add").withPointerParameter("block", base + off(big) + off(64));
+        	MOCK(heapPolicy)::EXPECT(add).withParam(base + off(big) + off(64));
         	CHECK(heap->shrink(d[1], 64) == 64);
         }
 };
@@ -401,8 +400,6 @@ TEST_GROUP(Heap_ ## type ## _ ## align ## _ ## spare) {                         
                                                                                                           \
     TEST_TEARDOWN() {                                                                                     \
         delete test;                                                                                      \
-        mock().checkExpectations();                                                                       \
-        mock().clear();                                                                                   \
     }                                                                                                     \
 };                                                                                                        \
                                                                                                           \

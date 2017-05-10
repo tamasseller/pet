@@ -17,6 +17,12 @@ TraceOutput TraceOutput::instance;
 void TraceOutput::reportProgress()
 {
 	trace::info << ".";
+
+    if(nDots == 64) {
+        trace::info << "\n";
+        nDots = 0;
+    }else
+        nDots++;
 }
 
 void TraceOutput::reportTestFailure(const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text)

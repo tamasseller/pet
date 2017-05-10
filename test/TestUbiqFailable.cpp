@@ -17,8 +17,8 @@
  *
  *******************************************************************************/
 
-#include "CppUTest/TestHarness.h"
-#include "CppUTestExt/MockSupport.h"
+#include "1test/Test.h"
+#include "1test/Mock.h"
 
 #include "ubiquitous/Failable.h"
 
@@ -74,26 +74,22 @@ TEST_GROUP(Failable)
 	}
 	TEST_TEARDOWN() {
 		assertMocked = false;
-	    mock().checkExpectations();
-		mock().clear();
 	}
 };
 
 TEST(Failable, TotallyCareless)
 {
-    mock().expectOneCall("uncheckedErrorReport");
+    MOCK()::EXPECT(uncheckedErrorReport);
 
 	testExp(2);
 }
 
 TEST(Failable, NoErrorHasCheck)
 {
-    mock().expectNCalls(0, "uncheckedErrorReport");
-
 	ExpResult result = testExp(2);
 
 	bool failure = result.failed();
-	CHECK_FALSE(failure);
+	CHECK(!failure);
 
 	int value = result;
 	CHECK(value == 4);
@@ -101,8 +97,6 @@ TEST(Failable, NoErrorHasCheck)
 
 TEST(Failable, ErroneousHasCheck)
 {
-    mock().expectNCalls(0, "uncheckedErrorReport");
-
 	ExpResult result = testExp(-1);
 
 	bool failure = result.failed();
@@ -111,8 +105,6 @@ TEST(Failable, ErroneousHasCheck)
 
 TEST(Failable, PorpagateHappy)
 {
-    mock().expectNCalls(0, "uncheckedErrorReport");
-
     ExpResult result = testExpTimesTwo(1);
 
 	bool failure = result.failed();
@@ -124,8 +116,6 @@ TEST(Failable, PorpagateHappy)
 
 TEST(Failable, AssignHappy)
 {
-    mock().expectNCalls(0, "uncheckedErrorReport");
-
     ExpResult result;
     result = testExpTimesTwo(1);
 
@@ -138,7 +128,7 @@ TEST(Failable, AssignHappy)
 
 TEST(Failable, ReAssignNoCheck)
 {
-    mock().expectOneCall("uncheckedErrorReport");
+    MOCK()::EXPECT(uncheckedErrorReport);
 
     ExpResult result = testExpTimesTwo(1);
 
@@ -150,8 +140,6 @@ TEST(Failable, ReAssignNoCheck)
 
 TEST(Failable, ReAssignResultCorrect)
 {
-    mock().expectNCalls(0, "uncheckedErrorReport");
-
     ExpResult result = testExpTimesTwo(1);
     CHECK(!result.failed());
     CHECK(result == 4);
@@ -162,7 +150,7 @@ TEST(Failable, ReAssignResultCorrect)
 
 TEST(Failable, NoErrorNoCheck)
 {
-    mock().expectOneCall("uncheckedErrorReport");
+    MOCK()::EXPECT(uncheckedErrorReport);
 
 	ExpResult result = testExp(2);
 	int value = result;
@@ -171,7 +159,7 @@ TEST(Failable, NoErrorNoCheck)
 
 TEST(Failable, ErroneousNoCheck)
 {
-    mock().expectOneCall("uncheckedErrorReport");
+    MOCK()::EXPECT(uncheckedErrorReport);
 
 	ExpResult result = testExp(-1);
 	int value = result;
@@ -179,7 +167,7 @@ TEST(Failable, ErroneousNoCheck)
 
 TEST(Failable, PorpagateWrongMiddleUser)
 {
-    mock().expectOneCall("uncheckedErrorReport");
+    MOCK()::EXPECT(uncheckedErrorReport);
 
     ExpResult result = testWrongExpTimesTwo(1);
 
@@ -192,7 +180,7 @@ TEST(Failable, PorpagateWrongMiddleUser)
 
 TEST(Failable, PorpagateWrongEndUserHappy)
 {
-    mock().expectOneCall("uncheckedErrorReport");
+    MOCK()::EXPECT(uncheckedErrorReport);
 
     ExpResult result = testExpTimesTwo(1);
 
@@ -202,7 +190,7 @@ TEST(Failable, PorpagateWrongEndUserHappy)
 
 TEST(Failable, PorpagateWrongEndUserErroneous)
 {
-    mock().expectOneCall("uncheckedErrorReport");
+    MOCK()::EXPECT(uncheckedErrorReport);
 
     ExpResult result = testExpTimesTwo(-1);
     volatile int value = result;

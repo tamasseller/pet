@@ -17,7 +17,7 @@
  *
  *******************************************************************************/
 
-#include "CppUTest/TestHarness.h"
+#include "1test/Test.h"
 
 #include "heap/Heap.h"
 #include "heap/TlsfPolicy.h"

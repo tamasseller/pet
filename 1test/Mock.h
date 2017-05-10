@@ -11,8 +11,10 @@
 
 #include "TestRunner.h"
 
+#include "Macro.h"
+
 #ifndef EXPECT_POOL_SIZE
-#define EXPECT_POOL_SIZE		64
+#define EXPECT_POOL_SIZE    512
 #endif
 
 namespace pet {
@@ -56,7 +58,7 @@ uint16_t ExpectPool<size>::readIdx = 0;
 
 template<uint16_t size>
 inline bool ExpectPool<size>::expect(uintptr_t value)
-                                     {
+{
     if (writeIdx < size) {
         pool[writeIdx++] = value;
         return true;
@@ -66,7 +68,7 @@ inline bool ExpectPool<size>::expect(uintptr_t value)
 
 template<uint16_t size>
 inline bool ExpectPool<size>::call(uintptr_t value)
-                                  {
+{
     if (readIdx < writeIdx) {
         return pool[readIdx++] == value;
     } else
@@ -125,14 +127,14 @@ class MockDecorator {
             return *this;
         }
 
-        inline MockDecorator withParam(const char* param) {
+        inline MockDecorator withStringParam(const char* param) {
             if (!error && !output(javaHash(param)))
                 error = "Mock - string parameter error";
 
             return *this;
         }
 
-        inline MockDecorator withParam(char* param) {
+        inline MockDecorator withStringParam(char* param) {
             if (!error && !output(javaHash(param)))
                 error = "Mock - string parameter error";
 
@@ -154,7 +156,7 @@ class MockDecorator {
 
 template<uintptr_t hash>
 class Mock {
-        static TestHandle* disabledForTest;
+        static TestInterface* disabledForTest;
         typedef ExpectPool<EXPECT_POOL_SIZE> Pool;
         inline static bool nopOutput(uintptr_t value);
         public:
@@ -167,7 +169,7 @@ class Mock {
 };
 
 template<uintptr_t hash>
-TestHandle* Mock<hash>::disabledForTest = nullptr;
+TestInterface* Mock<hash>::disabledForTest = nullptr;
 
 
 template<uintptr_t hash>

@@ -17,12 +17,11 @@
  *
  *******************************************************************************/
 
-#include "CppUTest/TestHarness.h"
+#include "1test/Test.h"
 
 #include "pool/Stack.h"
 
 #include "MockAllocator.h"
-#include "FailureInjectorPlugin.h"
 
 #include <initializer_list>
 

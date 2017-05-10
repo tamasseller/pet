@@ -17,27 +17,53 @@
  *
  *******************************************************************************/
 
-#include "1test/Test.h"
+#ifndef REGISTRY_H_
+#define REGISTRY_H_
 
-#include "meta/Range.h"
-#include "meta/ExpLog.h"
+#include "data/LinkedList.h"
 
-using namespace pet;
+namespace pet {
 
-TEST_GROUP(ExpRange) {};
+template<class Interface>
+class Registry {
+public:
+	class ElementBase: public Interface {
+		friend LinkedList<ElementBase>;
+		ElementBase *next;
+	protected:
+		ElementBase(): next(0) {}
+	};
 
-TEST(ExpRange, BaseTwoOneToTen) {
-	for(int i=0; i<10; i++) {
-		auto val = applyOverRange<exp<2>::x, 1, 10>::value[i];
-		CHECK(val == 2 << i);
+private:
+	typedef LinkedList<ElementBase> List;
+    static List list;
+public:
+	template <class Child>
+	class StaticElement: public ElementBase {
+	protected:
+		StaticElement() {
+			Registry::add(this);
+		}
+
+		static Child instance;
+	};
+
+	static void add(ElementBase* item) {
+	    list.add(item);
 	}
+
+	static typename LinkedList<ElementBase>::Iterator iterator() {
+		return list.iterator();
+	}
+};
+
+template<class Interface>
+typename Registry<Interface>::List Registry<Interface>::list;
+
+template <class Interface>
+template <class Child>
+Child Registry<Interface>::StaticElement<Child>::instance;
+
 }
 
-TEST(ExpRange, BaseThreeZeroToFifteen) {
-	unsigned int x = 1;
-	for(int i=0; i<15; i++) {
-		auto val = applyOverRange<exp<3>::x, 0, 15>::value[i];
-		CHECK(val == x);
-		x *= 3;
-	}
-}
+#endif /* REGISTRY_H_ */

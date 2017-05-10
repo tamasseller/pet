@@ -82,22 +82,22 @@ TEST(Mock, ParamsWrong) {
 TEST(Mock, ParamsString) {
     const char *str1 = "foo";
     const char *str2 = "foo";
-    MOCK(params)::EXPECT(method).withParam(str1);
-    MOCK(params)::CALL(method).withParam(str2);
+    MOCK(params)::EXPECT(method).withStringParam(str1);
+    MOCK(params)::CALL(method).withStringParam(str2);
 }
 
 TEST(Mock, ParamsStringWrong) {
     const char *str1 = "foo";
     const char *str2 = "bar";
-    MOCK(params)::EXPECT(method).withParam(str1);
-    MOCK(params)::CALL(method).withParam(str2);
+    MOCK(params)::EXPECT(method).withStringParam(str1);
+    MOCK(params)::CALL(method).withStringParam(str2);
 }
 
 TEST(Mock, ParamsStringLegacy) {
     char *str1 = (char *)"foo";
     char *str2 = (char *)"foo";
-    MOCK(params)::EXPECT(method).withParam(str1);
-    MOCK(params)::CALL(method).withParam(str2);
+    MOCK(params)::EXPECT(method).withStringParam(str1);
+    MOCK(params)::CALL(method).withStringParam(str2);
 }
 
 TEST(Mock, ParamsData) {

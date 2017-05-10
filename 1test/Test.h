@@ -17,8 +17,8 @@
  *
  *******************************************************************************/
 
-#ifndef MACROS_H_
-#define MACROS_H_
+#ifndef TEST_H_
+#define TEST_H_
 
 #include "TestBase.h"
 #include "TestRunner.h"
@@ -68,11 +68,11 @@ struct INTERNAL_TEST_CLASS_NAME(name, group):                                   
 																						\
 	virtual void runTest()																\
 	{																					\
-        instance.dummy();                                                               \
+	    TestBase::instance.dummy();                                                     \
         run();                                                                          \
 	}																					\
 };																						\
 																						\
 void INTERNAL_TEST_CLASS_NAME(name, group)::testBody() 								    \
 
-#endif /* MACROS_H_ */
+#endif /* TEST_H_ */

@@ -17,6 +17,8 @@
  *
  *******************************************************************************/
 
+#include "Registry.h"
+
 #include "TestRunner.h"
 #include "Mock.h"
 
@@ -24,11 +26,9 @@
 
 namespace pet {
 
-LinkedList<TestHandle> TestRunner::tests;
-
 static jmp_buf jmpBuff;
 
-TestHandle* TestRunner::currentTest;
+TestInterface* TestRunner::currentTest;
 TestOutput* TestRunner::output;
 
 int TestRunner::runAllTests(TestOutput* output)
@@ -36,7 +36,7 @@ int TestRunner::runAllTests(TestOutput* output)
 	TestRunner::output = output;
 	unsigned int run = 0, failed = 0;
 
-	for(auto it = tests.iterator(); it.current(); it.step()) {
+	for(auto it = Registry<TestInterface>::iterator(); it.current(); it.step()) {
 		output->reportProgress();
 		currentTest = it.current();
 

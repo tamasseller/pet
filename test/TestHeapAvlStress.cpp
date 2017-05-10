@@ -5,7 +5,7 @@
  *      Author: tamas.seller
  */
 
-#include "CppUTest/TestHarness.h"
+#include "1test/Test.h"
 
 #undef new
 

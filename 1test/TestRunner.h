@@ -20,8 +20,6 @@
 #ifndef TESTRUNNER_H_
 #define TESTRUNNER_H_
 
-#include "data/LinkedList.h"
-
 #include "TestHandle.h"
 #include "TraceOutput.h"
 
@@ -31,25 +29,17 @@ class TestRunner {
 	template<class>
 	friend class TestBase;
 
-	static inline void registerTest(TestHandle* test);
-
-	static pet::LinkedList<TestHandle> tests;
-
-	static TestHandle* currentTest;
+	static TestInterface* currentTest;
 	static TestOutput* output;
 public:
 	static int runAllTests(TestOutput* output = &TraceOutput::instance);
 	static void failTest(const char* sourceInfo, const char* text);
-	static inline TestHandle* getCurrentTest();
+	static inline TestInterface* getCurrentTest();
 };
 
 ////////////////////////////////////////////////////////////////
 
-inline void TestRunner::registerTest(TestHandle* test) {
-	tests.add(test);
-}
-
-inline TestHandle* TestRunner::getCurrentTest() {
+inline TestInterface* TestRunner::getCurrentTest() {
     return currentTest;
 }
 

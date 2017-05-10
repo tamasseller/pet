@@ -22,7 +22,7 @@
 
 #include <malloc.h>
 
-#include "FailureSource.h"
+#include "1test/FailureInjector.h"
 #include "ubiquitous/Error.h"
 #include "ubiquitous/Trace.h"
 
@@ -58,7 +58,7 @@ struct Allocator {
 	}
 };
 
-struct FailableAllocator: public Allocator, public StaticFailureSource<FailableAllocator>{
+struct FailableAllocator: public Allocator, public pet::StaticFailureSource<FailableAllocator>{
 	virtual const char* getFailureSourceName() {
 		return "Allocator";
 	}

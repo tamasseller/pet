@@ -19,7 +19,7 @@
 
 #include "data/Fifo.h"
 
-#include "CppUTest/TestHarness.h"
+#include "1test/Test.h"
 
 using namespace pet;
 

@@ -17,14 +17,14 @@
  *
  *******************************************************************************/
 
-#include "CppUTest/TestHarness.h"
+#include "1test/Test.h"
+#include "1test/FailureInjector.h"
 
 #undef new
 
 #include "pool/Fifo.h"
 
 #include "MockAllocator.h"
-#include "FailureInjectorPlugin.h"
 
 using namespace pet;
 

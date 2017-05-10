@@ -20,12 +20,17 @@
 #ifndef DEBUGCONFIG_H_
 #define DEBUGCONFIG_H_
 
-#include "CppUTest/TestHarness.h"
-#include "CppUTestExt/MockSupport.h"
-#include "Addr2lineBacktrace.h"
+
+/*#include "Addr2lineBacktrace.h"*/
+
+#include "1test/Test.h"
+#include "1test/Mock.h"
+
 #include "MockWriter.h"
 
 #include <string>
+
+// #include "ubiquitous/ConfigHelper.h"
 
 extern bool assertMocked;
 extern bool writerMocked;
@@ -34,10 +39,10 @@ extern std::string recorded;
 
 UNCHECKED_ERROR_REPORT() {
 	if(assertMocked) {
-		mock().actualCall("uncheckedErrorReport");
+		MOCK()::CALL(uncheckedErrorReport);
 	} else {
-		Addr2lineBacktrace().print();
-		FAIL("Unchecked Error");
+		//Addr2lineBacktrace().print();
+	    FAIL("Unchecked Error");
 	}
 }
 
