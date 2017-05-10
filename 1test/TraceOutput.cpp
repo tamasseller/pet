@@ -40,16 +40,16 @@ void TraceOutput::reportTestFailure(const char* testName, const char* sourceInfo
     trace::warn << "\n";
 }
 
-void TraceOutput::reportFinalFailure(uint32_t total, uint32_t failure)
+void TraceOutput::reportFinal(uint32_t normal, uint32_t failure, uint32_t synthetic)
 {
     trace::warn << "\n";
-	trace::info << "ERROR (" << failure << " of " << total << " tests failed)\n";
-}
 
-void TraceOutput::reportFinalSuccess(uint32_t total)
-{
+    if(failure) {
+        trace::info << "ERROR (" << failure << " of " << total << " tests failed)\n";
+    } else {
+        trace::info << "OK (all " << total << " tests ";
+        trace::info << "have been ran successfully)\n";
+    }
+
     trace::warn << "\n";
-	trace::info << "OK (all " << total << " tests have been ran successfully)\n";
 }
-
-

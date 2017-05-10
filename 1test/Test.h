@@ -30,7 +30,8 @@
 
 #define FAIL(text)          pet::TestRunner::failTest(INTERNAL_AT(), text)
 
-#define CHECK(x)            { if(!(x)) FAIL("Expectation: '" INTERNAL_STRINGIFY(x) "' failed"); }
+#define CHECK_ALWAYS(x)     { if(!(x)) FAIL("Expectation: '" INTERNAL_STRINGIFY(x) "' failed"); }
+#define CHECK(x)            { if(!pet::TestRunner::isCurrentTestSynthetic()) CHECK_ALWAYS(x); }
 
 #define TEST_SETUP()        inline void testSetup()
 #define TEST_TEARDOWN()     inline void testTeardown()

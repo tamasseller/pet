@@ -19,8 +19,7 @@ class TraceOutput: public TestOutput {
 
 	virtual void reportProgress();
 	virtual void reportTestFailure(const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text);
-	virtual void reportFinalFailure(uint32_t total, uint32_t failure);
-	virtual void reportFinalSuccess(uint32_t total) ;
+	virtual void reportFinal(uint32_t normal, uint32_t failure, uint32_t synthetic);
 	virtual inline ~TraceOutput() {}
 
 public:

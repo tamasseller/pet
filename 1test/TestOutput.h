@@ -16,8 +16,7 @@ class TestOutput {
 	friend class TestRunner;
 	virtual void reportProgress() = 0;
 	virtual void reportTestFailure(const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text) = 0;
-	virtual void reportFinalFailure(uint32_t total, uint32_t failure) = 0;
-	virtual void reportFinalSuccess(uint32_t total) = 0;
+	virtual void reportFinal(uint32_t normal, uint32_t failure, uint32_t synthetic) = 0;
 protected:
 	virtual inline ~TestOutput() {}
 };

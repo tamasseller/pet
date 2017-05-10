@@ -7,23 +7,38 @@
 #ifndef FAILUREINJECTOR_H_
 #define FAILUREINJECTOR_H_
 
+#include "Registry.h"
+
 namespace pet {
 
-template<class Child>
-class StaticFailureSource {
-    protected:
-    static Child instance;
+class FailureInjector {
+    static int max, counter, failAt;
+protected:
+    friend class TestRunner;
+    static void reset() {
+        max = counter = failAt = 0;
+    }
 
-    inline bool shouldSimulateError() {
-        return false;
+    static void firstRunDone() {
+        max = counter;
+    }
+
+    static bool hasMore() {
+        return failAt < max;
+    }
+
+    static bool step() {
+        counter = 0;
+        failAt++;
+        return true;
+    }
+public:
+    static bool shouldSimulateError() {
+        counter++;
+        return counter == failAt;
     }
 };
 
-template<class Child>
-Child StaticFailureSource<Child>::instance;
-
 }
-
-#define CHECK_ALWAYS(x) CHECK(x)
 
 #endif /* FAILUREINJECTOR_H_ */

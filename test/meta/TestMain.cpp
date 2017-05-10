@@ -22,7 +22,8 @@
 
 #include <cstring>
 #include <iostream>
-#include <set>
+#include <list>
+#include <algorithm>
 
 using namespace pet;
 
@@ -38,8 +39,8 @@ struct FailureRecord {
 		this->failureSourceInfo = rindex(failureSourceInfo, '/') ? rindex(failureSourceInfo, '/') + 1: failureSourceInfo;
 	}
 
-	bool operator <(const FailureRecord& other) const {
-		return sourceInfo + testName + failureSourceInfo < other.sourceInfo + other.testName + other.failureSourceInfo;
+	bool operator ==(const FailureRecord& other) const {
+		return sourceInfo + testName + failureSourceInfo == other.sourceInfo + other.testName + other.failureSourceInfo;
 	}
 };
 
@@ -49,9 +50,13 @@ struct FailureRecord {
 
 bool printActualFailureRecords = false;
 
-int totalExpected = 33;
+int normalExpected = 37;
+int syntheticExpected = 6;
 
-std::set<FailureRecord> expectedFailures{
+std::list<FailureRecord> expectedFailures{
+    FailureRecord("CheckAlways@FailureInjector", "TestFailureInjector.cpp:30", "TestFailureInjector.cpp:32", "Expectation: 'false' failed"),
+    FailureRecord("CheckAlways@FailureInjector", "TestFailureInjector.cpp:30", "TestFailureInjector.cpp:32", "Expectation: 'false' failed"),
+    FailureRecord("Check@FailureInjector", "TestFailureInjector.cpp:26", "TestFailureInjector.cpp:27", "Expectation: 'FailureInjector::shouldSimulateError()' failed"),
 	FailureRecord("NonEmptyMessageFailure", "TestNoGroup.cpp:37", "TestNoGroup.cpp:38", "NonEmpty"),
 	FailureRecord("EmptyMessageFailure", "TestNoGroup.cpp:33", "TestNoGroup.cpp:34", ""),
 	FailureRecord("CheckFalse", "TestNoGroup.cpp:29", "TestNoGroup.cpp:30", "Expectation: 'false' failed"),
@@ -80,10 +85,11 @@ std::set<FailureRecord> expectedFailures{
 
 struct MetaTestOutput: public TestOutput {
 	uint32_t progress = 0;
-	uint32_t total = 0;
+	uint32_t normal = 0;
 	uint32_t failed = 0;
+	uint32_t synthetic = 0;
 
-	std::set<FailureRecord> failures;
+	std::list<FailureRecord> failures;
 
 	virtual void reportProgress() {
 		progress++;
@@ -95,18 +101,14 @@ struct MetaTestOutput: public TestOutput {
         if(printActualFailureRecords)
             std::cout << "\"" << record.testName << "\", \"" << record.sourceInfo << "\", \"" <<  record.failureSourceInfo << "\", \"" << record.text << "\"" << std::endl;
 
-        failures.insert(record);
+        failures.push_back(record);
 	}
 
 
-	virtual void reportFinalFailure(uint32_t total, uint32_t failure) {
-		this->total = total;
+	virtual void reportFinal(uint32_t normal, uint32_t failure, uint32_t synthetic) {
+		this->normal = normal;
 		this->failed = failure;
-	}
-
-	virtual void reportFinalSuccess(uint32_t total) {
-		this->total = total;
-		this->failed = 0;
+		this->synthetic = synthetic;
 	}
 
 	virtual inline ~MetaTestOutput() {}
@@ -118,14 +120,19 @@ int main(int ac, char** av)
 
 	int ret = 0;
 
+	auto dotsExpected = normalExpected + syntheticExpected;
+
     if(pet::TestRunner::runAllTests(&output) != -1) {
     	std::cerr << "runAllTests return value error" << std::endl;
     	ret = -1;
-    } else if(totalExpected != output.total){
-    	std::cerr << "number of tests error (expected " << totalExpected << " got " << output.total << ")" << std::endl;
+    } else if(normalExpected != output.normal){
+    	std::cerr << "number of tests error (expected " << normalExpected << " got " << output.normal << ")" << std::endl;
     	ret = -1;
-    } else if(totalExpected != output.progress){
-    	std::cerr << "progress reporting error (expected " << totalExpected << " got " << output.progress << ")" << std::endl;
+    } else if(syntheticExpected != output.synthetic){
+        std::cerr << "number of synthetic tests error (expected " << syntheticExpected << " got " << output.synthetic << ")" << std::endl;
+        ret = -1;
+    } else if(dotsExpected != output.progress){
+    	std::cerr << "progress reporting error (expected " << dotsExpected << " got " << output.progress << ")" << std::endl;
     	ret = -1;
     } else if(expectedFailures.size() != output.failed){
     	std::cerr << "final number of failures reporting error (expected " << expectedFailures.size() << " got " << output.failed << ")" << std::endl;
@@ -136,7 +143,8 @@ int main(int ac, char** av)
     } else {
     	bool bad = false;
     	for(auto &x: expectedFailures) {
-    		auto y = output.failures.find(x);
+    		auto y = std::find(output.failures.begin(), output.failures.end(), x);
+
     		if(y == output.failures.end()) {
     			std::cerr << "missing failure (" << x.testName << ")" << std::endl;
     			ret = -1;
@@ -144,7 +152,8 @@ int main(int ac, char** av)
     	}
 
     	if(!ret)
-    	    std::cerr << "OK (expected and got " << output.failures.size() << " failures out of " << totalExpected << " tests with correct reports)" << std::endl;
+    	    std::cerr << "OK (expected and got " << output.failures.size() << " failures out of " << normalExpected << " normal and "
+    	    << syntheticExpected << " synthetic tests with correct reports)" << std::endl;
     }
 
     return ret;

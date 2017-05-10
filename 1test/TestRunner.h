@@ -20,7 +20,7 @@
 #ifndef TESTRUNNER_H_
 #define TESTRUNNER_H_
 
-#include "TestHandle.h"
+#include "TestInterface.h"
 #include "TraceOutput.h"
 
 namespace pet {
@@ -31,16 +31,22 @@ class TestRunner {
 
 	static TestInterface* currentTest;
 	static TestOutput* output;
+	static bool isSynthetic;
 public:
 	static int runAllTests(TestOutput* output = &TraceOutput::instance);
 	static void failTest(const char* sourceInfo, const char* text);
 	static inline TestInterface* getCurrentTest();
+	static inline bool isCurrentTestSynthetic();
 };
 
 ////////////////////////////////////////////////////////////////
 
 inline TestInterface* TestRunner::getCurrentTest() {
     return currentTest;
+}
+
+inline bool TestRunner::isCurrentTestSynthetic() {
+    return isSynthetic;
 }
 
 }

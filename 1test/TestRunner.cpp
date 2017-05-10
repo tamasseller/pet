@@ -21,6 +21,7 @@
 
 #include "TestRunner.h"
 #include "Mock.h"
+#include "FailureInjector.h"
 
 #include <setjmp.h>
 
@@ -30,34 +31,46 @@ static jmp_buf jmpBuff;
 
 TestInterface* TestRunner::currentTest;
 TestOutput* TestRunner::output;
+bool TestRunner::isSynthetic;
 
 int TestRunner::runAllTests(TestOutput* output)
 {
 	TestRunner::output = output;
-	unsigned int run = 0, failed = 0;
+	unsigned int run = 0, failed = 0, synthetic = 0;
 
 	for(auto it = Registry<TestInterface>::iterator(); it.current(); it.step()) {
-		output->reportProgress();
-		currentTest = it.current();
+	    isSynthetic = false;
+	    FailureInjector::reset();
+	    while(true) {
+	        currentTest = it.current();
 
-		if(setjmp(jmpBuff))
-			failed++;
-		else
-			currentTest->runTest();
+	        if(setjmp(jmpBuff))
+	            failed++;
+	        else
+	            currentTest->runTest();
 
-		run++;
+            output->reportProgress();
+
+            if(!isSynthetic)
+                FailureInjector::firstRunDone();
+
+	        if(!FailureInjector::hasMore())
+	            break;
+
+	        FailureInjector::step();
+
+	        synthetic++;
+	        isSynthetic = true;
+	    }
+
+        run++;
 	}
 
 	currentTest = 0;
 	TestRunner::output = 0;
 
-	if(failed) {
-		output->reportFinalFailure(run, failed);
-		return -1;
-	} else {
-		output->reportFinalSuccess(run);
-		return 0;
-	}
+    output->reportFinal(run, failed, synthetic);
+    return failed ? -1 : 0;
 }
 
 void TestRunner::failTest(const char* srcInfo, const char* text)

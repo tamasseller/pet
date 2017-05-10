@@ -3,12 +3,13 @@ OUTPUT = pet-meta-test
 # Library sources
 
 SOURCES += ../../1test/TestRunner.cpp
-
+SOURCES += ../../1test/FailureInjector.cpp
 # Test code
 
 SOURCES += TestGroups.cpp
 SOURCES += TestMock.cpp
 SOURCES += TestNoGroup.cpp
+SOURCES += TestFailureInjector.cpp
 
 # Test support
 
