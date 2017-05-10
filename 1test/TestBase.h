@@ -21,14 +21,23 @@
 #define TEST_H_
 
 #include "TestHandle.h"
+#include "Mock.h"
 
 namespace pet {
 
 template<class Child>
 class TestBase: public TestHandle {
 protected:
-	TestBase();
+    inline void run();
+    inline TestBase();
+
 	static Child instance;
+};
+
+class TestGroupBase {
+    public:
+        inline void testSetup() {}
+        inline void testTeardown() {}
 };
 
 }
@@ -41,9 +50,20 @@ template<class Child>
 Child pet::TestBase<Child>::instance;
 
 template<class Child>
-pet::TestBase<Child>::TestBase()
+inline pet::TestBase<Child>::TestBase()
 {
 	TestRunner::registerTest(&instance);
 }
+
+template<class Child>
+inline void pet::TestBase<Child>::run()
+{
+    pet::MockExpectPool::clear();
+    static_cast<Child*>(this)->testSetup();
+    static_cast<Child*>(this)->testBody();
+    static_cast<Child*>(this)->testTeardown();
+    pet::MockExpectPool::check();
+}
+
 
 #endif /* TEST_H_ */

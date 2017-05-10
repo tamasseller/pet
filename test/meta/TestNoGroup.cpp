@@ -22,14 +22,18 @@
 TEST(Sanity) {
 }
 
-TEST(Failure) {
-	FAIL();
-}
-
 TEST(CheckTrue) {
 	CHECK(true);
 }
 
 TEST(CheckFalse) {
 	CHECK(false);
+}
+
+TEST(EmptyMessageFailure) {
+    FAIL("");
+}
+
+TEST(NonEmptyMessageFailure) {
+    FAIL("NonEmpty");
 }

@@ -19,19 +19,31 @@ void TraceOutput::reportProgress()
 	trace::info << ".";
 }
 
-void TraceOutput::reportTestFailure(const char* testName, const char* sourceInfo, const char *failureSourceInfo)
+void TraceOutput::reportTestFailure(const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text)
 {
-	trace::warn 	<< "\nTest '" << testName << "' (" << sourceInfo <<  ")\n\n\tfailed at " << failureSourceInfo << "\n\n";
+	trace::warn << "\n";
+    trace::warn << "Test '" << testName << "' (" << sourceInfo <<  ")\n";
+    trace::warn << "\n";
+
+    trace::warn << "    failed at " << failureSourceInfo;
+
+    if(text)
+        trace::warn << ": " << text;
+
+    trace::warn << "\n";
+    trace::warn << "\n";
 }
 
 void TraceOutput::reportFinalFailure(uint32_t total, uint32_t failure)
 {
-	trace::info << "\nERROR (" << failure << " of " << total << " tests failed)\n";
+    trace::warn << "\n";
+	trace::info << "ERROR (" << failure << " of " << total << " tests failed)\n";
 }
 
 void TraceOutput::reportFinalSuccess(uint32_t total)
 {
-	trace::info << "\nOK (all " << total << " tests have been ran successfully)\n";
+    trace::warn << "\n";
+	trace::info << "OK (all " << total << " tests have been ran successfully)\n";
 }
 
 

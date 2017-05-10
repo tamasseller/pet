@@ -19,15 +19,44 @@
 
 #include "1test/Test.h"
 
-void f(bool ok)
-{
-	CHECK(ok);
-}
+TEST_GROUP(Group) {
+    bool x = false;
+    bool y = false;
 
-TEST(FunctionOk) {
-	f(true);
-}
+    void f(bool ok)
+    {
+        CHECK(ok);
+    }
 
-TEST(FunctionNotOk) {
-	f(false);
-}
+    TEST_SETUP() {
+        x = true;
+    }
+
+    TEST_TEARDOWN() {
+        f(x && y);
+    }
+};
+
+TEST(Group, AllOk) {
+    y = true;
+};
+
+TEST(Group, TeardownNotOk) {
+};
+
+TEST(Group, BodyNotOk) {
+    f(x && x);
+};
+
+TEST_GROUP(OtherGroup) {
+    bool x = false;
+    bool y = false;
+
+    TEST_SETUP() {
+        FAIL("User message");
+    }
+};
+
+TEST(OtherGroup, SetupNotOk) {
+
+};

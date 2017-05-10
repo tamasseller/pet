@@ -6,9 +6,9 @@ SOURCES += ../../1test/TestRunner.cpp
 
 # Test code
 
-SOURCES += MetaTest1.cpp
-SOURCES += MetaTest2.cpp
-SOURCES += Test1Mock.cpp
+SOURCES += TestGroups.cpp
+SOURCES += TestMock.cpp
+SOURCES += TestNoGroup.cpp
 
 # Test support
 

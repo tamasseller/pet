@@ -39,13 +39,18 @@ class TestRunner {
 	static TestOutput* output;
 public:
 	static int runAllTests(TestOutput* output = &TraceOutput::instance);
-	static int failTest(const char* sourceInfo);
+	static void failTest(const char* sourceInfo, const char* text);
+	static inline TestHandle* getCurrentTest();
 };
 
 ////////////////////////////////////////////////////////////////
 
 inline void TestRunner::registerTest(TestHandle* test) {
 	tests.add(test);
+}
+
+inline TestHandle* TestRunner::getCurrentTest() {
+    return currentTest;
 }
 
 }

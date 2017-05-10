@@ -18,6 +18,7 @@
  *******************************************************************************/
 
 #include "TestRunner.h"
+#include "Mock.h"
 
 #include <setjmp.h>
 
@@ -59,9 +60,9 @@ int TestRunner::runAllTests(TestOutput* output)
 	}
 }
 
-int TestRunner::failTest(const char* srcInfo)
+void TestRunner::failTest(const char* srcInfo, const char* text)
 {
-	output->reportTestFailure(currentTest->getName(), currentTest->getSourceInfo(), srcInfo);
+	output->reportTestFailure(currentTest->getName(), currentTest->getSourceInfo(), srcInfo, text);
 	longjmp(jmpBuff,1);
 }
 
