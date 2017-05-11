@@ -190,6 +190,38 @@ struct Str {
 
 		return true;
 	}
+
+	template<unsigned int base>
+	static inline bool atou(unsigned int &x, const char* input, unsigned int length)
+	{
+		static_assert(base <= 16, "Radix too high");
+
+		x = 0;
+
+		char c = *input++;
+
+		if(!c)
+			return false;
+
+		while(true) {
+			if('0' <= c && c <= '9')
+				x += c - '0';
+			else if('a' <= c && c <= 'f')
+				x += c - 'a' + 10;
+			else if('A' <= c && c <= 'F')
+				x += c - 'A' + 10;
+			else
+				return false;
+
+			if(!(c = *input++) || !--length)
+				break;
+
+			x *= base;
+		}
+
+		return true;
+	}
+
 };
 
 }
