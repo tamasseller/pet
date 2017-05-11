@@ -54,17 +54,19 @@ struct Allocator {
 	}
 
 	static bool allFreed() {
-		return count == 0;
+	    bool ret = count == 0;
+	    count = 0;
+		return ret;
 	}
 };
 
-struct FailableAllocator: public Allocator, public pet::StaticFailureSource<FailableAllocator>{
+struct FailableAllocator: public Allocator {
 	virtual const char* getFailureSourceName() {
 		return "Allocator";
 	}
 
 	static void* alloc(unsigned int s) {
-		if(instance.shouldSimulateError())
+		if(pet::FailureInjector::shouldSimulateError())
 			return 0;
 
 		return Allocator::alloc(s);

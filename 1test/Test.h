@@ -28,9 +28,10 @@
 
 #define TEST(...)           VAR_ARG_MACRO(TEST, ##__VA_ARGS__)
 
-#define FAIL(text)          pet::TestRunner::failTest(INTERNAL_AT(), text)
+#define FAIL_ALWAYS(text)   pet::TestRunner::failTest(INTERNAL_AT(), text)
+#define FAIL(text)          { if(!pet::TestRunner::isCurrentTestSynthetic()) FAIL_ALWAYS(text); }
 
-#define CHECK_ALWAYS(x)     { if(!(x)) FAIL("Expectation: '" INTERNAL_STRINGIFY(x) "' failed"); }
+#define CHECK_ALWAYS(x)     { if(!(x)) FAIL_ALWAYS("Expectation: '" INTERNAL_STRINGIFY(x) "' failed"); }
 #define CHECK(x)            { if(!pet::TestRunner::isCurrentTestSynthetic()) CHECK_ALWAYS(x); }
 
 #define TEST_SETUP()        inline void testSetup()

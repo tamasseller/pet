@@ -4,6 +4,8 @@ OUTPUT = pet-test
 
 SOURCES += ../1test/TestRunner.cpp
 SOURCES += ../1test/TraceOutput.cpp
+SOURCES += ../1test/FailureInjector.cpp
+
 SOURCES += ../data/AvlTree.cpp
 SOURCES += ../data/BinaryTree.cpp
 SOURCES += ../ubiquitous/PrintfWriter.cpp
@@ -53,15 +55,6 @@ SOURCES += MockAllocator.cpp
 SOURCES += DebugConfig.cpp
 SOURCES += TestMain.cpp
 
-# Failure injector
-
-#SOURCES += failure-injector/Addr2lineBacktrace.cpp
-#SOURCES += failure-injector/FailureInjectorPlugin.cpp
-#SOURCES += failure-injector/FailureInjectorShell.cpp
-#SOURCES += failure-injector/FailureSource.cpp
-#SOURCES += failure-injector/SimpleStringHelper.cpp
-#SOURCES += failure-injector/SourceRecord.cpp
-
 # Includes
 
 INCLUDE_DIRS += .
@@ -82,13 +75,8 @@ CXXFLAGS += -fno-exceptions
 CXXFLAGS += -fdelete-null-pointer-checks
 CXXFLAGS += -DCPPUTEST_USE_MEM_LEAK_DETECTION=0
 
-#LIBS += CppUTest
-#LIBS += CppUTestExt
-
 #TEST_CMD_PREFIX=LD_LIBRARY_PATH=/opt/gcc-5.3.0/lib32/
 #CXX=/opt/gcc-5.3.0/bin/g++
 LD=$(CXX) 
-
-#CPPUTEST_FLAGS = 
 
 include ultimate-makefile/Makefile.ultimate	

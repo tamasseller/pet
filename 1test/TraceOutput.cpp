@@ -25,10 +25,10 @@ void TraceOutput::reportProgress()
         nDots++;
 }
 
-void TraceOutput::reportTestFailure(const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text)
+void TraceOutput::reportTestFailure(bool isSynthetic, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text)
 {
 	trace::warn << "\n";
-    trace::warn << "Test '" << testName << "' (" << sourceInfo <<  ")\n";
+    trace::warn << (isSynthetic ? "Synthetic test based on '" : "Test '") << testName << "' (" << sourceInfo <<  ")\n";
     trace::warn << "\n";
 
     trace::warn << "    failed at " << failureSourceInfo;
@@ -45,10 +45,19 @@ void TraceOutput::reportFinal(uint32_t normal, uint32_t failure, uint32_t synthe
     trace::warn << "\n";
 
     if(failure) {
-        trace::info << "ERROR (" << failure << " of " << total << " tests failed)\n";
+        trace::info << "ERROR (" << failure << " of " << normal << " regular ";
+
+        if(synthetic)
+            trace::info << "plus " << synthetic << " synthetic ";
+
+        trace::info << "tests failed)\n";
     } else {
-        trace::info << "OK (all " << total << " tests ";
-        trace::info << "have been ran successfully)\n";
+        trace::info << "OK (all " << normal << " regular ";
+
+        if(synthetic)
+            trace::info << "and " << synthetic << " synthetic ";
+
+        trace::info << "tests have been ran successfully)\n";
     }
 
     trace::warn << "\n";

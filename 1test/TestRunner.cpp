@@ -75,7 +75,7 @@ int TestRunner::runAllTests(TestOutput* output)
 
 void TestRunner::failTest(const char* srcInfo, const char* text)
 {
-	output->reportTestFailure(currentTest->getName(), currentTest->getSourceInfo(), srcInfo, text);
+	output->reportTestFailure(isSynthetic, currentTest->getName(), currentTest->getSourceInfo(), srcInfo, text);
 	longjmp(jmpBuff,1);
 }
 

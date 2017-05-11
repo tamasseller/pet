@@ -95,7 +95,7 @@ struct MetaTestOutput: public TestOutput {
 		progress++;
 	}
 
-	virtual void reportTestFailure(const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char* text) {
+	virtual void reportTestFailure(bool isSynthetic, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char* text) {
 	    FailureRecord record(testName, sourceInfo, failureSourceInfo, text);
 
         if(printActualFailureRecords)

@@ -30,6 +30,8 @@
 
 using namespace pet;
 
+typedef IdentifierRegistry<FailableAllocator> TestRegistry;
+
 TEST_GROUP(RegistrySanity) {
 	TEST_TEARDOWN() {
 		CHECK(Allocator::allFreed());
@@ -37,29 +39,29 @@ TEST_GROUP(RegistrySanity) {
 };
 
 TEST(RegistrySanity, NonexistentQuery) {
-	IdentifierRegistry<Allocator> r;
+	TestRegistry r;
 	CHECK(r.get(666) == 0);
 };
 
 TEST(RegistrySanity, InvalidQuery) {
-	IdentifierRegistry<Allocator> r;
+	TestRegistry r;
 	CHECK(r.get(-1) == 0);
 };
 
 
 TEST(RegistrySanity, Success) {
-	IdentifierRegistry<Allocator> r;
+	TestRegistry r;
 	CHECK(r.final("foo") == 0);
 }
 
 TEST(RegistrySanity, ValidQueryAfterSuccess) {
-	IdentifierRegistry<Allocator> r;
+	TestRegistry r;
 	CHECK(r.final("foo") == 0);
 	CHECK(strcmp(r.get(0), "foo") == 0);
 }
 
 TEST(RegistrySanity, SequentialAdd) {
-	IdentifierRegistry<Allocator> r;
+	TestRegistry r;
 	CHECK(r.put('f'));
 	CHECK(r.put('o'));
 	CHECK(r.put('o'));
@@ -68,7 +70,7 @@ TEST(RegistrySanity, SequentialAdd) {
 }
 
 TEST(RegistrySanity, SequentialAddFinal) {
-	IdentifierRegistry<Allocator> r;
+	TestRegistry r;
 	CHECK(r.put('b'));
 	CHECK(r.put('a'));
 	CHECK(r.final("r") == 0);
@@ -77,32 +79,32 @@ TEST(RegistrySanity, SequentialAddFinal) {
 
 
 TEST(RegistrySanity, SuccessAfterNonexistentQuery) {
-	IdentifierRegistry<Allocator> r;
+	TestRegistry r;
 	CHECK(r.get(666) == 0);
 	CHECK(r.final("foo") == 0);
 }
 
 TEST(RegistrySanity, Different) {
-	IdentifierRegistry<Allocator> r;
+	TestRegistry r;
 	CHECK(r.final("foo") == 0);
 	CHECK(r.final("bar") == 1);
 }
 
 TEST(RegistrySanity, DifferentAfterInvalidQuery) {
-	IdentifierRegistry<Allocator> r;
+	TestRegistry r;
 	CHECK(r.final("foo") == 0);
 	CHECK(r.get(-1) == 0);
 	CHECK(r.final("bar") == 1);
 }
 
 TEST(RegistrySanity, HashCollision) {
-	IdentifierRegistry<Allocator> r;
+	TestRegistry r;
 	CHECK(r.final("liquid") == 0);
 	CHECK(r.final("costarring") == 1);
 }
 
 TEST_GROUP(Registry) {
-	void fill(IdentifierRegistry<Allocator> &r) {
+	void fill(TestRegistry &r) {
 		CHECK(r.final("foo") == 0);
 		CHECK(r.final("bar") == 1);
 		CHECK(r.final("liquid") == 2);
@@ -124,24 +126,24 @@ TEST_GROUP(Registry) {
 };
 
 TEST(Registry, GetNonLast) {
-	IdentifierRegistry<Allocator> r;
+	TestRegistry r;
 	fill(r);
 	CHECK(strcmp(r.get(6), "some") == 0);
 }
 
 TEST(Registry, Refill) {
-	IdentifierRegistry<Allocator> r;
+	TestRegistry r;
 	fill(r);
 	fill(r);
 }
 
 TEST(Registry, Iterator) {
-	IdentifierRegistry<Allocator> r;
+	TestRegistry r;
 
 	fill(r);
 
 	std::vector<std::string> names;
-	for(IdentifierRegistry<Allocator>::Iterator it = r.iterator(); it.current(); it.step())
+	for(TestRegistry::Iterator it = r.iterator(); it.current(); it.step())
 		names.push_back(it.current()->hstr.str());
 
 	std::sort(names.begin(), names.end());
