@@ -20,7 +20,7 @@
 #ifndef TESTFWD_H_
 #define TESTFWD_H_
 
-#include "Registry.h"
+#include "ubiquitous/Registry.h"
 
 namespace pet {
 

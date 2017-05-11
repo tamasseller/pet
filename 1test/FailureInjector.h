@@ -20,8 +20,6 @@
 #ifndef FAILUREINJECTOR_H_
 #define FAILUREINJECTOR_H_
 
-#include "Registry.h"
-
 namespace pet {
 
 class FailureInjector {

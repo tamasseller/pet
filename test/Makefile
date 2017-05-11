@@ -8,6 +8,7 @@ SOURCES += ../1test/FailureInjector.cpp
 
 SOURCES += ../data/AvlTree.cpp
 SOURCES += ../data/BinaryTree.cpp
+SOURCES += ../module/Modules.cpp
 SOURCES += ../ubiquitous/PrintfWriter.cpp
 
 # Test code
@@ -47,6 +48,7 @@ SOURCES += TestPoolStringStorage.cpp
 SOURCES += TestUbiqFailable.cpp
 SOURCES += TestUbiqError.cpp
 SOURCES += TestUbiqTrace.cpp
+SOURCES += TestUbiqModules.cpp
 
 # Test support
 

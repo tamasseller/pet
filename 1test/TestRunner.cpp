@@ -17,7 +17,7 @@
  *
  *******************************************************************************/
 
-#include "Registry.h"
+#include "ubiquitous/Registry.h"
 
 #include "TestRunner.h"
 #include "Mock.h"
