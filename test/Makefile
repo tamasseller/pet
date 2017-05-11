@@ -68,7 +68,7 @@ CXXFLAGS += -O0 									# Avoid optimizer screwing up coverage data
 CXXFLAGS += -g3										# Include all available debug info
 CXXFLAGS += -fno-inline								# Do not inline (coverage again)
 CXXFLAGS += -m32									# Use 32 bit mode (to model the target MCUs)
-CXXFLAGS += -fmax-errors=5							# Avoid blowing the console
+CXXFLAGS += -fmax-errors=5							# Avoid blowing up the console
 CXXFLAGS += -rdynamic								# Allows meaningful backrtaces 
 CXXFLAGS += --coverage								# Generate program flow data and inject profiling code
 CXXFLAGS += -fno-exceptions
