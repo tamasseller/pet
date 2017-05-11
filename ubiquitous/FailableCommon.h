@@ -22,10 +22,7 @@
 
 
 /* Example usage of custom error reporter for Failable.
-	#include "CppUTest/TestHarness.h"
-	#include "Backtrace.h"
 	UNCHECKED_ERROR_REPORT() {
-		Backtrace().print();
 		FAIL("Unchecked Error");
 	}
 */

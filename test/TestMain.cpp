@@ -17,12 +17,6 @@
  *
  *******************************************************************************/
 
-/*#include "CppUTest/CommandLineTestRunner.h"
-#include "CppUTest/TestRegistry.h"
-#include "CppUTest/MemoryLeakWarningPlugin.h"
-
-#include "FailureInjectorPlugin.h"*/
-
 #include "1test/TestRunner.h"
 
 int main(int ac, char** av)
@@ -30,8 +24,4 @@ int main(int ac, char** av)
     int ret = pet::TestRunner::runAllTests();
     if(ret)
         return ret;
-
-    /*MemoryLeakWarningPlugin::destroyGlobalDetector();
-	TestRegistry::getCurrentRegistry()->installPlugin(FailureInjectorPlugin::instance());
-    return CommandLineTestRunner::RunAllTests(ac, av);*/
 }

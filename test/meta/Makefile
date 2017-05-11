@@ -32,12 +32,9 @@ CXXFLAGS += -rdynamic								# Allows meaningful backrtaces
 CXXFLAGS += --coverage								# Generate program flow data and inject profiling code
 CXXFLAGS += -fno-exceptions
 CXXFLAGS += -fdelete-null-pointer-checks
-CXXFLAGS += -DCPPUTEST_USE_MEM_LEAK_DETECTION=0
 
 #TEST_CMD_PREFIX=LD_LIBRARY_PATH=/opt/gcc-5.3.0/lib32/
 #CXX=/opt/gcc-5.3.0/bin/g++
 LD=$(CXX) 
-
-#CPPUTEST_FLAGS = 
 
 include ../ultimate-makefile/Makefile.ultimate	
