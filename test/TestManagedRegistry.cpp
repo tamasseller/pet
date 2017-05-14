@@ -30,7 +30,8 @@
 
 using namespace pet;
 
-typedef IdentifierRegistry<FailableAllocator> TestRegistry;
+// TODO failable testing
+typedef IdentifierRegistry<Allocator> TestRegistry;
 
 TEST_GROUP(RegistrySanity) {
 	TEST_TEARDOWN() {
