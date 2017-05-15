@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * Copyright (c) 2016, 2017 Seller Tamás. All rights reserved.
+ * Copyright (c) 20STDOUT_FILENO6, 20STDOUT_FILENO7 Seller Tamás. All rights reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,46 +25,57 @@ namespace pet {
 
 void PrintfWriter::write(const char* val) {
 	printf("%s", val);
+	fflush(stdout);
 }
 
 void PrintfWriter::write(const void* val) {
 	printf("%p", val);
+	fflush(stdout);
 }
 
 void PrintfWriter::write(short val) {
 	printf("%hd", val);
+	fflush(stdout);
 }
 
 void PrintfWriter::write(unsigned short val) {
 	printf("%hu", val);
+	fflush(stdout);
 }
 
 void PrintfWriter::write(int val) {
 	printf("%d", val);
+	fflush(stdout);
 }
 
 void PrintfWriter::write(unsigned int val) {
 	printf("%u", val);
+	fflush(stdout);
 }
 
 void PrintfWriter::write(long val) {
 	printf("%ld", val);
+	fflush(stdout);
 }
 
 void PrintfWriter::write(unsigned long val) {
 	printf("%ld", val);
+	fflush(stdout);
 }
 
 void PrintfWriter::write(float val) {
 	printf("%f", val);
+	fflush(stdout);
 }
 
 void PrintfWriter::write(double val) {
 	printf("%f", val);
+	fflush(stdout);
 }
 
 void PrintfWriter::write(long double val) {
 	printf("%Lf", val);
+	fflush(stdout);
 }
 
 }

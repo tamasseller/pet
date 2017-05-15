@@ -58,13 +58,17 @@ TEST_GROUP(TreeMapEmtpy) {
 TEST(TreeMapEmtpy, AddOne) {
 	map->put(1, 2);
 	CHECK(map->get(1));
-	CHECK(*map->get(1) == 2);
+	auto x = map->get(1);
+	if(x)
+	CHECK(*x == 2);
 }
 
 TEST(TreeMapEmtpy, UpdateOne) {
 	map->put(1, 2);
 	CHECK(map->get(1));
-	CHECK(*map->get(1) == 2);
+	auto x = map->get(1);
+	if(x)
+		CHECK(*x == 2);
 
 	map->put(1, 3);
 	CHECK(map->get(1));
@@ -94,7 +98,9 @@ TEST_GROUP(TreeMapNormalize) {
 
 	TEST_TEARDOWN() {
 		CHECK(map->get(10));
-		CHECK(*map->get(10) == 0);
+		auto x = map->get(10);
+		if(x)
+			CHECK(*x == 0);
 		delete map;
 		CHECK(Allocator::allFreed());
 	}
@@ -336,8 +342,11 @@ TEST(TreeMapSquares, AddMore) {
 	for(int i = 100; i<150; i++)
 		map->put(i, i*i);
 
-	for(int i = 0; i<150; i++)
-		CHECK(*map->get(i) == i*i);
+	for(int i = 0; i<150; i++) {
+		auto x = map->get(i);
+		if(x)
+			CHECK(*x == i*i);
+	}
 }
 
 TEST(TreeMapSquares, Iteratate) {

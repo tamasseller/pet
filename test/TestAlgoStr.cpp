@@ -308,3 +308,44 @@ TEST(Str, utoa16) {
 	CHECK(strcmp(big, "ffffffff") == 0);
 }
 
+TEST(Str, atou10) {
+	unsigned int x;
+
+	CHECK(Str::atou<10>(x, "1", 10));
+	CHECK(x == 1);
+
+	CHECK(Str::atou<10>(x, "10", 10));
+	CHECK(x == 10);
+
+	CHECK(Str::atou<10>(x, "100", 10));
+	CHECK(x == 100);
+
+	CHECK(Str::atou<10>(x, "1000", 10));
+	CHECK(x == 1000);
+
+	CHECK(Str::atou<10>(x, "1414213562", 10));
+	CHECK(x == 1414213562);
+}
+
+
+TEST(Str, atou16) {
+	unsigned int x;
+
+	CHECK(Str::atou<16>(x, "1", 1));
+	CHECK(x == 1);
+
+	CHECK(Str::atou<16>(x, "1", 1000));
+	CHECK(x == 1);
+
+	CHECK(!Str::atou<16>(x, "x", 1));
+	CHECK(!Str::atou<16>(x, "x", 1000));
+
+	CHECK(Str::atou<16>(x, "101", 2));
+	CHECK(x == 16);
+
+	CHECK(Str::atou<16>(x, "101", 100));
+	CHECK(x == 257);
+
+	CHECK(Str::atou<16>(x, "400", 3));
+	CHECK(x == 1024);
+}
