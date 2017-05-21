@@ -31,8 +31,9 @@
 #define FAIL_ALWAYS(text)   pet::TestRunner::failTest(INTERNAL_AT(), text)
 #define FAIL(text)          { if(!pet::TestRunner::isCurrentTestSynthetic()) FAIL_ALWAYS(text); }
 
-#define CHECK_ALWAYS(x)     { if(!(x)) FAIL_ALWAYS("Expectation: '" INTERNAL_STRINGIFY(x) "' failed"); }
-#define CHECK(x)            { bool _R_E_T_ = (x); if(!pet::TestRunner::isCurrentTestSynthetic()) CHECK_ALWAYS(_R_E_T_); }
+#define FAIL_EXPECT(x)   FAIL_ALWAYS("Expectation: '" INTERNAL_STRINGIFY(x) "' failed")
+#define CHECK_ALWAYS(x)     { if(!(x)) FAIL_EXPECT(x); }
+#define CHECK(x)            { if(!(x) && !pet::TestRunner::isCurrentTestSynthetic()) FAIL_EXPECT(x); }
 
 #define TEST_SETUP()        inline void testSetup()
 #define TEST_TEARDOWN()     inline void testTeardown()
