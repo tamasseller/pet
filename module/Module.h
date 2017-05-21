@@ -9,25 +9,22 @@
 
 #include "ubiquitous/Registry.h"
 #include "ModuleInterface.h"
-#include "Deps.h"
+#include "Requires.h"
 
 namespace pet {
 
-template<class Child, class Reqs = Requires<>, class Prov = Provides<>>
-class Module: public Registry<ModuleInterface>::StaticElement<Child>, public Reqs, public Prov {
+template<class Child, class Reqs = Requires<>>
+class Module: public Registry<ModuleInterface>::StaticElement<Child>, public Reqs {
     protected:
         inline void installModule() {}
 
-        inline virtual unsigned int requires(const Tag* const * &reqs) {
+        inline virtual unsigned int requires(ModuleInterface* const * &reqs) {
             reqs = Reqs::deps;
             return Reqs::nDeps;
         }
 
-        inline virtual unsigned int provides(const Tag* const * &serv) {
-            serv = Prov::services;
-            return Prov::nServices;
-        }
-
+        template<class...> friend class Requires;
+        using Registry<ModuleInterface>::StaticElement<Child>::instance;
     public:
         inline virtual ~Module() {}
 };

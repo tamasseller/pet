@@ -9,18 +9,15 @@
 
 #include "ubiquitous/Registry.h"
 #include "ModuleInterface.h"
-#include "Tag.h"
 
 namespace pet {
 
 class Modules {
         typedef LinkedList<ModuleInterface> InitList;
 
-        static ModuleInterface* findProvider(const Tag* service);
         static bool recurse(InitList& initList, ModuleInterface* current);
-
     public:
-        static bool initAll();
+        static bool init();
 };
 
 }

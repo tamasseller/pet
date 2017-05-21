@@ -9,18 +9,16 @@
 
 namespace pet {
 
-#include "Tag.h"
-
 class ModuleInterface {
-    friend class Modules;
-    virtual void init() = 0;
+    bool visited = false;
+	bool locked = false;
 
     friend class LinkedList<ModuleInterface>;
     ModuleInterface *next = 0;
-    bool visited = false, locked = false;
 
-    virtual unsigned int requires(const Tag* const * &) = 0;
-    virtual unsigned int provides(const Tag* const * &) = 0;
+    friend class Modules;
+    virtual void init() = 0;
+    virtual unsigned int requires(ModuleInterface* const * &) = 0;
 public:
     inline virtual ~ModuleInterface() {}
 };

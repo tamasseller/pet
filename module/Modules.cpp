@@ -8,26 +8,6 @@
 
 using namespace pet;
 
-ModuleInterface* Modules::findProvider(const Tag* service)
-{
-    ModuleInterface* ret = nullptr;
-
-    for(auto it = Registry<ModuleInterface>::iterator(); it.current(); it.step()) {
-        const Tag* const * services;
-        int n = it.current()->provides(services);
-
-        for(int i = 0; i < n; i++) {
-            if(services[i] == service) {
-                if(ret)
-                    return nullptr;
-                ret = it.current();
-            }
-        }
-    }
-
-    return ret;
-}
-
 bool Modules::recurse(InitList& initList, ModuleInterface* current)
 {
     if(current->locked)
@@ -38,26 +18,22 @@ bool Modules::recurse(InitList& initList, ModuleInterface* current)
 
     current->locked = true;
 
-    const Tag* const * dependencies;
+    ModuleInterface* const * dependencies;
     int n = current->requires(dependencies);
 
     for(int i = 0; i < n; i++) {
-        ModuleInterface *target;
-        if(!(target = findProvider(dependencies[i])))
-            return false;
-
-        if(!recurse(initList, current))
+        if(!recurse(initList, dependencies[i]))
             return false;
     }
 
     current->visited = true;
-    initList.add(current);
+    initList.addBack(current);
 
     current->locked = false;
     return true;
 }
 
-bool Modules::initAll()
+bool Modules::init()
 {
     InitList initList;
 

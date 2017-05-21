@@ -48,7 +48,7 @@ SOURCES += TestPoolStringStorage.cpp
 SOURCES += TestUbiqFailable.cpp
 SOURCES += TestUbiqError.cpp
 SOURCES += TestUbiqTrace.cpp
-SOURCES += TestUbiqModules.cpp
+SOURCES += TestModules.cpp
 
 # Test support
 
