@@ -108,6 +108,11 @@ TEST(NonEmptyDoubleList, Pop)
 
 	CHECK(list.front() == nullptr);
 	CHECK(list.back() == nullptr);
+
+	CHECK(list.popBack() == nullptr);
+
+	CHECK(list.front() == nullptr);
+	CHECK(list.back() == nullptr);
 }
 
 TEST(NonEmptyDoubleList, PopOtherWay)
@@ -126,6 +131,11 @@ TEST(NonEmptyDoubleList, PopOtherWay)
 	CHECK(list.back() == &e2);
 
 	CHECK(list.popBack() == &e2);
+
+	CHECK(list.front() == nullptr);
+	CHECK(list.back() == nullptr);
+
+	CHECK(list.popFront() == nullptr);
 
 	CHECK(list.front() == nullptr);
 	CHECK(list.back() == nullptr);

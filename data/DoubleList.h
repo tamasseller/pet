@@ -225,6 +225,8 @@ inline Element* DoubleList<Element>::popFront()
 
 	if(first)
 		first = first->next;
+	else
+		return ret;
 
 	if(first)
 		first->prev = nullptr;
@@ -241,6 +243,8 @@ inline Element* DoubleList<Element>::popBack()
 
 	if(last)
 		last = last->prev;
+	else
+		return ret;
 
 	if(last)
 		last->next = nullptr;
