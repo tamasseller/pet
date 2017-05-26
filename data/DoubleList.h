@@ -76,11 +76,16 @@ public:
 	/** @copydoc LinkedList::addBack */
 	inline bool addBack(Element* elem);
 
-    /** @copydoc LinkedList::fastAdd */
     really inline void fastAddBack(Element* elem);
 
 	/** @copydoc LinkedList::remove */
 	inline bool remove(Element* elem);
+
+	inline Element* front();
+	inline Element* back();
+
+	inline Element* popFront();
+	inline Element* popBack();
 
 	/**
 	 * Fast, unchecked remove element.
@@ -199,6 +204,50 @@ really inline void DoubleList<Element>::Iterator::step()
 {
 	if(element)
 		element = element->next;
+}
+
+template<class Element>
+inline Element* DoubleList<Element>::front()
+{
+	return first;
+}
+
+template<class Element>
+inline Element* DoubleList<Element>::back()
+{
+	return last;
+}
+
+template<class Element>
+inline Element* DoubleList<Element>::popFront()
+{
+	Element* ret = first;
+
+	if(first)
+		first = first->next;
+
+	if(first)
+		first->prev = nullptr;
+	else
+		last = nullptr;
+
+	return ret;
+}
+
+template<class Element>
+inline Element* DoubleList<Element>::popBack()
+{
+	Element* ret = last;
+
+	if(last)
+		last = last->prev;
+
+	if(last)
+		last->next = nullptr;
+	else
+		first = nullptr;
+
+	return ret;
 }
 
 }

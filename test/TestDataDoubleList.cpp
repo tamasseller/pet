@@ -89,6 +89,48 @@ TEST_GROUP(NonEmptyDoubleList) {
 	}
 };
 
+TEST(NonEmptyDoubleList, Pop)
+{
+	CHECK(list.front() == &e3);
+	CHECK(list.back() == &e1);
+
+	CHECK(list.popFront() == &e3);
+
+	CHECK(list.front() == &e2);
+	CHECK(list.back() == &e1);
+
+	CHECK(list.popBack() == &e1);
+
+	CHECK(list.front() == &e2);
+	CHECK(list.back() == &e2);
+
+	CHECK(list.popFront() == &e2);
+
+	CHECK(list.front() == nullptr);
+	CHECK(list.back() == nullptr);
+}
+
+TEST(NonEmptyDoubleList, PopOtherWay)
+{
+	CHECK(list.front() == &e3);
+	CHECK(list.back() == &e1);
+
+	CHECK(list.popBack() == &e1);
+
+	CHECK(list.front() == &e3);
+	CHECK(list.back() == &e2);
+
+	CHECK(list.popFront() == &e3);
+
+	CHECK(list.front() == &e2);
+	CHECK(list.back() == &e2);
+
+	CHECK(list.popBack() == &e2);
+
+	CHECK(list.front() == nullptr);
+	CHECK(list.back() == nullptr);
+}
+
 TEST(NonEmptyDoubleList, RemoveNonFirst) {
 	CHECK(list.remove(&e2));
 
@@ -199,10 +241,7 @@ TEST_GROUP(DoubleListStress) {
     DoubleList<SimpleElement> list;
 };
 
-#include <iostream>
-
-TEST(DoubleListStress, Stress)
-{
+TEST(DoubleListStress, Stress) {
     for(int i=691; i; i = ((i + 691) % 1021)) {
         CHECK(!list.iterator().current());
         for(int j=719; j; j = ((j + 719) % 1021)) {
