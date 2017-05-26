@@ -173,8 +173,8 @@ public:
 		Frame* current = nonemptyFrames.iterator().current();
 
 		if(current && current->pool.isEmpty()) {
-			nonemptyFrames.remove(current);
-			emptyFrames.add(current);
+			nonemptyFrames.fastRemove(current);
+			emptyFrames.fastAdd(current);
 		}
 
 		current = nonemptyFrames.iterator().current();
@@ -187,7 +187,7 @@ public:
 
 			current = new(newSpace) Frame();
 			current->counter = 1;
-			nonemptyFrames.add(current);
+			nonemptyFrames.fastAddFront(current);
 		}else
 			current->counter++;
 
@@ -215,11 +215,15 @@ public:
 		frame->pool.release(elem);
 
 		if(!--frame->counter){
-			nonemptyFrames.remove(frame);
+			nonemptyFrames.fastRemove(frame);
 			Allocator::free(frame);
 		}else {
 			emptyFrames.remove(frame);
-			nonemptyFrames.add(frame);
+			/*
+			 * The fast version can not be used here,
+			 * because it may already be present.
+			 */
+			nonemptyFrames.addFront(frame);
 		}
 	}
 

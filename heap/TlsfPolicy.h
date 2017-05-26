@@ -367,7 +367,7 @@ inline void TlsfPolicy<SizeType, alignmentBits>::update(unsigned int oldSize, Bl
 template <class SizeType, unsigned int alignmentBits>
 inline void TlsfPolicy<SizeType, alignmentBits>::FreeList::add(FreeBlock *block)
 {
-	this->fastAdd(block);
+	this->fastAddFront(block);
 }
 
 template <class SizeType, unsigned int alignmentBits>

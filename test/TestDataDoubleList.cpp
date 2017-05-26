@@ -38,12 +38,12 @@ TEST_GROUP(EmptyDoubleList) {
 };
 
 TEST(EmptyDoubleList, EmptyAdd) {
-	CHECK(list.add(&e1));
+	CHECK(list.addFront(&e1));
 }
 
 TEST(EmptyDoubleList, RepeatedAdd) {
-	CHECK(list.add(&e1));
-	CHECK(!list.add(&e1));
+	CHECK(list.addFront(&e1));
+	CHECK(!list.addFront(&e1));
 }
 
 TEST(EmptyDoubleList, EmptyAddBack) {
@@ -60,12 +60,12 @@ TEST(EmptyDoubleList, EmptyRemove) {
 }
 
 TEST(EmptyDoubleList, ValidRemove) {
-	CHECK(list.add(&e1));
+	CHECK(list.addFront(&e1));
 	CHECK(list.remove(&e1));
 }
 
 TEST(EmptyDoubleList, RepeatedRemove) {
-	CHECK(list.add(&e1));
+	CHECK(list.addFront(&e1));
 	CHECK(list.remove(&e1));
 	CHECK(!list.remove(&e1));
 }
@@ -84,25 +84,25 @@ TEST_GROUP(NonEmptyDoubleList) {
 
 	TEST_SETUP() {
 		CHECK(list.addBack(&e1));
-		CHECK(list.add(&e2));
-		CHECK(list.add(&e3));
+		CHECK(list.addFront(&e2));
+		CHECK(list.addFront(&e3));
 	}
 };
 
 TEST(NonEmptyDoubleList, RemoveNonFirst) {
 	CHECK(list.remove(&e2));
 
-	CHECK(!list.add(&e1));
-	CHECK(list.add(&e2));
-	CHECK(!list.add(&e3));
+	CHECK(!list.addFront(&e1));
+	CHECK(list.addFront(&e2));
+	CHECK(!list.addFront(&e3));
 }
 
 TEST(NonEmptyDoubleList, RemoveNonFirstAddBack) {
 	CHECK(list.remove(&e2));
 
-	CHECK(!list.add(&e1));
+	CHECK(!list.addFront(&e1));
 	CHECK(list.addBack(&e2));
-	CHECK(!list.add(&e3));
+	CHECK(!list.addFront(&e3));
 }
 
 
@@ -168,7 +168,7 @@ TEST(NonEmptyDoubleList, IterateAfterFirstRemoved) {
 
 TEST(NonEmptyDoubleList, IterateAfterReAdd) {
 	CHECK(list.remove(&e2));
-	CHECK(list.add(&e2));
+	CHECK(list.addFront(&e2));
 
 	auto it = list.iterator();
 	CHECK(it.current() == &e2);
@@ -192,4 +192,38 @@ TEST(NonEmptyDoubleList, IterateAfterReAddBack) {
 	CHECK(it.current() == &e2);
 	it.step();
 	CHECK(it.current() == 0);
+}
+
+TEST_GROUP(DoubleListStress) {
+    SimpleElement elements[1021];
+    DoubleList<SimpleElement> list;
+};
+
+#include <iostream>
+
+TEST(DoubleListStress, Stress)
+{
+    for(int i=691; i; i = ((i + 691) % 1021)) {
+        CHECK(!list.iterator().current());
+        for(int j=719; j; j = ((j + 719) % 1021)) {
+            unsigned int n = (i + j) % 1021u;
+            if(i & 1) {
+                CHECK(list.addFront(elements + n));
+            } else {
+                CHECK(list.addBack(elements + n));
+            }
+        }
+
+        for(int j=1; j<1021; j++)
+            if(j != i)
+                CHECK(list.contains(elements + j));
+
+        for(int j=727; j; j = (j + 727) % 1021) {
+            unsigned int n = (i + j) % 1021u;
+            CHECK(list.remove(elements + n));
+        }
+
+        CHECK(!list.remove(elements + i % 1021));
+        CHECK(!list.remove(elements + (2*i) % 1021));
+    }
 }

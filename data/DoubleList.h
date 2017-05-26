@@ -46,6 +46,7 @@ namespace pet {
 template<class Element>
 class DoubleList: public pet::IterativeSearch<DoubleList<Element>, Element>::Decorator {
 	Element* first = 0;
+	Element* last = 0;
 public:
 	/** @copydoc LinkedList::Iterator */
 	class Iterator {
@@ -61,17 +62,22 @@ public:
 		really inline void step();
 	};
 
+	really inline bool contains(Element* elem);
+
 	/** @copydoc LinkedList::iterator */
 	really inline Iterator iterator();
 
 	/** @copydoc LinkedList::add */
-	inline bool add(Element* elem);
+	inline bool addFront(Element* elem);
 
 	/** @copydoc LinkedList::fastAdd */
-	really inline void fastAdd(Element* elem);
+	really inline void fastAddFront(Element* elem);
 
 	/** @copydoc LinkedList::addBack */
 	inline bool addBack(Element* elem);
+
+    /** @copydoc LinkedList::fastAdd */
+    really inline void fastAddBack(Element* elem);
 
 	/** @copydoc LinkedList::remove */
 	inline bool remove(Element* elem);
@@ -91,63 +97,73 @@ public:
 };
 
 template<class Element>
-really inline void DoubleList<Element>::fastAdd(Element* elem)
+really inline bool DoubleList<Element>::contains(Element* elem)
 {
-	if(first)
-		first->prev = elem;
+    for(Iterator it=iterator(); it.current(); it.step())
+        if(it.current() == elem)
+            return true;
 
-	elem->prev = 0;
-	elem->next = first;
-	first = elem;
+    return false;
 }
 
 
 template<class Element>
-inline bool DoubleList<Element>::add(Element* elem)
+inline bool DoubleList<Element>::addFront(Element* elem)
 {
-	for(Iterator it=iterator(); it.current(); it.step())
-		if(it.current() == elem)
-			return false;
+    if(contains(elem))
+        return false;
 
-	fastAdd(elem);
+	fastAddFront(elem);
 	return true;
 }
 
 template<class Element>
 inline bool DoubleList<Element>::addBack(Element* elem)
 {
-	Iterator it=iterator();
-	while(it.current()) {
-		if(it.current() == elem)
-			return false;
+    if(contains(elem))
+        return false;
 
-		if(!it.current()->next)
-			break;
+    fastAddBack(elem);
+    return true;
+}
 
-		it.step();
-	}
+template<class Element>
+really inline void DoubleList<Element>::fastAddFront(Element* elem)
+{
+    if(first)
+        first->prev = elem;
 
-	elem->next = 0;
-	elem->prev = it.current();
+    elem->prev = 0;
+    elem->next = first;
+    first = elem;
 
-	if(it.current())
-		it.current()->next = elem;
-	else
-		first = elem;
+    if(!last)
+        last = first;
+}
 
-	return true;
+template<class Element>
+really inline void DoubleList<Element>::fastAddBack(Element* elem)
+{
+    if(last)
+        last->next = elem;
+
+    elem->prev = last;
+    elem->next = 0;
+
+    last = elem;
+
+    if(!first)
+        first = last;
 }
 
 template<class Element>
 really inline void DoubleList<Element>::fastRemove(Element* elem)
 {
-	if(elem->prev)
-		elem->prev->next = elem->next;
-	else
-		first = elem->next;
+    Element *& prevsNext = (elem->prev) ? elem->prev->next : first;
+    Element *& nextsPrev = (elem->next) ? elem->next->prev : last;
 
-	if(elem->next)
-		elem->next->prev = elem->prev;
+    prevsNext = elem->next;
+    nextsPrev = elem->prev;
 }
 
 template<class Element>
