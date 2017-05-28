@@ -79,6 +79,54 @@ TEST(EmptyDoubleList, OverIterate) {
 	CHECK(it.current() == 0);
 }
 
+TEST(EmptyDoubleList, Insert) {
+	auto it = list.iterator();
+	list.insertBefore(&e2, it);			// {} -> {2}
+										//  ^
+
+	CHECK(it.current() == nullptr);
+	CHECK(list.front() == &e2);
+	CHECK(list.back() == &e2);
+
+	auto it2 = list.iterator();			// {2} -> {1, 2}
+	list.insertBefore(&e1, it2);		//  ^
+
+	CHECK(it2.current() == &e2);
+	CHECK(list.front() == &e1);
+	CHECK(list.back() == &e2);
+}
+
+TEST(EmptyDoubleList, Insert2) {
+	auto it = list.iterator();
+	list.insertBefore(&e1, it);			// {} -> {1}
+										//  ^
+
+	CHECK(it.current() == nullptr);
+	CHECK(list.front() == &e1);
+	CHECK(list.back() == &e1);
+
+	list.insertBefore(&e3, it);			// {1} -> {1, 3}
+										//   ^
+
+	CHECK(it.current() == nullptr);
+	CHECK(list.front() == &e1);
+	CHECK(list.back() == &e3);
+
+	auto it2 = list.iterator();			// {1, 3} -> {1, 2, 3}
+	it2.step();							//     ^
+	list.insertBefore(&e2, it2);
+
+	CHECK(it2.current() == &e3);
+	auto it3 = list.iterator();
+	CHECK(it3.current() == &e1);
+	it3.step();
+	CHECK(it3.current() == &e2);
+	it3.step();
+	CHECK(it3.current() == &e3);
+	it3.step();
+	CHECK(it3.current() == nullptr);
+}
+
 TEST_GROUP(NonEmptyDoubleList) {
 	DoubleList<SimpleElement> list;
 
@@ -247,15 +295,19 @@ TEST(NonEmptyDoubleList, IterateAfterReAddBack) {
 }
 
 TEST_GROUP(DoubleListStress) {
-    SimpleElement elements[1021];
+	static constexpr uint32_t prime1 = 449;
+	static constexpr uint32_t prime2 = 457;
+	static constexpr uint32_t prime3 = 461;
+	static constexpr uint32_t prime4 = 463;
+    SimpleElement elements[prime4];
     DoubleList<SimpleElement> list;
 };
 
 TEST(DoubleListStress, Stress) {
-    for(int i=691; i; i = ((i + 691) % 1021)) {
+    for(int i=prime1; i; i = ((i + prime1) % prime4)) {
         CHECK(!list.iterator().current());
-        for(int j=719; j; j = ((j + 719) % 1021)) {
-            unsigned int n = (i + j) % 1021u;
+        for(int j=prime2; j; j = ((j + prime2) % prime4)) {
+            unsigned int n = (i + j) % prime4;
             if(i & 1) {
                 CHECK(list.addFront(elements + n));
             } else {
@@ -263,16 +315,16 @@ TEST(DoubleListStress, Stress) {
             }
         }
 
-        for(int j=1; j<1021; j++)
+        for(int j=1; j<prime4; j++)
             if(j != i)
                 CHECK(list.contains(elements + j));
 
-        for(int j=727; j; j = (j + 727) % 1021) {
-            unsigned int n = (i + j) % 1021u;
+        for(int j=prime3; j; j = (j + prime3) % prime4) {
+            unsigned int n = (i + j) % prime4;
             CHECK(list.remove(elements + n));
         }
 
-        CHECK(!list.remove(elements + i % 1021));
-        CHECK(!list.remove(elements + (2*i) % 1021));
+        CHECK(!list.remove(elements + i % prime4));
+        CHECK(!list.remove(elements + (2*i) % prime4));
     }
 }

@@ -20,6 +20,7 @@ SOURCES += TestDataFifo.cpp
 SOURCES += TestDataBinaryTree.cpp
 SOURCES += TestDataDoubleList.cpp
 SOURCES += TestDataLinkedList.cpp
+SOURCES += TestDataOrderedDoubleList.cpp
 SOURCES += TestHeapAvlStress.cpp
 SOURCES += TestHeapBestFitStress.cpp
 SOURCES += TestHeapHost1.cpp

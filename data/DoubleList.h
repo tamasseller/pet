@@ -81,6 +81,8 @@ public:
 	/** @copydoc LinkedList::remove */
 	inline bool remove(Element* elem);
 
+	inline void insertBefore(Element* elem, Iterator at);
+
 	inline Element* front();
 	inline Element* back();
 
@@ -182,6 +184,20 @@ inline bool DoubleList<Element>::remove(Element* elem)
 	}
 
 	return false;
+}
+
+template<class Element>
+inline void DoubleList<Element>::insertBefore(Element* elem, Iterator at) {
+	if(at.current()) {
+		Element* &prevsNext = (at.current()->prev) ? at.current()->prev->next : first;
+		prevsNext = elem;
+		at.current()->prev = elem;
+
+		Element* prev = (at.current()->prev) ? at.current()->prev : nullptr;
+		elem->prev = prev;
+		elem->next = at.current();
+	} else
+		this->addBack(elem);
 }
 
 template<class Element>
