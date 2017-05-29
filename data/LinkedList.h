@@ -46,7 +46,7 @@ namespace pet {
  */
 template<class Element>
 class LinkedList: public pet::IterativeSearch<LinkedList<Element>, Element>::Decorator {
-	Element* first = 0;
+	Element* first = nullptr;
 public:
 	/**
 	 * Forward iterator.
@@ -147,6 +147,17 @@ public:
 	inline bool remove(Element* elem);
 
 	/**
+	 * Remove all elements.
+	 */
+	inline void clear();
+
+	/**
+	 * Remove all elements.
+	 */
+	inline bool isEmpty();
+
+
+	/**
 	 * Get an all through iterator.
 	 *
 	 * @return 	An iterator that is at the foremost possible location
@@ -196,6 +207,17 @@ inline bool LinkedList<Element>::remove(Element* elem)
 
 	return false;
 }
+
+template<class Element>
+inline void LinkedList<Element>::clear() {
+	first = nullptr;
+}
+
+template<class Element>
+inline bool LinkedList<Element>::isEmpty() {
+	return first == nullptr;
+}
+
 
 template<class Element>
 really inline typename LinkedList<Element>::Iterator

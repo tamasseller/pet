@@ -36,25 +36,35 @@ TEST_GROUP(EmptyLinkedList) {
 };
 
 TEST(EmptyLinkedList, EmptyAdd) {
+	CHECK(list.isEmpty());
 	CHECK(list.add(&e1));
+	CHECK(!list.isEmpty());
 }
 
 TEST(EmptyLinkedList, RepeatedAdd) {
+	CHECK(list.isEmpty());
 	CHECK(list.add(&e1));
 	CHECK(!list.add(&e1));
+	CHECK(!list.isEmpty());
 }
 
 TEST(EmptyLinkedList, EmptyAddBack) {
+	CHECK(list.isEmpty());
 	CHECK(list.addBack(&e1));
+	CHECK(!list.isEmpty());
 }
 
 TEST(EmptyLinkedList, RepeatedAddBack) {
+	CHECK(list.isEmpty());
 	CHECK(list.addBack(&e1));
 	CHECK(!list.addBack(&e1));
+	CHECK(!list.isEmpty());
 }
 
 TEST(EmptyLinkedList, EmptyRemove) {
+	CHECK(list.isEmpty());
 	CHECK(!list.remove(&e1));
+	CHECK(list.isEmpty());
 }
 
 TEST(EmptyLinkedList, ValidRemove) {
@@ -63,9 +73,19 @@ TEST(EmptyLinkedList, ValidRemove) {
 }
 
 TEST(EmptyLinkedList, RepeatedRemove) {
+	CHECK(list.isEmpty());
+
 	CHECK(list.add(&e1));
+
+	CHECK(!list.isEmpty());
+
 	CHECK(list.remove(&e1));
+
+	CHECK(list.isEmpty());
+
 	CHECK(!list.remove(&e1));
+
+	CHECK(list.isEmpty());
 }
 
 TEST(EmptyLinkedList, OverIterate) {
@@ -87,7 +107,23 @@ TEST_GROUP(NonEmptyLinkedList) {
 	}
 };
 
+TEST(NonEmptyLinkedList, Clear) {
+	CHECK(!list.isEmpty());
+
+	list.clear();
+
+	CHECK(list.isEmpty());
+	CHECK(list.add(&e2));
+	CHECK(!list.isEmpty());
+
+	list.clear();
+
+	CHECK(list.isEmpty());
+}
+
+
 TEST(NonEmptyLinkedList, RemoveNonFirst) {
+
 	CHECK(list.remove(&e2));
 
 	CHECK(!list.add(&e1));
