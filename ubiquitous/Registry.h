@@ -31,7 +31,9 @@ public:
 		friend LinkedList<ElementBase>;
 		ElementBase *next;
 	protected:
-		ElementBase(): next(0) {}
+		ElementBase() {
+			Registry::add(this);
+		}
 	};
 
 private:
@@ -41,15 +43,15 @@ public:
 	template <class Child>
 	class StaticElement: public ElementBase {
 	protected:
-		StaticElement() {
-			Registry::add(this);
-		}
-
 		static Child instance;
 	};
 
 	static void add(ElementBase* item) {
 	    list.add(item);
+	}
+
+	static void clear() {
+	    list.clear();
 	}
 
 	static typename LinkedList<ElementBase>::Iterator iterator() {
