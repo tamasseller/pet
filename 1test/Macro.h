@@ -20,8 +20,8 @@
 #ifndef MACRO_H_
 #define MACRO_H_
 
-#define INTERNAL_STRINGIFY_2(x)                 #x
-#define INTERNAL_STRINGIFY(x)                   INTERNAL_STRINGIFY_2(x)
+#define INTERNAL_STRINGIFY_2(...)               #__VA_ARGS__
+#define INTERNAL_STRINGIFY(...)                 INTERNAL_STRINGIFY_2(__VA_ARGS__)
 #define INTERNAL_AT()                           __FILE__ ":" INTERNAL_STRINGIFY(__LINE__)
 
 #define ARG_NUMBER_TAGGER(F, _1, _2, _3, real, ...) F##real

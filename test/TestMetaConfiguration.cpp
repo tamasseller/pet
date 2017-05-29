@@ -91,8 +91,8 @@ TEST(MetaConfiguration, Sanity) {
     typedef Configurable<T1<int>> C3;
     CHECK(C1::v1 == 1);
     CHECK(C2::v1 == -1);
-    CHECK((TypeEquals<C1::t1, void>::value));
-    CHECK((TypeEquals<C3::t1, int>::value));
+    CHECK(TypeEquals<C1::t1, void>::value);
+    CHECK(TypeEquals<C3::t1, int>::value);
 }
 
 TEST(MetaConfiguration, MultiValue) {
@@ -120,15 +120,15 @@ TEST(MetaConfiguration, MultiType) {
     typedef Configurable<T3<const volatile char*>, T1<long long int>> C2;
     typedef Configurable<T2<double>, T3<void*>> C3;
 
-    CHECK((TypeEquals<C1::t1, int>::value));
-    CHECK((TypeEquals<C2::t1, long long int>::value));
-    CHECK((TypeEquals<C3::t1, void>::value));
+    CHECK(TypeEquals<C1::t1, int>::value);
+    CHECK(TypeEquals<C2::t1, long long int>::value);
+    CHECK(TypeEquals<C3::t1, void>::value);
 
-    CHECK((TypeEquals<C1::t2, Class2>::value));
-    CHECK((TypeEquals<C2::t2, char>::value));
-    CHECK((TypeEquals<C3::t2, double>::value));
+    CHECK(TypeEquals<C1::t2, Class2>::value);
+    CHECK(TypeEquals<C2::t2, char>::value);
+    CHECK(TypeEquals<C3::t2, double>::value);
 
-    CHECK((TypeEquals<C1::t3, Class1>::value));
-    CHECK((TypeEquals<C2::t3, const volatile char*>::value));
-    CHECK((TypeEquals<C3::t3, void*>::value));
+    CHECK(TypeEquals<C1::t3, Class1>::value);
+    CHECK(TypeEquals<C2::t3, const volatile char*>::value);
+    CHECK(TypeEquals<C3::t3, void*>::value);
 }
