@@ -34,6 +34,7 @@ SOURCES += TestHeapTlsf.cpp
 SOURCES += TestManagedHstring.cpp
 SOURCES += TestManagedRegistry.cpp
 SOURCES += TestManagedTreeMap.cpp
+SOURCES += TestMetaConfiguration.cpp
 SOURCES += TestMetaExpLog.cpp
 SOURCES += TestMetaExpRange.cpp
 SOURCES += TestMetaFieldAccessor.cpp
