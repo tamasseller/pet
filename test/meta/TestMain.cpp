@@ -114,6 +114,20 @@ struct MetaTestOutput: public TestOutput {
 	virtual inline ~MetaTestOutput() {}
 };
 
+struct MetaTestPlugin: pet::TestPlugin{
+	int before = 0, after = 0;
+
+	virtual void beforeTest() {
+		before++;
+	}
+
+	virtual void afterTest() {
+		after++;
+	}
+
+	inline virtual ~MetaTestPlugin() {}
+};
+
 int main(int ac, char** av)
 {
 	MetaTestOutput output;
@@ -121,6 +135,9 @@ int main(int ac, char** av)
 	int ret = 0;
 
 	auto dotsExpected = normalExpected + syntheticExpected;
+
+	MetaTestPlugin plugin;
+	pet::TestRunner::installPlugin(&plugin);
 
     if(pet::TestRunner::runAllTests(&output) != -1) {
     	std::cerr << "runAllTests return value error" << std::endl;
@@ -139,6 +156,9 @@ int main(int ac, char** av)
     	ret = -1;
     } else if(expectedFailures.size() != output.failures.size()) {
     	std::cerr << "number of failures error (expected " << expectedFailures.size() << " got " << output.failures.size() << ")" << std::endl;
+    	ret = -1;
+    } else if(plugin.before != dotsExpected || plugin.after != dotsExpected){
+    	std::cerr << "plugin error (expected " << dotsExpected << " got " << plugin.before << " calls before test and "<< plugin.after << " after)" << std::endl;
     	ret = -1;
     } else {
     	for(auto &x: expectedFailures) {

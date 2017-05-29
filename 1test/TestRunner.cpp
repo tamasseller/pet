@@ -29,9 +29,11 @@ namespace pet {
 
 static jmp_buf jmpBuff;
 
+LinkedList<TestPlugin> TestRunner::plugins;
 TestInterface* TestRunner::currentTest;
 TestOutput* TestRunner::output;
 bool TestRunner::isSynthetic;
+
 
 int TestRunner::runAllTests(TestOutput* output)
 {
@@ -46,8 +48,16 @@ int TestRunner::runAllTests(TestOutput* output)
 
 	        if(setjmp(jmpBuff))
 	            failed++;
-	        else
-	            currentTest->runTest();
+	        else {
+	        	for(auto pluginIt = plugins.iterator(); pluginIt.current(); pluginIt.step())
+	        		pluginIt.current()->beforeTest();
+
+	        	currentTest->runTest();
+
+	        }
+        	for(auto pluginIt = plugins.iterator(); pluginIt.current(); pluginIt.step())
+        		pluginIt.current()->afterTest();
+
 
             output->reportProgress();
 
@@ -72,6 +82,11 @@ int TestRunner::runAllTests(TestOutput* output)
     output->reportFinal(run, failed, synthetic);
     return failed ? -1 : 0;
 }
+
+bool TestRunner::installPlugin(TestPlugin* plugin) {
+	return plugins.add(plugin);
+}
+
 
 void TestRunner::failTestAlways(const char* sourceInfo, const char* text)
 {

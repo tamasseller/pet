@@ -21,6 +21,7 @@
 #define TESTRUNNER_H_
 
 #include "TestInterface.h"
+#include "TestPlugin.h"
 #include "TraceOutput.h"
 
 namespace pet {
@@ -32,7 +33,10 @@ class TestRunner {
 	static TestInterface* currentTest;
 	static TestOutput* output;
 	static bool isSynthetic;
+	static LinkedList<TestPlugin> plugins;
 public:
+	static bool installPlugin(TestPlugin*);
+
 	static int runAllTests(TestOutput* output = &TraceOutput::instance);
 	static inline TestInterface* getCurrentTest();
 
