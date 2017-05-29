@@ -73,10 +73,28 @@ int TestRunner::runAllTests(TestOutput* output)
     return failed ? -1 : 0;
 }
 
-void TestRunner::failTest(const char* srcInfo, const char* text)
+void TestRunner::failTestAlways(const char* sourceInfo, const char* text)
 {
-	output->reportTestFailure(isSynthetic, currentTest->getName(), currentTest->getSourceInfo(), srcInfo, text);
-	longjmp(jmpBuff,1);
+    output->reportTestFailure(isSynthetic, currentTest->getName(), currentTest->getSourceInfo(), sourceInfo, text);
+    longjmp(jmpBuff,1);
+}
+
+void TestRunner::failTest(const char* sourceInfo, const char* text)
+{
+    if(!isSynthetic)
+        failTestAlways(sourceInfo, text);
+}
+
+void TestRunner::checkExpectationAlways(bool condition, const char* sourceInfo, const char* text)
+{
+    if(!condition)
+        failTestAlways(sourceInfo, text);
+}
+
+void TestRunner::checkExpectation(bool condition, const char* sourceInfo, const char* text)
+{
+    if(!condition)
+        failTest(sourceInfo, text);
 }
 
 }

@@ -34,19 +34,18 @@ class TestRunner {
 	static bool isSynthetic;
 public:
 	static int runAllTests(TestOutput* output = &TraceOutput::instance);
-	static void failTest(const char* sourceInfo, const char* text);
 	static inline TestInterface* getCurrentTest();
-	static inline bool isCurrentTestSynthetic();
+
+    static void failTest(const char* sourceInfo, const char* text);
+    static void failTestAlways(const char* sourceInfo, const char* text);
+    static void checkExpectation(bool condition, const char* sourceInfo, const char* text);
+    static void checkExpectationAlways(bool condition, const char* sourceInfo, const char* text);
 };
 
 ////////////////////////////////////////////////////////////////
 
 inline TestInterface* TestRunner::getCurrentTest() {
     return currentTest;
-}
-
-inline bool TestRunner::isCurrentTestSynthetic() {
-    return isSynthetic;
 }
 
 }

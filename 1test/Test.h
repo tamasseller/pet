@@ -28,12 +28,12 @@
 
 #define TEST(...)           VAR_ARG_MACRO(TEST, ##__VA_ARGS__)
 
-#define FAIL_ALWAYS(text)   pet::TestRunner::failTest(INTERNAL_AT(), text)
-#define FAIL(text)          { if(!pet::TestRunner::isCurrentTestSynthetic()) FAIL_ALWAYS(text); }
+#define FAIL(text)          pet::TestRunner::failTest(INTERNAL_AT(), text)
+#define FAIL_ALWAYS(text)   pet::TestRunner::failTestAlways(INTERNAL_AT(), text)
 
-#define FAIL_EXPECT(x)   FAIL_ALWAYS("Expectation: '" INTERNAL_STRINGIFY(x) "' failed")
-#define CHECK_ALWAYS(x)     { if(!(x)) FAIL_EXPECT(x); }
-#define CHECK(x)            { if(!(x) && !pet::TestRunner::isCurrentTestSynthetic()) FAIL_EXPECT(x); }
+#define CHECK_FAIL_TEXT(x)  ("Expectation: '" INTERNAL_STRINGIFY(x) "' failed")
+#define CHECK(x)            pet::TestRunner::checkExpectation(x, INTERNAL_AT(), CHECK_FAIL_TEXT(x))
+#define CHECK_ALWAYS(x)     pet::TestRunner::checkExpectationAlways(x, INTERNAL_AT(), CHECK_FAIL_TEXT(x))
 
 #define TEST_SETUP()        inline void testSetup()
 #define TEST_TEARDOWN()     inline void testTeardown()
@@ -71,7 +71,8 @@ struct INTERNAL_TEST_CLASS_NAME(name, group):                                   
 																						\
 	virtual void runTest()																\
 	{																					\
-	    TestBase::instance.dummy();                                                     \
+	    typedef INTERNAL_TEST_CLASS_NAME(name, group)::TestBase Base;                   \
+        Base::instance.Base::dummy();                                                   \
         run();                                                                          \
 	}																					\
 };																						\
