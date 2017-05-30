@@ -29,6 +29,12 @@ namespace {
     class Class1;
     class Class2;
 
+    template<class> struct Template1 {static constexpr int n = 1;};
+    template<class> struct Template2 {static constexpr int n = 2;};
+    template<class> struct Template3 {static constexpr int n = 3;};
+	template<class, class> struct IrregularTemplate {static constexpr const char* other = "4";};
+
+
     template<int x>
     struct V1: public ConfigValue<int, V1, x> {};
 
@@ -47,6 +53,15 @@ namespace {
     template<class Type>
     struct T3: public ConfigType<T3, Type> {};
 
+    template<template<class...> class Template>
+    struct X1: public ConfigTemplate<X1, Template> {};
+
+    template<template<class...> class Template>
+    struct X2: public ConfigTemplate<X2, Template> {};
+
+    template<template<class...> class Template>
+    struct X3: public ConfigTemplate<X3, Template> {};
+
     template<class... Args>
     struct Configurable {
             static constexpr auto v1 = V1<1>::extract<Args...>::value;
@@ -55,6 +70,15 @@ namespace {
             using t1 = typename T1<void>::extract<Args...>::type;
             using t2 = typename T2<char>::extract<Args...>::type;
             using t3 = typename T3<Class1>::extract<Args...>::type;
+
+            template<class... X>
+            using x1 = typename X1<Template1>::extract<Args...>::template typeTemplate<X...>;
+
+            template<class... X>
+            using x2 = typename X2<Template2>::extract<Args...>::template typeTemplate<X...>;
+
+            template<class... X>
+            using x3 = typename X3<Template3>::extract<Args...>::template typeTemplate<X...>;
     };
 
     template<class A, class B> struct TypeEquals {
@@ -64,6 +88,15 @@ namespace {
     template<class A> struct TypeEquals<A, A> {
         static constexpr bool value = true;
     };
+
+    template<template<class...> class A, template<class...> class B> struct TemplateEquals {
+        static constexpr bool value = false;
+    };
+
+    template<template<class...> class A> struct TemplateEquals<A, A> {
+        static constexpr bool value = true;
+    };
+
 }
 
 TEST_GROUP(MetaConfiguration){};
@@ -89,10 +122,14 @@ TEST(MetaConfiguration, Sanity) {
     typedef Configurable<> C1;
     typedef Configurable<V1<-1>> C2;
     typedef Configurable<T1<int>> C3;
+    typedef Configurable<X1<Template2>> C4;
     CHECK(C1::v1 == 1);
     CHECK(C2::v1 == -1);
     CHECK(TypeEquals<C1::t1, void>::value);
     CHECK(TypeEquals<C3::t1, int>::value);
+    CHECK(C1::x1<int>::n == 1);
+    CHECK(C4::x1<int>::n == 2);
+
 }
 
 TEST(MetaConfiguration, MultiValue) {
@@ -131,4 +168,27 @@ TEST(MetaConfiguration, MultiType) {
     CHECK(TypeEquals<C1::t3, Class1>::value);
     CHECK(TypeEquals<C2::t3, const volatile char*>::value);
     CHECK(TypeEquals<C3::t3, void*>::value);
+}
+
+TEST(MetaConfiguration, MultiTemplate) {
+    typedef Configurable<X1<Template2>, X2<Template3>> C1;
+    typedef Configurable<X3<Template1>, X1<Template3>> C2;
+    typedef Configurable<X2<Template1>, X3<Template2>> C3;
+
+    CHECK(C1::x1<int>::n == 2);
+    CHECK(C2::x1<int>::n == 3);
+    CHECK(C3::x1<int>::n == 1);
+
+    CHECK(C1::x2<int>::n == 3);
+    CHECK(C2::x2<int>::n == 2);
+    CHECK(C3::x2<int>::n == 1);
+
+    CHECK(C1::x3<int>::n == 3);
+    CHECK(C2::x3<int>::n == 1);
+    CHECK(C3::x3<int>::n == 2);
+}
+
+TEST(MetaConfiguration, TemplateAdditional) {
+	const char *c = Configurable<X1<IrregularTemplate>>::x1<int, void>::other;
+    CHECK(*c == '4');
 }

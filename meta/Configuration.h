@@ -44,6 +44,8 @@ struct ValueExtractor<Value, I, Args...> {
     static constexpr auto value = ValueTagChecker<Value, typename Value::Tag, typename I::Tag, I, Args...>::value;
 };
 
+template<class Value, template <Value> class > struct ValueTagger;
+
 template<class Type, class... Args>
 struct TypeExtractor {};
 
@@ -67,6 +69,42 @@ struct TypeExtractor<Type, I, Args...> {
     using type = typename TypeTagChecker<Type, typename Type::Tag, typename I::Tag, I, Args...>::type;
 };
 
+template<template <class> class > struct TypeTagger;
+
+
+template<class Template, class... Args>
+struct TemplateExtractor {
+	template<class... X>
+	using typeTemplate = typename Template::template typeTemplate<X...>;
+};
+
+template<class Template>
+struct TemplateExtractor<Template> {
+	template<class... X>
+    using typeTemplate = typename Template::template typeTemplate<X...>;
+};
+
+template<class Template, class Expected, class Comparable, class Current, class... Args>
+struct TemplateTagChecker {
+	template<class... X>
+    using typeTemplate = typename TemplateExtractor<Template, Args...>::template typeTemplate<X...>;
+};
+
+template<class Template, class Expected, class Current, class... Args>
+struct TemplateTagChecker<Template, Expected, Expected, Current, Args...> {
+	template<class... X>
+    using typeTemplate = typename Current::template typeTemplate<X...>;
+};
+
+template<class Template, class I, class... Args>
+struct TemplateExtractor<Template, I, Args...> {
+	template<class... X>
+    using typeTemplate = typename TemplateTagChecker<Template, typename Template::Tag, typename I::Tag, I, Args...>::template typeTemplate<X...>;
+};
+
+template<template <template <class...> class> class > struct TemplateTagger;
+
+
 }
 
 template<class InputType, template<InputType> class InputTag, InputType inputValue>
@@ -79,8 +117,7 @@ struct ConfigValue {
                 typedef InputType Type;
                 static constexpr Type value = inputValue;
 
-                static constexpr InputType zero = 0;
-                typedef InputTag<zero> Tag;
+                typedef detail::ValueTagger<InputType, InputTag> Tag;
 
 
             public:
@@ -95,9 +132,28 @@ class ConfigType {
         template<class, class...> friend struct detail::TypeExtractor;
         template<class, class, class, class...> friend struct detail::TypeTagChecker;
         typedef InputType type;
-        typedef InputTag<void> Tag;
+
+        typedef detail::TypeTagger<InputTag> Tag;
     public:
         template<class... Args>
         using extract = typename detail::TypeExtractor<ConfigType, Args...>;
+};
+
+template<template<template<class...> class > class InputTag, template<class...> class InputType>
+class ConfigTemplate {
+        template<class, class...> friend struct detail::ValueExtractor;
+        template<class, class, class, class...> friend struct detail::ValueTagChecker;
+        template<class, class...> friend struct detail::TypeExtractor;
+        template<class, class, class, class...> friend struct detail::TypeTagChecker;
+        template<class, class...> friend struct detail::TemplateExtractor;
+        template<class, class, class, class...> friend struct detail::TemplateTagChecker;
+
+		template<class... X>
+        using typeTemplate = InputType<X...>;
+
+        typedef detail::TemplateTagger<InputTag> Tag;
+    public:
+        template<class... Args>
+        using extract = typename detail::TemplateExtractor<ConfigTemplate, Args...>;
 };
 }
