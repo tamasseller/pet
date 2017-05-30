@@ -20,6 +20,7 @@
 #include "1test/Test.h"
 
 #include "meta/Configuration.h"
+#include "meta/TypeWrappers.h"
 
 using namespace pet;
 
@@ -33,6 +34,9 @@ namespace {
     template<class> struct Template2 {static constexpr int n = 2;};
     template<class> struct Template3 {static constexpr int n = 3;};
 	template<class, class> struct IrregularTemplate {static constexpr const char* other = "4";};
+	template<class X> struct Unwrap{static constexpr auto value = X::value;};
+	template<class X, class Y> struct Adder{static constexpr auto value = X() + Y();};
+	template<class X> struct Negate{static constexpr auto value = !X();};
 
 
     template<int x>
@@ -191,4 +195,11 @@ TEST(MetaConfiguration, MultiTemplate) {
 TEST(MetaConfiguration, TemplateAdditional) {
 	const char *c = Configurable<X1<IrregularTemplate>>::x1<int, void>::other;
     CHECK(*c == '4');
+
+    CHECK(Configurable<X1<Unwrap>>::x1<Value<int, 42>>::value == 42);
+
+    CHECK(Configurable<X1<Adder>>::x1<Value<int, 2>, Value<int, 3>>::value == 5);
+
+    CHECK(Configurable<X1<Negate>>::x1<True>::value == false);
+    CHECK(Configurable<X1<Negate>>::x1<False>::value == true);
 }
