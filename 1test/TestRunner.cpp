@@ -23,7 +23,7 @@
 #include "Mock.h"
 #include "FailureInjector.h"
 
-#include <setjmp.h>
+#include "setjmp.h" // Intentionally not <setjmp.h> !
 
 namespace pet {
 
