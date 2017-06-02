@@ -190,14 +190,15 @@ template<class Element>
 inline void DoubleList<Element>::insertBefore(Element* elem, Iterator at) {
 	if(at.current()) {
 		Element* &prevsNext = (at.current()->prev) ? at.current()->prev->next : first;
+		Element* prev = (at.current()->prev) ? at.current()->prev : nullptr;
+
 		prevsNext = elem;
 		at.current()->prev = elem;
 
-		Element* prev = (at.current()->prev) ? at.current()->prev : nullptr;
 		elem->prev = prev;
 		elem->next = at.current();
 	} else
-		this->addBack(elem);
+		this->fastAddBack(elem);
 }
 
 template<class Element>
