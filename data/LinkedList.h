@@ -154,8 +154,7 @@ public:
 	/**
 	 * Remove all elements.
 	 */
-	inline bool isEmpty();
-
+	inline bool isEmpty() const;
 
 	/**
 	 * Get an all through iterator.
@@ -214,7 +213,7 @@ inline void LinkedList<Element>::clear() {
 }
 
 template<class Element>
-inline bool LinkedList<Element>::isEmpty() {
+inline bool LinkedList<Element>::isEmpty() const {
 	return first == nullptr;
 }
 

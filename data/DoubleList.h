@@ -62,10 +62,10 @@ public:
 		really inline void step();
 	};
 
-	really inline bool contains(Element* elem);
+	really inline bool contains(Element* elem) const;
 
 	/** @copydoc LinkedList::iterator */
-	really inline Iterator iterator();
+	really inline Iterator iterator() const;
 
 	/** @copydoc LinkedList::add */
 	inline bool addFront(Element* elem);
@@ -83,8 +83,8 @@ public:
 
 	inline void insertBefore(Element* elem, Iterator at);
 
-	inline Element* front();
-	inline Element* back();
+	inline Element* front() const;
+	inline Element* back() const;
 
 	inline Element* popFront();
 	inline Element* popBack();
@@ -104,7 +104,7 @@ public:
 };
 
 template<class Element>
-really inline bool DoubleList<Element>::contains(Element* elem)
+really inline bool DoubleList<Element>::contains(Element* elem) const
 {
     for(Iterator it=iterator(); it.current(); it.step())
         if(it.current() == elem)
@@ -202,7 +202,7 @@ inline void DoubleList<Element>::insertBefore(Element* elem, Iterator at) {
 
 template<class Element>
 really inline typename DoubleList<Element>::Iterator
-DoubleList<Element>::iterator() {
+DoubleList<Element>::iterator() const {
 	return Iterator(first);
 }
 
@@ -223,13 +223,13 @@ really inline void DoubleList<Element>::Iterator::step()
 }
 
 template<class Element>
-inline Element* DoubleList<Element>::front()
+inline Element* DoubleList<Element>::front() const
 {
 	return first;
 }
 
 template<class Element>
-inline Element* DoubleList<Element>::back()
+inline Element* DoubleList<Element>::back() const
 {
 	return last;
 }
