@@ -48,6 +48,8 @@ public:
 	inline Element* highest();
 	inline Element* popLowest();
 	inline Element* popHighest();
+
+	using DoubleList<Element>::contains;
 };
 
 template<class Element, bool (*compare)(const Element&, const Element&)>
