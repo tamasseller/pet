@@ -20,6 +20,29 @@
 #ifndef COMPILER_H_
 #define COMPILER_H_
 
+#if defined (__GNUC__) && (__ARM_ARCH == 7)
+#define clz __builtin_clz
+#else
+static inline unsigned int clz(unsigned int data) {
+	unsigned int shift, value, count = 31;
+
+	if (data == 0)
+		return 32;
+
+	for (shift = 16; shift; shift >>= 1) {
+		value = data >> shift;
+
+		if (value) {
+			data = value;
+			count = count - shift;
+		}
+	}
+
+	return count;
+}
+#endif
+
+
 #define	really __attribute__((always_inline))
 
 #endif /* COMPILER_H_ */

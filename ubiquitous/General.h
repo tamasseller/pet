@@ -20,32 +20,6 @@
 #ifndef GENERAL_H_
 #define GENERAL_H_
 
-// GCC
-#if 1
-#define clz __builtin_clz
-#else
-// not tested, from https://community.arm.com/thread/6400
-unsigned int clz(unsigned int data) {
-	unsigned int shift, value, count = 31;
-
-	if (data == 0)
-		return 32;
-
-	for (shift = 16; shift; shift >>= 1) {
-		value = data >> shift;
-
-		if (value) {
-			data = value;
-			count = count - shift;
-		}
-	}
-
-	return count;
-}
-#endif
-
-
-
 struct General {
 	constexpr inline static unsigned int log2floorConst(const unsigned int x) {
 		return ((x==0)?
