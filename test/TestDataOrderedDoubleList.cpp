@@ -51,6 +51,18 @@ TEST_GROUP(OrderedDoubleList) {
 		}
 		CHECK(!it.current());
 	}
+
+	template<class... T>
+	void expectPointers(T... expected) {
+		const Element* ptrs[] = {expected...};
+		auto it = list.iterator();
+		for(int i = 0; i<sizeof... (expected); i++) {
+			CHECK(it.current() == ptrs[i]);
+			it.step();
+		}
+		CHECK(!it.current());
+	}
+
 };
 
 TEST(OrderedDoubleList, OrderedOperations)
@@ -153,3 +165,25 @@ TEST(OrderedDoubleList, NonOrderedOperations)
 	expect();
 }
 
+TEST(OrderedDoubleList, EqualElements)
+{
+	Element a(1), b(2), c(2), d(3), e(3), f(3);
+
+	list.add(&c);
+	list.add(&e);
+	list.add(&f);
+
+	expectPointers(&c, &e, &f);
+
+	list.add(&a);
+
+	expectPointers(&a, &c, &e, &f);
+
+	list.add(&b);
+
+	expectPointers(&a, &c, &b, &e, &f);
+
+	list.add(&d);
+
+	expectPointers(&a, &c, &b, &e, &f, &d);
+}

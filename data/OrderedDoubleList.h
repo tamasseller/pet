@@ -56,10 +56,14 @@ template<class Element, bool (*compare)(const Element&, const Element&)>
 void OrderedDoubleList<Element, compare>::add(Element* elem) {
 	typename DoubleList<Element>::Iterator it = this->iterator();
 
-	while(it.current() && compare(*it.current(), *elem))
-		it.step();
+	if(!highest() || !compare(*elem, *highest()))
+		addHighest(elem);
+	else {
+		while(it.current() && !compare(*elem, *it.current()))
+			it.step();
 
-	this->insertBefore(elem, it);
+		this->insertBefore(elem, it);
+	}
 }
 
 template<class Element, bool (*compare)(const Element&, const Element&)>
