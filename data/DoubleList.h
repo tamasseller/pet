@@ -166,8 +166,8 @@ really inline void DoubleList<Element>::fastAddBack(Element* elem)
 template<class Element>
 really inline void DoubleList<Element>::fastRemove(Element* elem)
 {
-    Element *& prevsNext = (elem->prev) ? elem->prev->next : first;
-    Element *& nextsPrev = (elem->next) ? elem->next->prev : last;
+    auto& prevsNext = (elem->prev) ? elem->prev->next : first;
+    auto& nextsPrev = (elem->next) ? elem->next->prev : last;
 
     prevsNext = elem->next;
     nextsPrev = elem->prev;
@@ -189,8 +189,8 @@ inline bool DoubleList<Element>::remove(Element* elem)
 template<class Element>
 inline void DoubleList<Element>::insertBefore(Element* elem, Iterator at) {
 	if(at.current()) {
-		Element* &prevsNext = (at.current()->prev) ? at.current()->prev->next : first;
-		Element* prev = (at.current()->prev) ? at.current()->prev : nullptr;
+		auto& prevsNext = (at.current()->prev) ? at.current()->prev->next : first;
+		auto prev = (at.current()->prev) ? at.current()->prev : nullptr;
 
 		prevsNext = elem;
 		at.current()->prev = elem;
