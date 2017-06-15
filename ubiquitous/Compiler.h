@@ -23,13 +23,15 @@
 #if defined (__GNUC__) && (__ARM_ARCH == 7)
 #define clz __builtin_clz
 #else
-static inline unsigned int clz(unsigned int data) {
-	unsigned int shift, value, count = 31;
+template<typename Type>
+static inline unsigned int clz(Type data) {
+	static constexpr unsigned int bits = sizeof(data) * 8;
+	unsigned int shift, value, count = bits - 1;
 
 	if (data == 0)
-		return 32;
+		return bits;
 
-	for (shift = 16; shift; shift >>= 1) {
+	for (shift = bits / 2; shift; shift /= 2) {
 		value = data >> shift;
 
 		if (value) {

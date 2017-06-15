@@ -38,7 +38,7 @@ bool TestRunner::isSynthetic;
 int TestRunner::runAllTests(TestOutput* output)
 {
 	TestRunner::output = output;
-	unsigned int run = 0, failed = 0, synthetic = 0;
+	volatile unsigned int run = 0, failed = 0, synthetic = 0;
 
 	for(auto it = Registry<TestInterface>::iterator(); it.current(); it.step()) {
 	    isSynthetic = false;

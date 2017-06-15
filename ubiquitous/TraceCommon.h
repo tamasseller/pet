@@ -76,7 +76,7 @@ __TRACE_POLICY(X, Y, TracePolicy);					\
 namespace NS {class X;}								\
 __TRACE_POLICY(NS::X, Y, TracePolicy);
 
-#define GLOBAL_TRACE_POLICY(Y) __TRACE_POLICY(Global, Y, DefaultTracePolicy);
+#define GLOBAL_TRACE_POLICY(Y) __TRACE_POLICY(Global, Y, DefaultTracePolicy)
 
 /** @endcond */
 
