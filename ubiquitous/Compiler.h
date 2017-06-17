@@ -26,7 +26,8 @@
 template<typename Type>
 static inline unsigned int clz(Type data) {
 	static constexpr unsigned int bits = sizeof(data) * 8;
-	unsigned int shift, value, count = bits - 1;
+	unsigned int shift, count = bits - 1;
+	Type value;
 
 	if (data == 0)
 		return bits;
