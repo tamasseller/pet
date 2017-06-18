@@ -20,7 +20,8 @@
 #ifndef COMPILER_H_
 #define COMPILER_H_
 
-#if defined (__GNUC__) && (__ARM_ARCH == 7)
+#if defined (__GNUC__)
+#if (__ARM_ARCH == 7)
 #define clz __builtin_clz
 #else
 template<typename Type>
@@ -43,9 +44,11 @@ static inline unsigned int clz(Type data) {
 
 	return count;
 }
-#endif
+#endif // __ARM_ARCH == 7
 
+#define	really 		__attribute__((always_inline))
+#define section(x) 	__attribute((section(#x)))
 
-#define	really __attribute__((always_inline))
+#endif // __GNUC__
 
 #endif /* COMPILER_H_ */
