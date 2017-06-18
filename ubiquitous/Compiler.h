@@ -20,6 +20,7 @@
 #ifndef COMPILER_H_
 #define COMPILER_H_
 
-#define	really __attribute__((always_inline))
+#define	really 		__attribute__((always_inline))
+#define section(x) 	__attribute((section(#x)))
 
 #endif /* COMPILER_H_ */
