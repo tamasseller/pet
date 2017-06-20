@@ -222,6 +222,36 @@ struct Str {
 		return true;
 	}
 
+	template<unsigned int base>
+	static inline bool itoa(int x, char* output, unsigned int length)
+	{
+		if(x < 0) {
+			*output++ = '-';
+			length -= 1;
+			x = -x;
+		}
+
+		return utoa<base>(x, output, length);
+	}
+
+
+	template<unsigned int base>
+	static inline bool atoi(int &x, const char* input, unsigned int length)
+	{
+		bool invert = *input == '-';
+
+		if(*input == '+' || *input == '-') {
+			input++;
+			length--;
+		}
+
+		unsigned int ret;
+		if(!atou<base>(ret, input, length))
+			return false;
+
+		x = (invert ? -(int)ret : (int)ret);
+		return true;
+	}
 };
 
 }

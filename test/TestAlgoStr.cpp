@@ -331,12 +331,13 @@ TEST(Str, atou10) {
 TEST(Str, atou16) {
 	unsigned int x;
 
-	CHECK(Str::atou<16>(x, "1", 1));
+	CHECK(Str::atou<16>(x, "1Ff", 1));
 	CHECK(x == 1);
 
-	CHECK(Str::atou<16>(x, "1", 1000));
-	CHECK(x == 1);
+	CHECK(Str::atou<16>(x, "1Ff", 1000));
+	CHECK(x == 511);
 
+	CHECK(!Str::atou<16>(x, "", 1));
 	CHECK(!Str::atou<16>(x, "x", 1));
 	CHECK(!Str::atou<16>(x, "x", 1000));
 
@@ -348,4 +349,38 @@ TEST(Str, atou16) {
 
 	CHECK(Str::atou<16>(x, "400", 3));
 	CHECK(x == 1024);
+}
+
+TEST(Str, itoa) {
+	char temp[12];
+
+	CHECK(Str::itoa<10>(123, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "123") == 0);
+
+	CHECK(Str::itoa<10>(-345, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "-345") == 0);
+
+	CHECK(Str::itoa<16>(24589, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "600d") == 0);
+
+	CHECK(Str::itoa<16>(-24589, temp, sizeof(temp)));
+	CHECK(strcmp(temp, "-600d") == 0);
+}
+
+TEST(Str, atoi) {
+	int x;
+
+	CHECK(Str::atoi<10>(x, "+1", 10));
+	CHECK(x == 1);
+
+	CHECK(Str::atoi<10>(x, "-1", 10));
+	CHECK(x == -1);
+
+	CHECK(Str::atoi<10>(x, "+123", 10));
+	CHECK(x == 123);
+
+	CHECK(Str::atoi<10>(x, "-123", 10));
+	CHECK(x == -123);
+
+	CHECK(!Str::atoi<10>(x, "-frob", 10));
 }
