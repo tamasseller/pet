@@ -383,4 +383,8 @@ TEST(Str, atoi) {
 	CHECK(x == -123);
 
 	CHECK(!Str::atoi<10>(x, "-frob", 10));
+
+	x = 123;
+	CHECK(!Str::atoi<10>(x, "", 0));
+	CHECK(x == 123);
 }

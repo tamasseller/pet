@@ -65,7 +65,7 @@ protected:
 
 		Frame(Frame* f): prev(f), end(data){}
 
-		void* operator new(unsigned int s, void* self){
+		void* operator new(size_t s, void* self){
 			return self;
 		}
 	};

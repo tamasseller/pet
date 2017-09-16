@@ -147,7 +147,7 @@ private:
 	struct Frame{
 		Pool<ElementWrapper, countPerFrame> pool;
 
-		void* operator new(unsigned int s, void* self){
+		void* operator new(size_t s, void* self){
 			return self;
 		}
 
