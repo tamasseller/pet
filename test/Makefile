@@ -40,6 +40,7 @@ SOURCES += TestMetaExpRange.cpp
 SOURCES += TestMetaFieldAccessor.cpp
 SOURCES += TestMetaPacks.cpp
 SOURCES += TestMetaRange.cpp
+SOURCES += TestMetaSequence.cpp
 SOURCES += TestPoolArena.cpp
 SOURCES += TestPoolFifo.cpp
 SOURCES += TestPoolPool.cpp
