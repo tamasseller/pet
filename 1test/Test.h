@@ -27,6 +27,7 @@
 #include "Macro.h"
 
 #define TEST(...)               VAR_ARG_MACRO(TEST, ##__VA_ARGS__)
+#define IGNORE_TEST(...)        VAR_ARG_MACRO(IGNORE_TEST, ##__VA_ARGS__)
 
 #define FAIL(text)              pet::TestRunner::failTest(INTERNAL_AT(), text)
 #define FAIL_ALWAYS(text)       pet::TestRunner::failTestAlways(INTERNAL_AT(), text)
@@ -45,6 +46,10 @@ struct INTERNAL_TEST_GROUP_NAME(name): public pet::TestGroupBase
 
 #define TEST1(test)         INTERNAL_TEST(test, /* none */, _dummy_, "")
 #define TEST2(group, test)  INTERNAL_TEST(test, group, group, "@" INTERNAL_STRINGIFY(group))
+
+#define IGNORE_TEST1(test)         IGNORE_INTERNAL_TEST(test, /* none */, _dummy_)
+#define IGNORE_TEST2(group, test)  INTERNAL_IGNORE_TEST(test, group, group)
+
 
 #define TEST_CLASS_NAME_HELPER(name, group)     Test ## name ## In ## group ## Handle
 #define INTERNAL_TEST_CLASS_NAME(name, group)   TEST_CLASS_NAME_HELPER(name, group)
@@ -78,5 +83,15 @@ struct INTERNAL_TEST_CLASS_NAME(name, group):                                   
 };																						\
 																						\
 void INTERNAL_TEST_CLASS_NAME(name, group)::testBody() 								    \
+
+#define INTERNAL_IGNORE_TEST(name, group, parent)										\
+																						\
+struct INTERNAL_TEST_CLASS_NAME(name, group):                                           \
+    public INTERNAL_TEST_GROUP_NAME(parent) {           	                            \
+	void testBody();																	\
+};																						\
+																						\
+void INTERNAL_TEST_CLASS_NAME(name, group)::testBody() 								    \
+
 
 #endif /* TEST_H_ */
