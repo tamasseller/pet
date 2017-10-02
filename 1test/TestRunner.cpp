@@ -61,8 +61,9 @@ int TestRunner::runAllTests(TestOutput* output)
 
             output->reportProgress();
 
-            if(!isSynthetic)
+            if(!isSynthetic) {
                 FailureInjector::firstRunDone();
+            }
 
 	        if(!FailureInjector::hasMore())
 	            break;
