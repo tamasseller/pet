@@ -65,6 +65,8 @@ class ExpectPool {
         template<uintptr_t hash>
         friend class Mock;
 
+        static_assert(size <= 32767, "Pool size too big (max 32767)");
+
         template<class >
         friend class TestBase;
 
@@ -125,8 +127,9 @@ uint16_t ExpectPool<size>::readIdx = 0;
 template<uint16_t size>
 inline bool ExpectPool<size>::expect(uintptr_t value)
 {
-    if (writeIdx < size) {
-        pool[writeIdx++] = value;
+    if (writeIdx != (readIdx + size) % (2 * size)) {
+        pool[writeIdx % size] = value;
+        writeIdx = (writeIdx + 1) % (2 * size);
         return true;
     } else
         return false;
@@ -135,8 +138,10 @@ inline bool ExpectPool<size>::expect(uintptr_t value)
 template<uint16_t size>
 inline bool ExpectPool<size>::call(uintptr_t value)
 {
-    if (readIdx < writeIdx) {
-        return pool[readIdx++] == value;
+    if (readIdx != writeIdx) {
+        bool ret = pool[readIdx % size] == value;
+        readIdx = (readIdx + 1) % (2 * size);
+        return ret;
     } else
         return false;
 }

@@ -40,7 +40,7 @@ struct FailureRecord {
 	}
 
 	bool operator ==(const FailureRecord& other) const {
-		return sourceInfo + testName + failureSourceInfo == other.sourceInfo + other.testName + other.failureSourceInfo;
+		return sourceInfo + testName + failureSourceInfo + text == other.sourceInfo + other.testName + other.failureSourceInfo + other.text;
 	}
 };
 
@@ -50,7 +50,7 @@ struct FailureRecord {
 
 bool printActualFailureRecords = false;
 
-int normalExpected = 37;
+int normalExpected = 39;
 int syntheticExpected = 6;
 
 std::list<FailureRecord> expectedFailures{
@@ -60,19 +60,20 @@ std::list<FailureRecord> expectedFailures{
     FailureRecord("NonEmptyMessageFailure", "TestNoGroup.cpp:37", "TestNoGroup.cpp:38", "NonEmpty"),
     FailureRecord("EmptyMessageFailure", "TestNoGroup.cpp:33", "TestNoGroup.cpp:34", ""),
     FailureRecord("CheckFalse", "TestNoGroup.cpp:29", "TestNoGroup.cpp:30", "Expectation: 'false' failed"),
-    FailureRecord("DisabledIndependentUnexpected@Mock", "TestMock.cpp:163", "--- Finalization ---", "Mock - unmet expectations"),
-    FailureRecord("ParamsPointerWrong@Mock", "TestMock.cpp:146", "TestMock.cpp:149", "Mock - pointer parameter error"),
-    FailureRecord("ParamsDataWrongLength@Mock", "TestMock.cpp:132", "TestMock.cpp:136", "Mock - data block parameter error"),
-    FailureRecord("ParamsDataWrong@Mock", "TestMock.cpp:124", "TestMock.cpp:128", "Mock - data block parameter error"),
-    FailureRecord("ParamsStringWrong@Mock", "TestMock.cpp:103", "TestMock.cpp:107", "Mock - string parameter error"),
-    FailureRecord("ParamsWrong@Mock", "TestMock.cpp:91", "TestMock.cpp:93", "Mock - parameter error"),
-    FailureRecord("ParamsNoParamConsumed@Mock", "TestMock.cpp:81", "--- Finalization ---", "Mock - unmet expectations"),
-    FailureRecord("ParamsNoParamExpected@Mock", "TestMock.cpp:76", "TestMock.cpp:78", "Mock - parameter error"),
-    FailureRecord("IndependentSourcesFail@Mock", "TestMock.cpp:66", "TestMock.cpp:68", "Mock - unexpected call"),
-    FailureRecord("Unexpected@Mock", "TestMock.cpp:54", "TestMock.cpp:55", "Mock - unexpected call"),
-    FailureRecord("WrongOrder@Mock", "TestMock.cpp:48", "TestMock.cpp:51", "Mock - unexpected call"),
-    FailureRecord("MultipleIncomplete@Mock", "TestMock.cpp:42", "--- Finalization ---", "Mock - unmet expectations"),
-    FailureRecord("Incomplete@Mock", "TestMock.cpp:31", "--- Finalization ---", "Mock - unmet expectations"),
+    FailureRecord("CapacityOverload@Mock", "TestMock.cpp:166", "TestMock.cpp:168", "Mock - pool is full"),
+    FailureRecord("DisabledIndependentUnexpected@Mock", "TestMock.cpp:160", "--- Finalization ---", "Mock - unmet expectations"),
+    FailureRecord("ParamsPointerWrong@Mock", "TestMock.cpp:143", "TestMock.cpp:146", "Mock - pointer parameter error"),
+    FailureRecord("ParamsDataWrongLength@Mock", "TestMock.cpp:130", "TestMock.cpp:134", "Mock - data block parameter error"),
+    FailureRecord("ParamsDataWrong@Mock", "TestMock.cpp:123", "TestMock.cpp:127", "Mock - data block parameter error"),
+    FailureRecord("ParamsStringWrong@Mock", "TestMock.cpp:102", "TestMock.cpp:106", "Mock - string parameter error"),
+    FailureRecord("ParamsWrong@Mock", "TestMock.cpp:90", "TestMock.cpp:92", "Mock - parameter error"),
+    FailureRecord("ParamsNoParamConsumed@Mock", "TestMock.cpp:80", "--- Finalization ---", "Mock - unmet expectations"),
+    FailureRecord("ParamsNoParamExpected@Mock", "TestMock.cpp:75", "TestMock.cpp:77", "Mock - parameter error"),
+    FailureRecord("IndependentSourcesFail@Mock", "TestMock.cpp:65", "TestMock.cpp:67", "Mock - unexpected call"),
+    FailureRecord("Unexpected@Mock", "TestMock.cpp:53", "TestMock.cpp:54", "Mock - unexpected call"),
+    FailureRecord("WrongOrder@Mock", "TestMock.cpp:47", "TestMock.cpp:50", "Mock - unexpected call"),
+    FailureRecord("MultipleIncomplete@Mock", "TestMock.cpp:41", "--- Finalization ---", "Mock - unmet expectations"),
+    FailureRecord("Incomplete@Mock", "TestMock.cpp:30", "--- Finalization ---", "Mock - unmet expectations"),
     FailureRecord("SetupNotOk@OtherGroup", "TestGroups.cpp:60", "TestGroups.cpp:56", "User message"),
     FailureRecord("BodyNotOk@Group", "TestGroups.cpp:47", "TestGroups.cpp:28", "Expectation: 'ok' failed"),
     FailureRecord("TeardownNotOk@Group", "TestGroups.cpp:44", "TestGroups.cpp:28", "Expectation: 'ok' failed")
@@ -177,7 +178,7 @@ int main(int ac, char** av)
                 } else if((*y).failureSourceInfo != x.failureSourceInfo) {
                     std::cerr << "failure location (expected " << x.failureSourceInfo << " got " << (*y).failureSourceInfo << ")";
                 } else if((*y).text != x.text) {
-                    std::cerr << "message (expected " << x.text << " got " << (*y).text << ")";
+                    std::cerr << "message (expected '" << x.text << "' got '" << (*y).text << "')";
                 }
 
     		    std::cerr << " for test " << x.testName << std::endl;

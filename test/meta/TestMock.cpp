@@ -17,7 +17,6 @@
  *
  *******************************************************************************/
 
-
 #include "1test/Test.h"
 #include "1test/Mock.h"
 
@@ -126,7 +125,6 @@ TEST(Mock, ParamsDataWrong) {
     unsigned char data2[] = {0xba, 0xad};
     MOCK(params)::EXPECT(method).withParam(data1, sizeof(data1));
     MOCK(params)::CALL(method).withParam(data2, sizeof(data2));
-
 }
 
 TEST(Mock, ParamsDataWrongLength) {
@@ -134,7 +132,6 @@ TEST(Mock, ParamsDataWrongLength) {
     unsigned char data2[] = {0xda, 0x7a, 0xba, 0xad};
     MOCK(params)::EXPECT(method).withParam(data1, sizeof(data1));
     MOCK(params)::CALL(method).withParam(data2, sizeof(data2));
-
 }
 
 TEST(Mock, ParamsPointer) {
@@ -163,6 +160,17 @@ TEST(Mock, ReenablingTriggersNoError) {
 TEST(Mock, DisabledIndependentUnexpected) {
     MOCK(disabled)::disable();
     MOCK(disabled)::EXPECT(method);
-
     MOCK(enabled)::EXPECT(method);
+}
+
+TEST(Mock, CapacityOverload) {
+    for(int i = 0; i < EXPECT_POOL_SIZE + 1; i++)
+        MOCK(capacity)::EXPECT(method);
+}
+
+TEST(Mock, CapacityWrapparoud) {
+    for(int i = 0; i < 13 * EXPECT_POOL_SIZE; i++) {
+        MOCK(capacity)::EXPECT(method);
+        MOCK(capacity)::CALL(method);
+    }
 }
