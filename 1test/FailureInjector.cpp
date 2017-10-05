@@ -24,6 +24,4 @@ using namespace pet;
 int FailureInjector::max;
 int FailureInjector::counter;
 int FailureInjector::failAt;
-
-
-
+bool FailureInjector::enabled;

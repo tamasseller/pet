@@ -37,3 +37,7 @@ TEST(EmptyMessageFailure) {
 TEST(NonEmptyMessageFailure) {
     FAIL("NonEmpty");
 }
+
+TEST(CheckWithText) {
+    CHECK("Message can be hacked here", true == false);
+}

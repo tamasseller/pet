@@ -48,15 +48,16 @@ struct FailureRecord {
 ////
 ////
 
-bool printActualFailureRecords = false;
+bool printActualFailureRecords = false; // true;
 
-int normalExpected = 39;
-int syntheticExpected = 6;
+int normalExpected = 41;
+int syntheticExpected = 7;
 
 std::list<FailureRecord> expectedFailures{
     FailureRecord("CheckAlways@FailureInjector", "TestFailureInjector.cpp:43", "TestFailureInjector.cpp:45", "Expectation: 'false' failed"),
     FailureRecord("CheckAlways@FailureInjector", "TestFailureInjector.cpp:43", "TestFailureInjector.cpp:45", "Expectation: 'false' failed"),
     FailureRecord("Check@FailureInjector", "TestFailureInjector.cpp:39", "TestFailureInjector.cpp:40", "Expectation: 'FailureInjector::shouldSimulateError()' failed"),
+    FailureRecord("CheckWithText", "TestNoGroup.cpp:41", "TestNoGroup.cpp:42", "Expectation: '\"Message can be hacked here\", true == false' failed"),
     FailureRecord("NonEmptyMessageFailure", "TestNoGroup.cpp:37", "TestNoGroup.cpp:38", "NonEmpty"),
     FailureRecord("EmptyMessageFailure", "TestNoGroup.cpp:33", "TestNoGroup.cpp:34", ""),
     FailureRecord("CheckFalse", "TestNoGroup.cpp:29", "TestNoGroup.cpp:30", "Expectation: 'false' failed"),

@@ -44,3 +44,14 @@ TEST(FailureInjector, CheckAlways) {
     FailureInjector::shouldSimulateError();
     CHECK_ALWAYS(false);
 }
+
+TEST(FailureInjector, OnOff) {
+	FailureInjector::disable();
+    FailureInjector::shouldSimulateError();
+
+    FailureInjector::enable();
+    FailureInjector::shouldSimulateError();
+
+    FailureInjector::disable();
+    FailureInjector::shouldSimulateError();
+}
