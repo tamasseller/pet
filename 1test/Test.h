@@ -50,7 +50,6 @@ struct INTERNAL_TEST_GROUP_NAME(name): public pet::TestGroupBase
 #define IGNORE_TEST1(test)         IGNORE_INTERNAL_TEST(test, /* none */, _dummy_)
 #define IGNORE_TEST2(group, test)  INTERNAL_IGNORE_TEST(test, group, group)
 
-
 #define TEST_CLASS_NAME_HELPER(name, group)     Test ## name ## In ## group ## Handle
 #define INTERNAL_TEST_CLASS_NAME(name, group)   TEST_CLASS_NAME_HELPER(name, group)
 
@@ -62,8 +61,9 @@ TEST_GROUP(_dummy_) {};
 #define INTERNAL_TEST(name, group, parent, gName)    							        \
 																						\
 struct INTERNAL_TEST_CLASS_NAME(name, group):                                           \
-    public pet::TestBase<INTERNAL_TEST_CLASS_NAME(name, group)>,                        \
+    public pet::TestBase<INTERNAL_TEST_CLASS_NAME(name, group)>,						\
     public INTERNAL_TEST_GROUP_NAME(parent) {           	                            \
+	typedef INTERNAL_TEST_GROUP_NAME(parent) Group;										\
 	virtual const char* getName() {														\
 		return INTERNAL_STRINGIFY(name) gName;       	    							\
 	}																					\

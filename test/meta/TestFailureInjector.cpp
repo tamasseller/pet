@@ -22,9 +22,11 @@
 
 using namespace pet;
 
-TEST_GROUP(FailureInjector) {
-};
+static int counter = 0;
 
+TEST_GROUP(FailureInjector) {
+	int x = 0;
+};
 
 TEST(FailureInjector, Sanity) {
     FailureInjector::shouldSimulateError();
@@ -54,4 +56,22 @@ TEST(FailureInjector, OnOff) {
 
     FailureInjector::disable();
     FailureInjector::shouldSimulateError();
+}
+
+TEST(FailureInjector, Reinit) {
+	CHECK_ALWAYS(x==0);
+	x = 1;
+	FailureInjector::shouldSimulateError();
+}
+
+TEST_GROUP(FailureInjectorCleanup) {
+	struct Y {
+		Y() {counter++;}
+		~Y() {counter--;}
+	} y;
+};
+
+TEST(FailureInjectorCleanup, Destroy) {
+	CHECK_ALWAYS(counter==1);
+	FailureInjector::shouldSimulateError();
 }

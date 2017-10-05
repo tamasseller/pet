@@ -68,6 +68,8 @@ int TestRunner::runAllTests(TestOutput* output)
 	        if(!FailureInjector::hasMore())
 	            break;
 
+	        currentTest->reset();
+
 	        FailureInjector::step();
 
 	        synthetic++;

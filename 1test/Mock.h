@@ -67,7 +67,7 @@ class ExpectPool {
 
         static_assert(size <= 32767, "Pool size too big (max 32767)");
 
-        template<class >
+        template<class>
         friend class TestBase;
 
         /**

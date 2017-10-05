@@ -54,7 +54,7 @@ void TraceOutput::reportTestFailure(bool isSynthetic, const char* testName, cons
 
 void TraceOutput::reportFinal(uint32_t normal, uint32_t failure, uint32_t synthetic)
 {
-    trace::warn << "\n";
+    trace::info << "\n";
 
     if(failure) {
         trace::info << "ERROR (" << failure << " of " << normal << " regular ";
@@ -64,13 +64,17 @@ void TraceOutput::reportFinal(uint32_t normal, uint32_t failure, uint32_t synthe
 
         trace::info << "tests failed)\n";
     } else {
-        trace::info << "OK (all " << normal << " regular ";
+    	if(normal) {
+			trace::info << "OK (all " << normal << " regular ";
 
-        if(synthetic)
-            trace::info << "and " << synthetic << " synthetic ";
+			if(synthetic)
+				trace::info << "and " << synthetic << " synthetic ";
 
-        trace::info << "tests have been ran successfully)\n";
+			trace::info << "tests have been ran successfully)\n";
+    	} else {
+    		trace::info << "No tests registered to run !\n";
+    	}
     }
 
-    trace::warn << "\n";
+    trace::info << "\n";
 }
