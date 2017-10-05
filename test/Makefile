@@ -38,6 +38,7 @@ SOURCES += TestMetaConfiguration.cpp
 SOURCES += TestMetaExpLog.cpp
 SOURCES += TestMetaExpRange.cpp
 SOURCES += TestMetaFieldAccessor.cpp
+SOURCES += TestMetaMetaString.cpp
 SOURCES += TestMetaPacks.cpp
 SOURCES += TestMetaRange.cpp
 SOURCES += TestMetaSequence.cpp
