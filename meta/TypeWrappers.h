@@ -22,9 +22,6 @@ struct Value {
     constexpr Type operator()() const noexcept { return value; }
 };
 
-/*template<class Type, Type Value>
-constexpr wrap()*/
-
 typedef Value<bool, true> True;
 typedef Value<bool, false> False;
 
