@@ -144,8 +144,12 @@ template<class Value, class... Args> struct ValueExtractor {};
  */
 template<class Value>
 struct ValueExtractor<Value> {
-    static constexpr auto value = Value::value;
+    static constexpr decltype(Value::value) value = Value::value;
 };
+
+template<class Value>
+constexpr decltype(Value::value) ValueExtractor<Value>::value;
+
 
 /**
  * Generic definition of the tag matching worker.
@@ -345,3 +349,15 @@ class ConfigTemplate {
         using extract = typename detail::TemplateExtractor<ConfigTemplate, Args...>;
 };
 }
+
+/**
+ * Helper macros
+ */
+#define PET_CONFIG_VALUE(name, type) \
+	template<type x> struct name: pet::ConfigValue<type, name, x> {}
+
+#define PET_CONFIG_TYPE(name) \
+	template<class x> struct name: pet::ConfigType<name, x> {}
+
+#define PET_CONFIG_TEMPLATE(name) \
+	template<template<class...> class x> struct name: pet::ConfigTemplate<name, x> {}
