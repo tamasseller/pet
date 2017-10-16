@@ -16,10 +16,14 @@ SOURCES += ../ubiquitous/PrintfWriter.cpp
 
 SOURCES += TestAlgoIterate.cpp
 SOURCES += TestAlgoStr.cpp
+SOURCES += TestAlgoMinMaxHeap.cpp
 SOURCES += TestDataFifo.cpp
 SOURCES += TestDataBinaryTree.cpp
 SOURCES += TestDataDoubleList.cpp
 SOURCES += TestDataLinkedList.cpp
+SOURCES += TestDataMedianFilter.cpp
+SOURCES += TestDataPriorityQueue.cpp
+SOURCES += TestDataCircularBuffer.cpp
 SOURCES += TestDataOrderedDoubleList.cpp
 SOURCES += TestHeapAvlStress.cpp
 SOURCES += TestHeapBestFitStress.cpp
