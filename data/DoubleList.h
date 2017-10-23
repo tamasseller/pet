@@ -117,8 +117,8 @@ really inline bool DoubleList<Element>::contains(Element* elem) const
 template<class Element>
 inline bool DoubleList<Element>::addFront(Element* elem)
 {
-    if(contains(elem))
-        return false;
+	if(contains(elem))
+		return false;
 
 	fastAddFront(elem);
 	return true;
