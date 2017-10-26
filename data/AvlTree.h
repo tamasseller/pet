@@ -26,6 +26,13 @@
 
 namespace pet {
 
+namespace detail {
+
+struct TrivialAccessor {
+};
+
+}
+
 /**
  * Self balancing in-memory binary search tree.
  *
@@ -39,7 +46,12 @@ namespace pet {
  * because it is slightly slower to modify the tree than it is with the RB tree however it results
  * in a more spread out tree.
  */
-class AvlTree : public BinaryTree{
+
+template<class Accessor> class BasicAvlTree;
+using AvlTree = BasicAvlTree<detail::TrivialAccessor>;
+
+template<class Accessor>
+class BasicAvlTree: public BinaryTree{
 public:
 	/**
 	 * Base of the contained nodes.
@@ -57,16 +69,19 @@ public:
 	};
 
 private:
-	void normalize(Node *node);
-	void rotate_b2p(Node* str);
-	void rotate_s2p(Node* str);
+	inline void normalize(Node *node);
+	inline void rotate_b2p(Node* str);
+	inline void rotate_s2p(Node* str);
 
 	inline Node** get_root_parent_which(Node* str);
 	inline void calc_sizes(Node* i);
 	inline int subtree_size(Node* subtreeroot);
 	inline void doRemove(Node*, BinaryTree::Node**);
 public:
-	AvlTree();
+	inline BasicAvlTree() {
+	    root = nullptr;
+	}
+
 	/**
 	 * Add an element at a given position.
 	 *
@@ -75,7 +90,7 @@ public:
 	 * @param	node the node to be inserted.
 	 * @param	pos the position to insert it at.
 	 */
-	void insert(Position pos, Node* node);
+	inline void insert(Position pos, Node* node);
 
 	/**
 	 * Remove the element from a given position.
@@ -84,7 +99,7 @@ public:
 	 *
 	 * @param	pos the position of the element to be deleted.
 	 */
-	void remove(Position pos);
+	inline void remove(Position pos);
 
 	/**
 	 * Removes an element.
@@ -95,8 +110,169 @@ public:
 	 *
 	 * @param	node the node to be deleted.
 	 */
-	void remove(Node *node);
+	inline void remove(Node *node);
 };
+
+template<class Accessor>
+inline int BasicAvlTree<Accessor>::subtree_size(Node* subtreeroot)
+{
+    if(subtreeroot->smallsize > subtreeroot->bigsize)
+        return subtreeroot->smallsize;
+    else
+        return subtreeroot->bigsize;
+}
+
+template<class Accessor>
+inline void BasicAvlTree<Accessor>::calc_sizes(Node* i){
+    if(i->small)
+        i->smallsize = subtree_size((Node*)i->small)+1;
+    else
+        i->smallsize = 0;
+    if(i->big)
+        i->bigsize = subtree_size((Node*)i->big)+1;
+    else
+        i->bigsize = 0;
+}
+
+template<class Accessor>
+inline typename BasicAvlTree<Accessor>::Node** BasicAvlTree<Accessor>::get_root_parent_which(Node* str){
+    if(str->parent){
+        if(str->parent->small == str)
+            return (Node**)&str->parent->small;
+        else
+            return (Node**)&str->parent->big;
+    }else
+        return (BasicAvlTree::Node**)&root;
+}
+
+template<class Accessor>
+inline void BasicAvlTree<Accessor>::rotate_s2p(Node* str){
+    Node** root_parent_which = get_root_parent_which(str);
+    Node* small = (Node*)str->small;
+
+    *root_parent_which = small;
+    small->parent = str->parent;
+
+    if(small->big)
+        small->big->parent = str;
+    str->small = small->big;
+
+    small->big = str;
+    str->parent = small;
+
+    calc_sizes(str);
+    calc_sizes(small);
+}
+
+template<class Accessor>
+inline void BasicAvlTree<Accessor>::rotate_b2p(Node* str){
+    Node** root_parent_which = get_root_parent_which(str);
+    Node* big = (Node*)str->big;
+
+    *root_parent_which = big;
+    big->parent = str->parent;
+
+    if(big->small)
+        big->small->parent = str;
+    str->big = big->small;
+
+    big->small = str;
+    str->parent = big;
+
+    calc_sizes(str);
+    calc_sizes(big);
+}
+
+template<class Accessor>
+inline void BasicAvlTree<Accessor>::normalize(Node *node){
+    Node *i=node;
+    while(i){
+        Node *next = (Node*)i->parent;
+        calc_sizes(i);
+        if(i->bigsize > i->smallsize+1){
+            if(((Node*)i->big)->smallsize > ((Node*)i->big)->bigsize){
+                rotate_s2p((Node*)i->big);
+            }
+            rotate_b2p(i);
+        }
+        else if(i->smallsize > i->bigsize+1){
+            if(((Node*)i->small)->bigsize > ((Node*)i->small)->smallsize){
+                rotate_b2p((Node*)i->small);
+            }
+            rotate_s2p(i);
+        }
+        i = next;
+    }
+}
+
+template<class Accessor>
+inline void BasicAvlTree<Accessor>::insert(Position pos, BasicAvlTree::Node* node)
+{
+    *pos.origin = node;
+
+    node->small = (Node*)0;
+    node->big = (Node*)0;
+    node->parent = (Node*)pos.parent;
+
+    normalize(node);
+}
+
+template<class Accessor>
+inline void BasicAvlTree<Accessor>::doRemove(Node* node, BinaryTree::Node** which)
+{
+    if(node->small && node->big){
+        Node* replacement = node;
+        replacement = (Node*)replacement->small;
+        while(replacement->big)
+            replacement = (Node*)replacement->big;
+
+        Node* orig_parent;
+        if(replacement->parent != node){
+            replacement->parent->big = (Node*)replacement->small;
+            if(replacement->small)
+                replacement->small->parent = replacement->parent;
+            orig_parent = (Node*)replacement->parent;
+
+            replacement->small = (Node*)node->small;
+            replacement->small->parent = replacement;
+        }else{
+            orig_parent = replacement;
+        }
+
+        replacement->big = (Node*)node->big;
+        replacement->big->parent = replacement;
+
+        replacement->parent = (Node*)node->parent;
+        *which = replacement;
+
+        normalize(orig_parent);
+    }else{
+        if(node->small){
+            *which = node->small;
+            node->small->parent = node->parent;
+            normalize((Node*)node->parent);
+        }else{
+            *which = node->big;
+            if(node->big){
+                node->big->parent = node->parent;
+                normalize((Node*)node->parent);
+            }else{
+                normalize((Node*)node->parent);
+            }
+        }
+    }
+}
+
+template<class Accessor>
+inline void BasicAvlTree<Accessor>::remove(Position pos){
+    doRemove((Node*)pos.getNode(), pos.origin);
+}
+
+template<class Accessor>
+inline void BasicAvlTree<Accessor>::remove(Node* node){
+    doRemove(node, (BinaryTree::Node**)get_root_parent_which(node));
+}
+
 
 }
 

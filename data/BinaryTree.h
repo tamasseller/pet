@@ -57,7 +57,7 @@ public:
 		Node *parent;	//!< The parent
 
 		/** Create a disconnected node */
-		Node(): small(0), big(0), parent(0) {}
+		inline Node(): small(0), big(0), parent(0) {}
 	};
 
 	/**
@@ -81,7 +81,7 @@ public:
 		 *
 		 * @return The current state of the iteration: the current node or NULL if over the end.
 		 */
-		Node *current() const {
+		inline Node *current() const {
 			return currentNode;
 		}
 
@@ -90,7 +90,7 @@ public:
 		 *
 		 * Steps the iterator or does nothing if already finished.
 		 */
-		void step();
+		inline void step();
 
 		/**
 		 * Creates an iterator at a position.
@@ -109,7 +109,7 @@ protected:
 	struct Position {
 		Node *parent = 0;	//!< The parent of the node found or to be inserted or NULL for the root
 		Node **origin = 0;	//!< A pointer to the child pointer of parent or to the root pointer if it is the root
-		Node *getNode(){return *origin;} //!< Get the node or null if not present.
+		inline Node *getNode(){return *origin;} //!< Get the node or null if not present.
 	};
 
 	Node *root; //!< The root node of the tree.
@@ -150,7 +150,7 @@ public:
 	 * 			zero if equal, negative otherwise.
 	 */
 	template <typename KeyType, int (*const comp)(Node*, const KeyType&)>
-	Position seek(const KeyType& key) const{
+	inline Position seek(const KeyType& key) const{
 		Position ret;
 		Node *it = root;
 		while(it){
@@ -173,6 +173,40 @@ public:
 		return ret;
 	}
 };
+
+inline void BinaryTree::Iterator::step() {
+    if(!currentNode)
+        return;
+
+    if(goDown && currentNode->big) {
+        currentNode = currentNode->big;
+
+        if(currentNode->small) {
+            while(currentNode->small)
+                currentNode = currentNode->small;
+
+            if(!currentNode->big)
+                goDown = false;
+        }
+    } else {
+        while(true) {
+            if(!currentNode->parent) {
+                currentNode = 0;
+                return;
+            }
+
+            if(currentNode->parent->big == currentNode) {
+                currentNode = currentNode->parent;
+            }else {
+                BinaryTreeTrace::assert(currentNode->parent->small == currentNode);
+                break;
+            }
+        }
+
+        goDown = true;
+        currentNode = currentNode->parent;
+    }
+}
 
 }
 

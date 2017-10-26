@@ -5,9 +5,6 @@ OUTPUT = pet-test
 SOURCES += ../1test/TestRunner.cpp
 SOURCES += ../1test/TraceOutput.cpp
 SOURCES += ../1test/FailureInjector.cpp
-
-SOURCES += ../data/AvlTree.cpp
-SOURCES += ../data/BinaryTree.cpp
 SOURCES += ../ubiquitous/PrintfWriter.cpp
 
 # Test code
