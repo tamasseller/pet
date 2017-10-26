@@ -63,17 +63,17 @@ public:
 	/**
 	 * In-order iterator.
 	 *
-	 * Traverses the tree following the natural ordering of the elements.
+	 * Traverses the tree following the natural ordering of the elements, it does not do any
+	 * comparisons, the structure of the tree already encodes the order.
 	 *
-	 * @note It does not do any comparisons, the structure of the tree already encodes the order.
-	 *
-	 * @warning	Modifying the list while iterating through it with an iterator results in undefined behavior.
-	 * 			This condition is not checked, because there is no zero-overhead way to do it, so avoiding
-	 * 			this usage is entirely up to the user.
+	 * @warning	Modifying the container while iterating through it with an iterator results in
+	 * 			undefined behavior. This condition is not checked, because there is no
+	 * 			zero-overhead way to do it. Avoiding misusage is entirely up to the user.
 	 */
 	class Iterator {
-		bool goDown;
-		Node* currentNode;
+			/// The node the iterator is at.
+			Node* currentNode;
+
 		public:
 
 		/**
@@ -99,20 +99,69 @@ public:
 		 *
 		 * @param first The node to start with.
 		 */
-		Iterator(Node* first): goDown(first && first->big), currentNode(first){}
+		Iterator(Node* first): currentNode(first){}
 	};
 
 protected:
 	/**
-	 * Full result of a search
+	 * In-tree position of an existing or new node.
+	 *
+	 * An instance of this type identifies an abstract position in the tree,
+	 * that can be obtained while searching for a given key. It describes
+	 * the position in the tree where the node is found, or where it needs
+	 * to be inserted.
+	 *
+	 * It contains:
+	 *
+	 *  - a pointer to the parent node if there is any
+	 *  - and a pointer to the pointer that is to be pointed at the node.
+	 *
+	 * There are several different configurations regarding the validity and
+	 * meaning of these pointers:
+	 *
+	 *  1. The found element is the root or if an empty tree is traversed:
+	 *
+	 *    - there is no parent,
+	 *    - the back reference (origin) is the _root_ pointer of the tree.
+	 *
+	 *  2. The node is found and is not the root of the tree:
+	 *
+	 *    - the parent pointer is set to the nodes parent,
+	 *    - the origin points to either the _small_ or _big_ pointer of
+	 *      the parent, in accordance with the actual configuration of
+	 *      the found node and its parent.
+	 *
+	 *  3. The node is not found:
+	 *
+	 *    - the parent pointer points at the leaf where the search terminated,
+	 *    - the origin is set the same way as above.
+	 *
+	 * In all cases, this object provides sufficient information for:
+	 *
+	 *  - finding a node or determining its absence,
+	 *  - deleting a node that is found,
+	 *  - adding a new node that is not found.
 	 */
 	struct Position {
-		Node *parent = 0;	//!< The parent of the node found or to be inserted or NULL for the root
-		Node **origin = 0;	//!< A pointer to the child pointer of parent or to the root pointer if it is the root
-		inline Node *getNode(){return *origin;} //!< Get the node or null if not present.
+		/// The parent of the node found or to be inserted or NULL for the root
+		Node *parent = 0;
+
+		/// A pointer to the child pointer of parent or to the root pointer if it is the root
+		Node **origin = 0;
+
+		/// Get the node or null if not present.
+		inline Node *getNode(){return *origin;}
+
+		inline Position (Node* parent, Node** origin): parent(parent), origin(origin) {}
 	};
 
-	Node *root; //!< The root node of the tree.
+	/**
+	 * The root node of the tree.
+	 *
+	 * Points at the root of the tree, for an empty tree this field is null.
+	 */
+	Node *root;
+
 public:
 	/**
 	 * Initial in-order iterator.
@@ -123,6 +172,9 @@ public:
 		Node* first = root;
 
 		if(first) {
+			/*
+			 * Descend to the smallest node.
+			 */
 			while(first->small)
 				first = first->small;
 		}
@@ -151,60 +203,97 @@ public:
 	 */
 	template <typename KeyType, int (*const comp)(Node*, const KeyType&)>
 	inline Position seek(const KeyType& key) const{
-		Position ret;
-		Node *it = root;
-		while(it){
-			int cmp = comp(it, key);
-			if(cmp == 0)
+		/*
+		 * Initialize the return value with the result for an empty tree,
+		 * because the following loop will fall through in that case and
+		 * simply return this initial value.
+		 */
+		Position ret(nullptr, (BinaryTree::Node**)&root);
+
+		/*
+		 * Descend starting from the root:
+		 *
+		 *  - take the smaller of greater link depending on key comparison,
+		 *  - terminate on equality
+		 *  - also exit if a leaf is reached.
+		 */
+		for(Node *it = root; it; it = *ret.origin){
+			if(int cmp = comp(it, key)) {
+				/*
+				 * If the comparison function reports non equality take
+				 * the smaller or greater child depending on the result
+				 */
+				ret.origin = (cmp > 0) ? &it->small : &it->big;
+
+				/*
+				 * Update the parent pointer now, because this information
+				 * is lost if terminating due to falling off a leaf.
+				 */
+				ret.parent = it;
+			} else {
+				/*
+				 * Exit on equality.
+				 */
 				break;
-
-			ret.parent = it;
-			if(cmp > 0){
-				ret.origin = &it->small;
-			}else{
-				ret.origin = &it->big;
 			}
-			it = *ret.origin;
 		}
-
-		if(!ret.origin)
-			ret.origin = (BinaryTree::Node**)&root;
 
 		return ret;
 	}
 };
 
-inline void BinaryTree::Iterator::step() {
+inline void BinaryTree::Iterator::step()
+{
     if(!currentNode)
         return;
 
-    if(goDown && currentNode->big) {
+    if(currentNode->big) {
+        /*
+         * The small subtree is considered done, so at any node that has a
+         * greater child the next one is smallest node in the subtree of that.
+         *
+         *   -> 1            1
+         *        \            \
+         *          3   =>       3
+         *         /            /
+         *        2         -> 2
+         */
         currentNode = currentNode->big;
 
-        if(currentNode->small) {
-            while(currentNode->small)
-                currentNode = currentNode->small;
+        while(currentNode->small)
+        	currentNode = currentNode->small;
 
-            if(!currentNode->big)
-                goDown = false;
-        }
     } else {
+        /*
+         * If there is no greater child, the next node can be found by climbing
+         * back up. As long as stepping back along a greater child link, it is
+         * sure that the next element is smaller, thus it is considered already
+         * visited. Once stepped back through a smaller child link we have reached
+         * the next node in order.
+         *
+         *       3         -> 3
+         *     /            /
+         *   1       =>   1
+         *    \            \
+         *  -> 2            2
+         */
         while(true) {
-            if(!currentNode->parent) {
-                currentNode = 0;
-                return;
-            }
+        	// Save the previous node.
+        	Node* prev = currentNode;
 
-            if(currentNode->parent->big == currentNode) {
-                currentNode = currentNode->parent;
-            }else {
-                BinaryTreeTrace::assert(currentNode->parent->small == currentNode);
-                break;
-            }
+        	// Step to the parent.
+            currentNode = currentNode->parent;
+
+            // The root must have been visited already.
+            if(!currentNode)
+            	break;
+
+            // Done if stepped along small child link.
+			if(currentNode->small == prev)
+				break;
+
+            BinaryTreeTrace::assert(currentNode->big == prev);
         }
-
-        goDown = true;
-        currentNode = currentNode->parent;
     }
 }
 

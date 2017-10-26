@@ -28,8 +28,7 @@ namespace pet {
 
 namespace detail {
 
-struct TrivialAccessor {
-};
+struct TrivialAccessor;
 
 }
 
@@ -63,19 +62,49 @@ public:
 
 	class Node : public BinaryTree::Node{
 	public:
-		unsigned short smallsize;	//!< The height of the smaller subtree.
-		unsigned short bigsize;		//!< The height of the bigger subtree.
+		/// The height of the smaller subtree.
+		unsigned short smallsize;
+
+		/// The height of the bigger subtree.
+		unsigned short bigsize;
+
 		inline void* operator new( size_t sz, void* here ) {return here;}
 	};
 
 private:
+	/**
+	 * Update tree structure around node.
+	 *
+	 * Goes up the tree from _node_ and does rotations to
+	 * satisfy balancing the criteria.
+	 */
 	inline void normalize(Node *node);
-	inline void rotate_b2p(Node* str);
-	inline void rotate_s2p(Node* str);
 
-	inline Node** get_root_parent_which(Node* str);
-	inline void calc_sizes(Node* i);
-	inline int subtree_size(Node* subtreeroot);
+	/**
+	 * Rotate big to parent.
+	 *
+	 *      B                    D
+	 *    /   \                /   \
+	 *  A       D     =>     B       E
+	 *         / \          / \
+	 *        C   E        A   C
+	 */
+	inline void rotateBigToParent(Node* str);
+
+	/**
+	 * Rotate small to parent.
+	 *
+	 *        D                B
+	 *      /   \            /   \
+	 *    B       E   =>   A       D
+	 *   / \                      / \
+	 *  A   C                    C   E
+	 */
+	inline void rotateSmallToParent(Node* str);
+
+	inline BinaryTree::Node** getParentBackref(Node* str);
+	inline void updateSubtreeSizes(Node* i);
+	inline int subtreeSize(Node* str);
 	inline void doRemove(Node*, BinaryTree::Node**);
 public:
 	inline BasicAvlTree() {
@@ -113,41 +142,40 @@ public:
 	inline void remove(Node *node);
 };
 
+namespace detail {
+
+struct TrivialAccessor {
+	static inline AvlTree::Node* getWritable(AvlTree::Node* node) {
+		return node;
+	}
+};
+
+}
+
 template<class Accessor>
-inline int BasicAvlTree<Accessor>::subtree_size(Node* subtreeroot)
+inline int BasicAvlTree<Accessor>::subtreeSize(Node* str)
 {
-    if(subtreeroot->smallsize > subtreeroot->bigsize)
-        return subtreeroot->smallsize;
-    else
-        return subtreeroot->bigsize;
+    return (str->smallsize > str->bigsize) ? str->smallsize : str->bigsize;
 }
 
 template<class Accessor>
-inline void BasicAvlTree<Accessor>::calc_sizes(Node* i){
-    if(i->small)
-        i->smallsize = subtree_size((Node*)i->small)+1;
-    else
-        i->smallsize = 0;
-    if(i->big)
-        i->bigsize = subtree_size((Node*)i->big)+1;
-    else
-        i->bigsize = 0;
+inline void BasicAvlTree<Accessor>::updateSubtreeSizes(Node* i){
+	i->smallsize = (i->small) ? (subtreeSize((Node*)i->small) + 1) : 0;
+	i->bigsize = (i->big) ? (subtreeSize((Node*)i->big) + 1) : 0;
 }
 
 template<class Accessor>
-inline typename BasicAvlTree<Accessor>::Node** BasicAvlTree<Accessor>::get_root_parent_which(Node* str){
-    if(str->parent){
-        if(str->parent->small == str)
-            return (Node**)&str->parent->small;
-        else
-            return (Node**)&str->parent->big;
-    }else
-        return (BasicAvlTree::Node**)&root;
+inline typename BinaryTree::Node** BasicAvlTree<Accessor>::getParentBackref(Node* str)
+{
+    if(BinaryTree::Node* parent = str->parent)
+    	return ((parent->small == str) ? &parent->small : &parent->big);
+
+   	return &root;
 }
 
 template<class Accessor>
-inline void BasicAvlTree<Accessor>::rotate_s2p(Node* str){
-    Node** root_parent_which = get_root_parent_which(str);
+inline void BasicAvlTree<Accessor>::rotateSmallToParent(Node* str){
+	BinaryTree::Node** root_parent_which = getParentBackref(str);
     Node* small = (Node*)str->small;
 
     *root_parent_which = small;
@@ -160,13 +188,13 @@ inline void BasicAvlTree<Accessor>::rotate_s2p(Node* str){
     small->big = str;
     str->parent = small;
 
-    calc_sizes(str);
-    calc_sizes(small);
+    updateSubtreeSizes(str);
+    updateSubtreeSizes(small);
 }
 
 template<class Accessor>
-inline void BasicAvlTree<Accessor>::rotate_b2p(Node* str){
-    Node** root_parent_which = get_root_parent_which(str);
+inline void BasicAvlTree<Accessor>::rotateBigToParent(Node* str){
+	BinaryTree::Node** root_parent_which = getParentBackref(str);
     Node* big = (Node*)str->big;
 
     *root_parent_which = big;
@@ -179,28 +207,32 @@ inline void BasicAvlTree<Accessor>::rotate_b2p(Node* str){
     big->small = str;
     str->parent = big;
 
-    calc_sizes(str);
-    calc_sizes(big);
+    updateSubtreeSizes(str);
+    updateSubtreeSizes(big);
 }
 
 template<class Accessor>
-inline void BasicAvlTree<Accessor>::normalize(Node *node){
-    Node *i=node;
-    while(i){
-        Node *next = (Node*)i->parent;
-        calc_sizes(i);
-        if(i->bigsize > i->smallsize+1){
-            if(((Node*)i->big)->smallsize > ((Node*)i->big)->bigsize){
-                rotate_s2p((Node*)i->big);
-            }
-            rotate_b2p(i);
+inline void BasicAvlTree<Accessor>::normalize(Node *node)
+{
+    for(Node *i=node; i; ) {
+        Node *next = static_cast<Node*>(i->parent);
+        Node *big = static_cast<Node*>(i->big);
+        Node *small = static_cast<Node*>(i->small);
+
+        updateSubtreeSizes(i);
+
+        if(i->bigsize > i->smallsize + 1) {
+            if(big->smallsize > big->bigsize)
+                rotateSmallToParent(big);
+
+            rotateBigToParent(i);
+        } else if(i->smallsize > i->bigsize + 1) {
+            if(small->bigsize > small->smallsize)
+                rotateBigToParent(small);
+
+            rotateSmallToParent(i);
         }
-        else if(i->smallsize > i->bigsize+1){
-            if(((Node*)i->small)->bigsize > ((Node*)i->small)->smallsize){
-                rotate_b2p((Node*)i->small);
-            }
-            rotate_s2p(i);
-        }
+
         i = next;
     }
 }
@@ -209,10 +241,9 @@ template<class Accessor>
 inline void BasicAvlTree<Accessor>::insert(Position pos, BasicAvlTree::Node* node)
 {
     *pos.origin = node;
-
-    node->small = (Node*)0;
-    node->big = (Node*)0;
     node->parent = (Node*)pos.parent;
+
+    node->small = node->big = nullptr;
 
     normalize(node);
 }
@@ -253,13 +284,11 @@ inline void BasicAvlTree<Accessor>::doRemove(Node* node, BinaryTree::Node** whic
             normalize((Node*)node->parent);
         }else{
             *which = node->big;
-            if(node->big){
+            if(node->big)
                 node->big->parent = node->parent;
-                normalize((Node*)node->parent);
-            }else{
-                normalize((Node*)node->parent);
-            }
         }
+
+        normalize((Node*)node->parent);
     }
 }
 
@@ -270,7 +299,7 @@ inline void BasicAvlTree<Accessor>::remove(Position pos){
 
 template<class Accessor>
 inline void BasicAvlTree<Accessor>::remove(Node* node){
-    doRemove(node, (BinaryTree::Node**)get_root_parent_which(node));
+    doRemove(node, getParentBackref(node));
 }
 
 
