@@ -26,12 +26,6 @@
 
 namespace pet {
 
-namespace detail {
-
-struct TrivialAccessor;
-
-}
-
 /**
  * Self balancing in-memory binary search tree.
  *
@@ -41,16 +35,12 @@ struct TrivialAccessor;
  * and minimizing the operations needed for the add and remove operations. The AVL algorithm and
  * the [Red-black tree](https://en.wikipedia.org/wiki/Red%E2%80%93black_tree) are the two most
  * commonly used self-balancing tree algorithms. For most cases they perform roughly equally,
- * however elaborated benchmarks show that AVL tree is better if the access pattern is read hevy
+ * however elaborated benchmarks show that AVL tree is better if the access pattern is read-heavy
  * because it is slightly slower to modify the tree than it is with the RB tree however it results
  * in a more spread out tree.
  */
 
-template<class Accessor> class BasicAvlTree;
-using AvlTree = BasicAvlTree<detail::TrivialAccessor>;
-
-template<class Accessor>
-class BasicAvlTree: public BinaryTree{
+class AvlTree: public BinaryTree{
 public:
 	/**
 	 * Base of the contained nodes.
@@ -102,12 +92,38 @@ private:
 	 */
 	inline void rotateSmallToParent(Node* str);
 
+	/**
+	 * Get the parent's reference to this node.
+	 *
+	 * Returns a pointer either the matching child pointer of the
+	 * parent or the to the root pointer of the tree.
+	 */
 	inline BinaryTree::Node** getParentBackref(Node* str);
-	inline void updateSubtreeSizes(Node* i);
+
+	/**
+	 * Get maximal depth under this node.
+	 *
+	 * Returns the maximal distance of the leafs from the specified
+	 * node in its subtree. It does not iterate over the subtree,
+	 * but uses the stored values instead.
+	 */
 	inline int subtreeSize(Node* str);
+
+	/**
+	 * Update the stored subtree sizes.
+	 *
+	 * Sets the subtree size counters according the children's report.
+	 */
+	inline void updateSubtreeSizes(Node* i);
+
+	/**
+	 * Remove worker.
+	 *
+	 * Removes the specified node given its parent's child pointer.
+	 */
 	inline void doRemove(Node*, BinaryTree::Node**);
 public:
-	inline BasicAvlTree() {
+	inline AvlTree() {
 	    root = nullptr;
 	}
 
@@ -142,58 +158,96 @@ public:
 	inline void remove(Node *node);
 };
 
-namespace detail {
-
-struct TrivialAccessor {
-	static inline AvlTree::Node* getWritable(AvlTree::Node* node) {
-		return node;
-	}
-};
-
-}
-
-template<class Accessor>
-inline int BasicAvlTree<Accessor>::subtreeSize(Node* str)
+inline int AvlTree::subtreeSize(Node* str)
 {
-    return (str->smallsize > str->bigsize) ? str->smallsize : str->bigsize;
+	/*
+	 * The size of this subtree is the depth of the deeper child's plus one.
+	 */
+    return ((str->smallsize > str->bigsize) ? str->smallsize : str->bigsize) + 1;
 }
 
-template<class Accessor>
-inline void BasicAvlTree<Accessor>::updateSubtreeSizes(Node* i){
-	i->smallsize = (i->small) ? (subtreeSize((Node*)i->small) + 1) : 0;
-	i->bigsize = (i->big) ? (subtreeSize((Node*)i->big) + 1) : 0;
+inline void AvlTree::updateSubtreeSizes(Node* i){
+	i->smallsize = (i->small) ? subtreeSize((Node*)i->small) : 0;
+	i->bigsize = (i->big) ? subtreeSize((Node*)i->big) : 0;
 }
 
-template<class Accessor>
-inline typename BinaryTree::Node** BasicAvlTree<Accessor>::getParentBackref(Node* str)
+inline typename BinaryTree::Node** AvlTree::getParentBackref(Node* str)
 {
+	/*
+	 * If there is a parent its matching child pointer is returned,
+	 */
     if(BinaryTree::Node* parent = str->parent)
     	return ((parent->small == str) ? &parent->small : &parent->big);
 
+    /*
+     * Otherwise _str_ is the root, so the tree's root pointer is returned.
+     */
    	return &root;
 }
 
-template<class Accessor>
-inline void BasicAvlTree<Accessor>::rotateSmallToParent(Node* str){
+inline void AvlTree::rotateSmallToParent(Node* str)
+{
+	/*
+	 *   <parent>
+	 *       \
+	 *      <str>
+	 *      /   \
+	 * <small>   Z
+	 *   / \
+	 *  X   Y
+	 */
 	BinaryTree::Node** root_parent_which = getParentBackref(str);
     Node* small = (Node*)str->small;
 
+	/*
+	 *   <parent>
+	 *       \
+	 *        \     <str>
+	 *         \    /   \
+	 *         <small>   Z
+	 *           / \
+	 *          X   Y
+	 */
     *root_parent_which = small;
     small->parent = str->parent;
 
-    if(small->big)
-        small->big->parent = str;
+	/*
+	 *   <parent>
+	 *       \
+	 *      <small>   <str>
+	 *        /        / \
+	 *       X        Y   Z
+	 *
+	 * Y := small->big
+	 */
     str->small = small->big;
+    if(small->big) small->big->parent = str;
 
+    /*
+	 *   <parent>
+	 *       \
+	 *      <small>
+	 *       /   \
+	 *      X    <str>
+	 *           /  \
+	 *          Y    Z
+	 */
     small->big = str;
     str->parent = small;
 
+    /*
+     * The subtree sizes for both _small_ and _str_ are needed
+     * to be updated. However the subtrees of X, Y and Z have
+     * not been touched, so their subtree sizes can be used.
+     */
     updateSubtreeSizes(str);
     updateSubtreeSizes(small);
 }
 
-template<class Accessor>
-inline void BasicAvlTree<Accessor>::rotateBigToParent(Node* str){
+inline void AvlTree::rotateBigToParent(Node* str){
+	/*
+	 * Does the inverse of _rotateSmallToParent_.
+	 */
 	BinaryTree::Node** root_parent_which = getParentBackref(str);
     Node* big = (Node*)str->big;
 
@@ -211,9 +265,14 @@ inline void BasicAvlTree<Accessor>::rotateBigToParent(Node* str){
     updateSubtreeSizes(big);
 }
 
-template<class Accessor>
-inline void BasicAvlTree<Accessor>::normalize(Node *node)
+inline void AvlTree::normalize(Node *node)
 {
+	/*
+	 * Normalization is done by going up the tree from
+	 * the specified node. And checking if the balancing
+	 * criteria are still met. If not it is restored
+	 * employing tree rotations.
+	 */
     for(Node *i=node; i; ) {
         Node *next = static_cast<Node*>(i->parent);
         Node *big = static_cast<Node*>(i->big);
@@ -222,11 +281,28 @@ inline void BasicAvlTree<Accessor>::normalize(Node *node)
         updateSubtreeSizes(i);
 
         if(i->bigsize > i->smallsize + 1) {
+            /*
+             * If the subtree of the currently considered
+             * node leans towards the big side too much,
+             * its subtree needs to be checked to be either
+             * balanced or big heavy. If it is not, than
+             * needs to be rotated to straighten it out.
+             *
+             * A          A
+             *   \         \           B
+             *     C  ->    B    ->   / \
+             *    /          \       A   C
+             *   B            C
+             */
             if(big->smallsize > big->bigsize)
                 rotateSmallToParent(big);
 
             rotateBigToParent(i);
         } else if(i->smallsize > i->bigsize + 1) {
+        	/*
+        	 * Small heavy subtree is treated in the exact
+        	 * inverse way of the other case.
+        	 */
             if(small->bigsize > small->smallsize)
                 rotateBigToParent(small);
 
@@ -237,47 +313,108 @@ inline void BasicAvlTree<Accessor>::normalize(Node *node)
     }
 }
 
-template<class Accessor>
-inline void BasicAvlTree<Accessor>::insert(Position pos, BasicAvlTree::Node* node)
+inline void AvlTree::insert(Position pos, AvlTree::Node* node)
 {
+	/*
+	 * Establish the bi-directional parent-child link.
+	 */
     *pos.origin = node;
     node->parent = (Node*)pos.parent;
 
+    /*
+     * Zero out children, to signify a leaf node.
+     */
     node->small = node->big = nullptr;
 
+    /*
+     * Enforce the AVL tree invariant.
+     */
     normalize(node);
 }
 
-template<class Accessor>
-inline void BasicAvlTree<Accessor>::doRemove(Node* node, BinaryTree::Node** which)
+inline void AvlTree::doRemove(Node* node, BinaryTree::Node** which)
 {
     if(node->small && node->big){
-        Node* replacement = node;
-        replacement = (Node*)replacement->small;
-        while(replacement->big)
-            replacement = (Node*)replacement->big;
+    	/*
+    	 * An internal node with two children is replaced with the
+    	 * previous element in order, which is either a leaf or an
+    	 * internal node that has no greater child, because if it
+    	 * had, then it would not be the next in order, but the
+    	 * child (or the smallest element in its subtree) would be.
+    	 *
+    	 *             <node>                 <node>
+    	 *             /   \                  /   \
+    	 *   <replacement>  X    or         ...    X
+    	 *    /                             /  \
+    	 *  ...                          ...   <replacement>
+    	 */
+        BinaryTree::Node *origParent, *replacement = node->small;
 
-        Node* orig_parent;
-        if(replacement->parent != node){
+        if(!replacement->big){
+        	/*
+        	 * In the first case the _replacement_ is bound to the
+        	 * parent and the greater child of the node, which are
+        	 * common operations for both cases, the only difference
+        	 * being that the normalization needs to start from the
+        	 * _replacement_ not its original parent, because it is
+        	 * the node that is being removed.
+        	 */
+            origParent = replacement;
+        }else{
+        	/*
+        	 * In the second case the greatest element of the
+        	 * smaller subtree must be found.
+        	 */
+            while(replacement->big)
+                replacement = replacement->big;
+
+            /*
+             * The structure of the tree is only modified at the
+             * point where the replacement is taken from, so the
+             * later normalization needs to start at its parent.
+             */
+            origParent = replacement->parent;
+
+            /*
+             * The replacement is the greater child of its parent.
+             * It needs to be cut out from its place by attaching
+             * its smaller child as the greater child of the parent.
+             */
             replacement->parent->big = (Node*)replacement->small;
             if(replacement->small)
-                replacement->small->parent = replacement->parent;
-            orig_parent = (Node*)replacement->parent;
+            	replacement->small->parent = replacement->parent;
 
-            replacement->small = (Node*)node->small;
+            /*
+             * The smaller child of the node is inherited by the
+             * replacement.
+             */
+            replacement->small = node->small;
             replacement->small->parent = replacement;
-        }else{
-            orig_parent = replacement;
         }
 
-        replacement->big = (Node*)node->big;
-        replacement->big->parent = replacement;
+        /*
+         * Attach X as the big child of _replacement_ in both directions.
+         */
+        replacement->big = node->big;
+        node->big->parent = replacement;
 
-        replacement->parent = (Node*)node->parent;
+        /*
+         * Attach _replacement_ as the same child as node have been,
+         * to its parent, in both directions.
+         */
+        replacement->parent = node->parent;
         *which = replacement;
 
-        normalize(orig_parent);
+        /*
+         * Enforce tree invariant, with the starting place
+         * depending on the previous operations.
+         */
+        normalize((Node*)origParent);
     }else{
+    	/*
+    	 * If the node has only one child or it is a leaf, it is simply
+    	 * cut off and its child is attached to the parent in its place.
+    	 */
         if(node->small){
             *which = node->small;
             node->small->parent = node->parent;
@@ -288,17 +425,19 @@ inline void BasicAvlTree<Accessor>::doRemove(Node* node, BinaryTree::Node** whic
                 node->big->parent = node->parent;
         }
 
+        /*
+         * Enforce tree invariant, starting
+         * at the parent of the removed node.
+         */
         normalize((Node*)node->parent);
     }
 }
 
-template<class Accessor>
-inline void BasicAvlTree<Accessor>::remove(Position pos){
+inline void AvlTree::remove(Position pos){
     doRemove((Node*)pos.getNode(), pos.origin);
 }
 
-template<class Accessor>
-inline void BasicAvlTree<Accessor>::remove(Node* node){
+inline void AvlTree::remove(Node* node){
     doRemove(node, getParentBackref(node));
 }
 
