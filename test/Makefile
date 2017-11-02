@@ -16,6 +16,7 @@ SOURCES += TestAlgoStr.cpp
 SOURCES += TestAlgoMinMaxHeap.cpp
 SOURCES += TestDataFifo.cpp
 SOURCES += TestDataBinaryTree.cpp
+SOURCES += TestDataBinaryHeap.cpp
 SOURCES += TestDataDoubleList.cpp
 SOURCES += TestDataLinkedList.cpp
 SOURCES += TestDataMedianFilter.cpp

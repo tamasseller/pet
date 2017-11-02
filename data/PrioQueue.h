@@ -28,10 +28,13 @@ namespace pet {
  * Common base class for the priority queues implemented over an array.
  */
 template<class T, size_t N, class Child>
-class ArrayBackedPrioQueueBase: public PrioQueueBase<Child>
+class ArrayBackedPrioQueueBase: public IndexedPrioQueueBase<Child>
 {
     protected:
-        friend PrioQueueBase<Child>;
+		friend PrioQueueBase<Child>;
+		friend IndexedPrioQueueBase<Child>;
+		typedef size_t ElementId;
+
 
         /// The backing-store array.
         T data[N];
@@ -78,7 +81,8 @@ class ArrayBackedPrioQueueBase: public PrioQueueBase<Child>
  */
 template<class T, size_t N, class Child>
 class GenericPrioQueue: public ArrayBackedPrioQueueBase<T, N, Child> {
-        template<class C> friend class PrioQueueBase;
+        template<class, class> friend class PrioQueueBase;
+        friend IndexedPrioQueueBase<Child>;
 
         /// The number of elements contained.
         size_t size = 0;
@@ -198,7 +202,8 @@ struct PrioQueue<T, N, void>: GenericPrioQueue<T, N, PrioQueue<T, N, void>> {};
 template<class T, size_t N, class Child>
 class GenericPrioQueueWindow: public ArrayBackedPrioQueueBase<T, N, Child>
 {
-        template<class C> friend class PrioQueueBase;
+        template<class, class> friend class PrioQueueBase;
+        friend IndexedPrioQueueBase<Child>;
 
         /// Element count getter implementation required by the PrioQueueBase.
         inline static constexpr size_t getIndexLimit() {

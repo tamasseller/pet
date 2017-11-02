@@ -34,10 +34,6 @@ class BinaryTreeTrace: public pet::Trace<BinaryTreeTrace> {};
  * Represents a binary tree in which every node can directly access both of its children and its parent.
  * Mainly useful as a base of other trees as it provides method only for searching and does not for adding
  * and removing elements.
- *
- * @note 	Genericity is *not* achieved by making this a class template make.
- * 			The functionality provided by this class does not rely on knowing the full type of the stored elements.
- * 			It is also beneficial for avoiding code bloat.
  */
 class BinaryTree {
 public:
@@ -52,8 +48,8 @@ public:
 	 */
 	class Node {
 	public:
-		Node *small;	//!< The smaller children
-		Node *big;		//!< The bigger children
+		Node *small;	//!< The smaller child
+		Node *big;		//!< The bigger child
 		Node *parent;	//!< The parent
 
 		/** Create a disconnected node */

@@ -82,24 +82,8 @@ namespace pet {
  *             3   4 5   6
  *
  */
-template<class Child>
+template<class Child, class ElementId = size_t>
 class PrioQueueBase {
-    private:
-        /// Helper to find the index of a parent.
-        inline size_t parent(size_t n) {
-            return ((n + 1) >> 1) - 1;
-        }
-
-        /// Helper to find the index of the left child.
-        inline size_t leftChild(size_t n) {
-            return ((n + 1) << 1) - 1;
-        }
-
-        /// Helper to find the index of the right child.
-        inline size_t rightChild(size_t n) {
-            return ((n + 1) << 1);
-        }
-
     protected:
         /**
          * Re-establish heap property recursively, going towards the root.
@@ -108,18 +92,19 @@ class PrioQueueBase {
          * to be smaller (according to the comparator) or after inserting
          * a new element on the bottom layer.
          */
-        inline void heapUp(size_t e) {
+        inline void heapUp(ElementId e) {
             auto* self = static_cast<Child*>(this);
 
-            while(e) {
-                size_t p = parent(e);
-                if(self->compareElement(e, p))
-                    self->swapElement(e, p);
-                else
-                    break;
+            do {
+                ElementId p = self->parent(e);
 
-                e = p;
-            }
+                if(!self->isValid(p) || !self->compareElement(e, p))
+                    break;
+                else
+                    self->swapElement(e, p);
+
+                e = self->moveUp(e, p);
+            } while(self->isValid(e));
         }
 
         /**
@@ -129,15 +114,15 @@ class PrioQueueBase {
          * be greater for example after extracting the extremum (which is
          * contained at the root).
          */
-        inline void heapDown(size_t e) {
+        inline void heapDown(ElementId e) {
             auto* self = static_cast<Child*>(this);
 
             while(true) {
-                int l = leftChild(e);
-                int r = rightChild(e);
+            	ElementId l = self->leftChild(e);
+            	ElementId r = self->rightChild(e);
 
-                if(r >= self->getIndexLimit()) {
-                    if(l < self->getIndexLimit() && self->compareElement(l, e))
+                if(!self->isValid(r)) {
+                    if(self->isValid(l) && self->compareElement(l, e))
                         self->swapElement(l, e);
 
                     return;
@@ -146,14 +131,14 @@ class PrioQueueBase {
                 if(self->compareElement(r, e)) {
                     if(self->compareElement(r, l)) {
                         self->swapElement(e, r);
-                        e = r;
+                        e = self->moveDown(e, r);
                     } else {
                         self->swapElement(e, l);
-                        e = l;
+                        e = self->moveDown(e, l);
                     }
                 } else if(self->compareElement(l, e)) {
                     self->swapElement(e, l);
-                    e = l;
+                    e = self->moveDown(e, l);
                 } else
                     break;
             }
@@ -165,14 +150,47 @@ class PrioQueueBase {
          * This method needs to be called after modifying the value of an
          * arbitrary element.
          */
-        inline void refresh(size_t idx) {
+        inline void refresh(ElementId idx) {
             auto* self = static_cast<Child*>(this);
 
-            if(idx && self->compareElement(idx, parent(idx)))
+            if(idx && self->compareElement(idx, self->parent(idx)))
                 heapUp(idx);
             else
                 heapDown(idx);
         }
+};
+
+template<class Child>
+class IndexedPrioQueueBase: protected PrioQueueBase<Child, size_t> {
+	friend class PrioQueueBase<Child, size_t>;
+
+    /// Helper to find the index of a parent.
+	constexpr static inline size_t parent(size_t n) {
+        return ((n + 1) >> 1) - 1;
+    }
+
+    /// Helper to find the index of the left child.
+    constexpr static inline size_t leftChild(size_t n) {
+        return ((n + 1) << 1) - 1;
+    }
+
+    /// Helper to find the index of the right child.
+    constexpr static inline size_t rightChild(size_t n) {
+        return ((n + 1) << 1);
+    }
+
+	constexpr static inline size_t moveUp(size_t current, size_t parent) {
+		return parent;
+	}
+
+	constexpr static inline size_t moveDown(size_t parent, size_t child) {
+		return child;
+	}
+
+    inline bool isValid(size_t n) {
+    	auto* self = static_cast<Child*>(this);
+    	return n < self->getIndexLimit();
+    }
 };
 
 
@@ -183,7 +201,7 @@ namespace detail {
     }
 
     template<class T, bool (compare)(const T& a,const T& b)>
-    struct PrioQueueWorker: PrioQueueBase<PrioQueueWorker<T, compare>> {
+    struct PrioQueueWorker: IndexedPrioQueueBase<PrioQueueWorker<T, compare>> {
             typedef PrioQueueBase<PrioQueueWorker<T, compare>> Base;
 
             size_t size = 0;
