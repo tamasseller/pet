@@ -152,3 +152,42 @@ TEST(BinaryHeap, MiniStress) {
 	CHECK(uut.extreme() == nullptr);
 }
 
+
+TEST(BinaryHeap, Update) {
+    Uut::Node a('a'), b('b'), c('c'), d('d'), e('e'), f('f'), g('g');
+    uut.insert(&g);
+    uut.insert(&b);
+    uut.insert(&f);
+    uut.insert(&d);
+    uut.insert(&a);
+    uut.insert(&c);
+    uut.insert(&e);
+
+    d.data = 'D';
+    uut.update(&d);
+    CHECK(uut.extreme() == &d);
+
+    c.data = 'C';
+    uut.update(&c);
+    CHECK(uut.extreme() == &c);
+
+    e.data = 'E';
+    uut.update(&e);
+    CHECK(uut.extreme() == &c);
+
+    b.data = 'B';
+    uut.update(&b);
+    CHECK(uut.extreme() == &b);
+
+    f.data = 'F';
+    uut.update(&f);
+    CHECK(uut.extreme() == &b);
+
+    a.data = 'A';
+    uut.update(&a);
+    CHECK(uut.extreme() == &a);
+
+    g.data = 'G';
+    uut.update(&g);
+    CHECK(uut.extreme() == &a);
+}

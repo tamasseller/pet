@@ -33,57 +33,46 @@ namespace pet {
  *
  * It expects that:
  *
- *  - the elements are identified by a zero based index,
- *  - the CRTP child provides a method that returns the number of accessible elements.
- *  - the CRTP child provides a comparator method, that uses these indices
- *  - and that the CRTP child also provides a similar swap method.
+ *  - the elements are by instances of a user provided type (ElementId),
+ *  - the CRTP child provides a methods to query the parent and children
+ *    elements and validity of a given instance of this identifier type.
+ *  - the CRTP child provides comparator and swap methods, that uses
+ *    these identifiers as their arguments.
+ *  - the CRTP child provides a further boolean value (_areIdsStable_)
+ *    that is true if swap operations also swap the targets of the ids,
+ *    so that the original identifers address the swapped elements (ie.
+ *    they are pointers) and false if the identifiers held by the logic
+ *    must be swapped to represent the actual state after the swap
+ *    operation.
  *
- * The comparator method (compareElement) is expected to:
+ * The comparator method (_compareElement_) is expected to:
  *
- *  - take two indices as argument,
+ *  - take two identifiers as argument,
  *  - return a boolean that is true if the strict ordering relation holds
  *    for the two elements identified by the indices.
  *
- * The swapper (swapElement) method:
+ * The swapper (_swapElement_) method:
  *
- *  - takes two indices as argument,
- *  - swaps the elements, such that after it returns the elements can be
- *    found under the old indices of each other.
+ *  - takes two identifiers as argument,
+ *  - swaps the relation of elements, to their parents and children.
  *
- * The element number getter (getIndexLimit) method is required to return
- * the currently available number of elements. This number is expected to
- * be constant during the ordering operations.
- *
- * Internals
- * ---------
- *
- * The heap structure is interpreted such, that every stored element is a
- * node in a full binary tree, that has all of its levels full expcept for
- * the last one, that - depending on the current number of elements - may
- * be filled only partially. The shape of the tree is never modified by the
- * ordering operations.
- *
- * The partially ordered property of the heap data structure means that
- * every node has a smaller (or greater, depending on the comparator
- * function) value than its children. If any value is changed, or a new
- * element is introduced (on the bottom layer) the elements are swapped
- * such that this property is satisfied.
- *
- * The indices are attached to the nodes such that on each layer elements
- * are numbered from left to right with incrementing indices. On the nth
- * layer the leftmost element has the index 2^n-1  (with the root level
- * being 0) It looks like this, in the common upside down representation,
- * where the root is at the top:
- *
- *                  0
- *                /   \
- *               1     2
- *              / \   / \
- *             3   4 5   6
- *
+ * The validity query (_isValid_) method is required to return true if
+ * the element identifier passed as its argument targets an element that
+ * is an existing and usable (swappable, comparable) element. This
+ * property is expected to be constant during the ordering operations.
  */
 template<class Child, class ElementId = size_t>
 class PrioQueueBase {
+        /// Helper to step up along the swap path of elements.
+        constexpr static inline ElementId moveUp(ElementId current, ElementId parent) {
+            return Child::areIdsStable ? current : parent;
+        }
+
+        /// Helper to step down along the swap path of elements.
+        constexpr static inline ElementId moveDown(ElementId parent, ElementId child) {
+            return Child::areIdsStable ? parent : child;
+        }
+
     protected:
         /**
          * Re-establish heap property recursively, going towards the root.
@@ -160,9 +149,73 @@ class PrioQueueBase {
         }
 };
 
+/**
+ * Priority queue (min/max heap) logic, for array-like containers.
+ *
+ * It is a fully abstract logic that implements the ordering
+ * operations of a min/max heap or priority queue, that is
+ * implemented over random access storage.
+ *
+ * It can be used by providing the concrete details through
+ * a CRTP relationship.
+ *
+ * It expects that:
+ *
+ *  - the elements are identified by a zero based index,
+ *  - the CRTP child provides a method that returns the number of accessible elements.
+ *  - the CRTP child provides a comparator method, that uses these indices
+ *  - and that the CRTP child also provides a similar swap method.
+ *
+ * The comparator method (compareElement) is expected to:
+ *
+ *  - take two indices as argument,
+ *  - return a boolean that is true if the strict ordering relation holds
+ *    for the two elements identified by the indices.
+ *
+ * The swapper (swapElement) method:
+ *
+ *  - takes two indices as argument,
+ *  - swaps the elements, such that after it returns the elements can be
+ *    found under the old indices of each other.
+ *
+ * The element number getter (getIndexLimit) method is required to return
+ * the currently available number of elements. This number is expected to
+ * be constant during the ordering operations.
+ *
+ * Internals
+ * ---------
+ *
+ * The heap structure is interpreted such, that every stored element is a
+ * node in a full binary tree, that has all of its levels full expcept for
+ * the last one, that - depending on the current number of elements - may
+ * be filled only partially. The shape of the tree is never modified by the
+ * ordering operations.
+ *
+ * The partially ordered property of the heap data structure means that
+ * every node has a smaller (or greater, depending on the comparator
+ * function) value than its children. If any value is changed, or a new
+ * element is introduced (on the bottom layer) the elements are swapped
+ * such that this property is satisfied.
+ *
+ * The indices are attached to the nodes such that on each layer elements
+ * are numbered from left to right with incrementing indices. On the nth
+ * layer the leftmost element has the index 2^n-1  (with the root level
+ * being 0) It looks like this, in the common upside down representation,
+ * where the root is at the top:
+ *
+ *                  0
+ *                /   \
+ *               1     2
+ *              / \   / \
+ *             3   4 5   6
+ *
+ */
 template<class Child>
 class IndexedPrioQueueBase: protected PrioQueueBase<Child, size_t> {
 	friend class PrioQueueBase<Child, size_t>;
+
+	/// Swap operations change the meaning of ids.
+    static constexpr bool areIdsStable = false;
 
     /// Helper to find the index of a parent.
 	constexpr static inline size_t parent(size_t n) {
@@ -179,13 +232,6 @@ class IndexedPrioQueueBase: protected PrioQueueBase<Child, size_t> {
         return ((n + 1) << 1);
     }
 
-	constexpr static inline size_t moveUp(size_t current, size_t parent) {
-		return parent;
-	}
-
-	constexpr static inline size_t moveDown(size_t parent, size_t child) {
-		return child;
-	}
 
     inline bool isValid(size_t n) {
     	auto* self = static_cast<Child*>(this);
@@ -195,22 +241,29 @@ class IndexedPrioQueueBase: protected PrioQueueBase<Child, size_t> {
 
 
 namespace detail {
+    /// Comparison based on the < operator of the type.
     template<class T>
     static inline bool trivialCompare(const T& a,const T& b) {
         return a < b;
     }
 
+    /// Worker for the heapSort and findMedian methods.
     template<class T, bool (compare)(const T& a,const T& b)>
     struct PrioQueueWorker: IndexedPrioQueueBase<PrioQueueWorker<T, compare>> {
             typedef PrioQueueBase<PrioQueueWorker<T, compare>> Base;
 
+            /// Number of the already processed elements.
             size_t size = 0;
+
+            /// Pointer to the buffer that is being sorted.
             T* data;
 
+            /// Inverse comparator, needed due to order revesal of extraction.
             inline bool compareElement(size_t a, size_t b) {
                 return !compare(this->data[a], this->data[b]);
             }
 
+            /// 'Make heap' contructor.
             PrioQueueWorker(T* data, size_t n): data(data) {
                 for(size = 2; size < n; size++) {
                     Base::heapUp(size - 1);
@@ -219,10 +272,12 @@ namespace detail {
                 Base::heapUp(size - 1);
             }
 
+            /// Implementation of the IndexedPrioQueueBase requirements.
             inline size_t getIndexLimit() {
                 return size;
             }
 
+            /// Implementation of the IndexedPrioQueueBase requirements.
             inline void swapElement(size_t a, size_t b) {
                 const T temp = data[a];
                 data[a] = data[b];
@@ -233,6 +288,9 @@ namespace detail {
     };
 }
 
+/**
+ * Heap sort implementation based on the generic PrioQueueBase logic.
+ */
 template<class T, bool (compare)(const T& a,const T& b) = &detail::trivialCompare<T>>
 void heapSort(T* data, size_t n) {
     for (detail::PrioQueueWorker<T, compare> heap(data, n); heap.size > 1; ) {
@@ -241,7 +299,12 @@ void heapSort(T* data, size_t n) {
     }
 }
 
-template<class T, bool (compare)(const T& a,const T& b) = &detail::trivialCompare<T>>
+/**
+ * Partial heap sort that stops when the median is found based on the generic PrioQueueBase logic.
+ *
+ * @NOTE This implementation only supports odd numbers of input data items.
+ */
+template<class T, bool (compare)(const T& a, const T& b) = &detail::trivialCompare<T>>
 const T& findMedian(T* data, size_t n) {
     for (detail::PrioQueueWorker<T, compare> heap(data, n); heap.size > (n+1) / 2; ) {
         data[0] = data[--heap.size];

@@ -24,66 +24,91 @@
 
 namespace pet {
 
+/**
+ * A node of the BinaryHeap.
+ */
 class HeapNode {
 	public:
-		HeapNode *parent;		//!< The parent
-		HeapNode *children[2];	//!< The children
+        /// Pointer to the parent of the node or null for the root.
+		HeapNode *parent;
 
-		/** Create a disconnected node */
+		/// Pointer to the children of the node or null if not exists.
+		HeapNode *children[2];
+
+		/// Create a disconnected node.
 		inline HeapNode(): children{nullptr, nullptr}, parent(nullptr) {}
 };
 
+/**
+ * Intrusive binary heap, based on the generic PrioQueueBase logic.
+ *
+ * This class implements a binary heap (a binary tree that is heap
+ * structured) according to the used supplied comparison function,
+ * that is of the 'less' kind. Which means that it must return true
+ * if the strict ordering relation between the elements is true.
+ */
 template<bool (*compare)(HeapNode*, HeapNode*)>
 class BinaryHeap: PrioQueueBase<BinaryHeap<compare>, HeapNode*> {
 	friend class PrioQueueBase<BinaryHeap<compare>, HeapNode*>;
 	using Node = HeapNode;
 
-	Node* root;
-	size_t nElements;
+    /// Swap operations do not change the target of ids (PrioQueueBase requirement).
+    static constexpr bool areIdsStable = true;
 
-    /// Helper to find the parent.
+    /// Helper to find the parent (PrioQueueBase requirement).
 	static constexpr inline Node* parent(Node* n) {
     	return n->parent;
     }
 
-    /// Helper to find one child.
+    /// Helper to find one child (PrioQueueBase requirement).
     static constexpr inline Node* leftChild(Node* n) {
     	return n->children[0];
     }
 
-    /// Helper to find the other child.
+    /// Helper to find the other child (PrioQueueBase requirement).
     static constexpr inline Node* rightChild(Node* n) {
     	return n->children[1];
     }
 
-    static constexpr inline Node* moveUp(Node* current, Node* parent) {
-		return current;
-	}
-
-    static constexpr inline Node* moveDown(Node* parent, Node* child) {
-		return parent;
-	}
-
-
+    /// Helper to determine element reference validity (PrioQueueBase requirement).
 	static constexpr inline bool isValid(Node* n) {
     	return n != nullptr;
     }
 
+	/// Element comparator, 'less' type (PrioQueueBase requirement).
     static constexpr inline bool compareElement(Node* a, Node* b) {
          return compare(a, b);
     }
 
+    /// Pointer to the root node, or null if empty.
+    Node* root;
+
+    /// The number of elements in the container (used for finding the last element).
+    size_t nElements;
+
+    /// Exchange the contents of two pointers.
     static inline void swapPointers(Node* &a, Node* &b) {
-    	Node* const temp = a;
-    	a = b;
-    	b = temp;
+        Node* const temp = a;
+        a = b;
+        b = temp;
     }
 
+    /// Exchange the position of two element in the tree (PrioQueueBase requirement).
     inline void swapElement(Node* a, Node* b) {
+        /*
+         * Update parent backlinks to the swapped state.
+         */
     	*(a->parent ? (a->parent->children + (a->parent->children[0] == a ? 0 : 1)) : &root) = b;
     	*(b->parent ? (b->parent->children + (b->parent->children[0] == b ? 0 : 1)) : &root) = a;
+
+    	/*
+    	 * Swap the nodes parent pointers.
+    	 */
     	swapPointers(a->parent, b->parent);
 
+    	/*
+    	 * Swap the children and update their parent pointers.
+    	 */
     	for(int i=0; i<2; i++) {
         	swapPointers(a->children[i], b->children[i]);
 
@@ -95,16 +120,36 @@ class BinaryHeap: PrioQueueBase<BinaryHeap<compare>, HeapNode*> {
     	}
     }
 
+
+    /**
+     * In-tree position of an existing or new node.
+     *
+     * An instance of this type identifies an abstract position in the tree,
+     * that can be obtained while searching for a given key. It describes
+     * the position in the tree where the node is found, or where it needs
+     * to be inserted.
+     *
+     * It contains:
+     *
+     *  - a pointer to the parent node if there is any
+     *  - and a pointer to the pointer that is to be pointed at the node.
+     */
     struct Position {
     	Node* parent;
     	Node** backLink;
     };
 
+    /**
+     * Find the Position of the last element defined by the number of elements.
+     */
     Position findLastPlace()
     {
 		size_t path = nElements, low = 0, high = 31;
     	Position ret{nullptr, &root};
 
+    	/*
+    	 * Halving search for the bit position of the most significant one bit.
+    	 */
 		while(low != high){
 			unsigned int mid = (low + high + 1) >> 1;
 			if(~((1 << mid) - 1) & path)
@@ -113,6 +158,11 @@ class BinaryHeap: PrioQueueBase<BinaryHeap<compare>, HeapNode*> {
 				high = mid - 1;
 		}
 
+		/*
+		 * Follow the path defined by the number of elements to reach the
+		 * parent of the last element. At every bit position, zero bits mean
+		 * 'left' turn one bits mean 'right'.
+		 */
 		while(low) {
 			const size_t currentBit = 1 << (low-- - 1);
 			ret.parent = *ret.backLink;
@@ -123,6 +173,17 @@ class BinaryHeap: PrioQueueBase<BinaryHeap<compare>, HeapNode*> {
     }
 
 public:
+    /**
+     * Access the extremum, null for empty heap.
+     */
+    const Node* extreme() {
+        return root;
+    }
+
+    /**
+     * Insert a node at an adequate position according the
+     * comparison of elements.
+     */
     void insert(Node* n) {
     	nElements++;
     	Position pos = findLastPlace();
@@ -132,11 +193,15 @@ public:
     	this->heapUp(n);
     }
 
-    const Node* extreme() {
-    	return root;
-    }
-
-    const void remove(Node* n) {
+    /**
+     * Remove an arbitrary element and restore heap property.
+     *
+     * @NOTE It is an error to call this method on a node that
+     *       is not contained in this heap (or it is contained
+     *       in an other heap). This is not checked, as there
+     *       is no zero-overhead way of doing it.
+     */
+    void remove(Node* n) {
     	Position pos = findLastPlace();
     	nElements--;
 
@@ -159,7 +224,12 @@ public:
     	this->heapDown(subst);
     }
 
-    const void pop()
+    /**
+     * Discard the extremum and restore heap property.
+     *
+     * @NOTE Emptiness is checked, nothing is done on an empty heap.
+     */
+    void pop()
     {
     	if(!root)
     		return;
@@ -167,6 +237,17 @@ public:
     	remove(root);
     }
 
+    /**
+     * Restore the heap property after updating an arbitrary element.
+     *
+     * @NOTE It is an error to call this method on a node that
+     *       is not contained in this heap (or it is contained
+     *       in an other heap). This is not checked, as there
+     *       is no zero-overhead way of doing it.
+     */
+    void update(Node* n) {
+        this->refresh(n);
+    }
 };
 
 }
