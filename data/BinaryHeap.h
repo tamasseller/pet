@@ -27,8 +27,7 @@ namespace pet {
 /**
  * A node of the BinaryHeap.
  */
-class HeapNode {
-	public:
+struct HeapNode {
         /// Pointer to the parent of the node or null for the root.
 		HeapNode *parent;
 
@@ -36,7 +35,7 @@ class HeapNode {
 		HeapNode *children[2];
 
 		/// Create a disconnected node.
-		inline HeapNode(): children{nullptr, nullptr}, parent(nullptr) {}
+		inline HeapNode(): parent(nullptr), children{nullptr, nullptr} {}
 };
 
 /**
@@ -47,7 +46,7 @@ class HeapNode {
  * that is of the 'less' kind. Which means that it must return true
  * if the strict ordering relation between the elements is true.
  */
-template<bool (*compare)(HeapNode*, HeapNode*)>
+template<bool (*compare)(const HeapNode*, const HeapNode*)>
 class BinaryHeap: PrioQueueBase<BinaryHeap<compare>, HeapNode*> {
 	friend class PrioQueueBase<BinaryHeap<compare>, HeapNode*>;
 	using Node = HeapNode;
@@ -151,7 +150,7 @@ class BinaryHeap: PrioQueueBase<BinaryHeap<compare>, HeapNode*> {
     	 * Halving search for the bit position of the most significant one bit.
     	 */
 		while(low != high){
-			unsigned int mid = (low + high + 1) >> 1;
+			size_t mid = (low + high + 1) >> 1;
 			if(~((1 << mid) - 1) & path)
 				low = mid;
 			else
@@ -176,7 +175,7 @@ public:
     /**
      * Access the extremum, null for empty heap.
      */
-    const Node* extreme() {
+    Node* extreme() {
         return root;
     }
 
@@ -211,7 +210,7 @@ public:
     	if(n == subst)
     		return;
 
-		subst->parent = n->parent;
+    	subst->parent = n->parent;
 		*(n->parent ? (n->parent->children + (n->parent->children[0] == n ? 0 : 1)) : &root) = subst;
 
     	for(int i=0; i<2; i++) {

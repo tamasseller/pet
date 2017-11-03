@@ -23,7 +23,7 @@
 
 using namespace pet;
 
-static bool compareNodes(HeapNode* a, HeapNode* b);
+static bool compareNodes(const HeapNode* a, const HeapNode* b);
 
 struct Uut: BinaryHeap<&compareNodes> {
 	struct Node: HeapNode {
@@ -33,9 +33,9 @@ struct Uut: BinaryHeap<&compareNodes> {
 	};
 } uut;
 
-static bool compareNodes(HeapNode* a, HeapNode* b)
+static bool compareNodes(const HeapNode* a, const HeapNode* b)
 {
-	return static_cast<Uut::Node*>(a)->data < static_cast<Uut::Node*>(b)->data;
+	return static_cast<const Uut::Node*>(a)->data < static_cast<const Uut::Node*>(b)->data;
 }
 
 
