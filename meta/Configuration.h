@@ -361,3 +361,12 @@ class ConfigTemplate {
 
 #define PET_CONFIG_TEMPLATE(name) \
 	template<template<class...> class x> struct name: pet::ConfigTemplate<name, x> {}
+
+#define PET_EXTRACT_VALUE(name, config, defaultValue, arguments) \
+	static constexpr auto name = config<defaultValue>::template extract<arguments...>::value
+
+#define PET_EXTRACT_TYPE(name, config, defaultValue, arguments) \
+	using name = typename config<defaultValue>::template extract<arguments...>::type
+
+#define PET_EXTRACT_TEMPLATE(name, config, defaultValue, arguments) \
+	template<class... X> using name = typename config<defaultValue>::template extract<arguments...>::template typeTemplate<X...>
