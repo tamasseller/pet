@@ -45,8 +45,8 @@ namespace pet {
  */
 template<class Element>
 class DoubleList: public pet::IterativeSearch<DoubleList<Element>, Element>::Decorator {
-	Element* first = 0;
-	Element* last = 0;
+	Element* first = nullptr;
+	Element* last = nullptr;
 public:
 	/** @copydoc LinkedList::Iterator */
 	class Iterator {

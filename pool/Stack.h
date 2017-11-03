@@ -58,7 +58,7 @@ protected:
 	};
 
 	int pos = 0;					//!< The index of the current element on the current frame.
-	Frame *currFrame = 0;			//!< The current frame.
+	Frame *currFrame = nullptr;			//!< The current frame.
 public:
 	/**
 	 * Is there more data?

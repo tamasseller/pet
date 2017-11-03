@@ -140,7 +140,7 @@ protected:
 	 */
 	struct Position {
 		/// The parent of the node found or to be inserted or NULL for the root
-		Node *parent = 0;
+		Node *parent = nullptr;
 
 		/// A pointer to the child pointer of parent or to the root pointer if it is the root
 		Node **origin = 0;

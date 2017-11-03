@@ -40,14 +40,14 @@ template<class Element, class Allocator, unsigned int frameSize>
 class DynamicFifo {
 private:
 	struct Frame {
-		Frame *next = 0;
+		Frame *next = nullptr;
 		Element data[frameSize];
 		inline void* operator new( size_t sz, void* here ) {return here;}
 	};
 
 	struct Position {
 		int pos = 0;
-		Frame *frame = 0;
+		Frame *frame = nullptr;
 
 		inline bool isValid();
 		inline bool release();

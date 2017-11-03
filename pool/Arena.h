@@ -46,7 +46,7 @@ class Arena {
 
 		Frame(Frame* p): prev(p){}
 	};
-	Frame *frameList=0;
+	Frame *frameList=nullptr;
 	unsigned int counter;
 public:
 	/**

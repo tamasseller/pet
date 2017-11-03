@@ -14,7 +14,7 @@ class ModuleInterface {
 	bool locked = false;
 
     friend class LinkedList<ModuleInterface>;
-    ModuleInterface *next = 0;
+    ModuleInterface *next = nullptr;
 
     friend class Modules;
     virtual void init() = 0;

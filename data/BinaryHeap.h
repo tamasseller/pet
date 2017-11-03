@@ -80,10 +80,10 @@ class BinaryHeap: PrioQueueBase<BinaryHeap<compare>, HeapNode*> {
     }
 
     /// Pointer to the root node, or null if empty.
-    Node* root;
+    Node* root = nullptr;
 
     /// The number of elements in the container (used for finding the last element).
-    size_t nElements;
+    size_t nElements = 0;
 
     /// Exchange the contents of two pointers.
     static inline void swapPointers(Node* &a, Node* &b) {

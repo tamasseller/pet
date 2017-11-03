@@ -90,7 +90,7 @@ inline typename BestFitPolicy<SizeType, alignmentBits>::Block
 BestFitPolicy<SizeType, alignmentBits>::findAndRemove(unsigned int size)
 {
 	unsigned int bestSize = 0xffffffff;
-	FreeBlock* best = 0;
+	FreeBlock* best = nullptr;
 	for(auto it = freeStore.iterator(); it.current(); it.step()) {
 		unsigned int currSize = Block(it.current()).getSize();
 		if(currSize == size) {

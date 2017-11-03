@@ -48,7 +48,7 @@ public:
 	 * @return	The allocated item.
 	 */
 	pet::FailPointer<Element> acquire(){
-		Element* ret = 0;
+		Element* ret = nullptr;
 		if(!hasFree()){
 			if(hasSpare())
 				ret = (Element*)pool[tail++];
