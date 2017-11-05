@@ -142,7 +142,7 @@ class PrioQueueBase {
         inline void refresh(ElementId idx) {
             auto* self = static_cast<Child*>(this);
 
-            if(idx && self->compareElement(idx, self->parent(idx)))
+            if(self->isValid(idx) && self->isValid(self->parent(idx)) && self->compareElement(idx, self->parent(idx)))
                 heapUp(idx);
             else
                 heapDown(idx);
