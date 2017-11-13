@@ -30,11 +30,10 @@ void TraceOutput::reportProgress()
 {
 	trace::info << ".";
 
-    if(nDots == 64) {
+    if(++nDots == 64) {
         trace::info << "\n";
         nDots = 0;
-    }else
-        nDots++;
+    }
 }
 
 void TraceOutput::reportTestFailure(bool isSynthetic, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text)
