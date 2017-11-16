@@ -89,6 +89,8 @@ public:
 	inline Element* popFront();
 	inline Element* popBack();
 
+	really inline void clear();
+
 	/**
 	 * Fast, unchecked remove element.
 	 *
@@ -161,6 +163,11 @@ really inline void DoubleList<Element>::fastAddBack(Element* elem)
 
     if(!first)
         first = last;
+}
+
+template<class Element>
+really inline void DoubleList<Element>::clear() {
+	first = last = nullptr;
 }
 
 template<class Element>
