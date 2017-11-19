@@ -17,6 +17,9 @@
  *
  *******************************************************************************/
 
+#ifndef CONFIGURATION_H_
+#define CONFIGURATION_H_
+
 /*
  * Meta program for tag based configuration of template modules.
  * =============================================================
@@ -370,3 +373,5 @@ class ConfigTemplate {
 
 #define PET_EXTRACT_TEMPLATE(name, config, defaultValue, arguments) \
 	template<class... X> using name = typename config<defaultValue>::template extract<arguments...>::template typeTemplate<X...>
+
+#endif /* CONFIGURATION_H_ */
