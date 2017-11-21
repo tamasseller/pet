@@ -21,6 +21,7 @@ SOURCES += TestDataBinaryHeap.cpp
 SOURCES += TestDataDoubleList.cpp
 SOURCES += TestDataLinkedList.cpp
 SOURCES += TestDataMedianFilter.cpp
+SOURCES += TestDataMutableStorage.cpp
 SOURCES += TestDataPriorityQueue.cpp
 SOURCES += TestDataCircularBuffer.cpp
 SOURCES += TestDataOrderedDoubleList.cpp
@@ -45,6 +46,7 @@ SOURCES += TestMetaMetaString.cpp
 SOURCES += TestMetaPacks.cpp
 SOURCES += TestMetaRange.cpp
 SOURCES += TestMetaTuple.cpp
+SOURCES += TestMetaTypePackInfo.cpp
 SOURCES += TestMetaSequence.cpp
 SOURCES += TestPoolArena.cpp
 SOURCES += TestPoolFifo.cpp
@@ -72,7 +74,7 @@ INCLUDE_DIRS += failure-injector
 
 # Flags
 
-CXXFLAGS += -std=c++11								# Use the c++ standard released in 2011
+CXXFLAGS += -std=c++17								# Use the c++ standard released in 2011
 CXXFLAGS += -O0 									# Avoid optimizer screwing up coverage data
 CXXFLAGS += -g3										# Include all available debug info
 CXXFLAGS += -fno-inline								# Do not inline (coverage again)

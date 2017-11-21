@@ -23,53 +23,6 @@
 
 using namespace pet;
 
-TEST_GROUP(TypesInfo) {};
-
-TEST(TypesInfo, Position) {
-    CHECK(detail::TypeInfo<short, int, char>::Position<short>::value == 0);
-    CHECK(detail::TypeInfo<short, int, char>::Position<int>::value == 1);
-    CHECK(detail::TypeInfo<short, int, char>::Position<char>::value == 2);
-}
-
-TEST(TypesInfo, Size) {
-    CHECK(detail::TypeInfo<>::size == 0);
-    CHECK(detail::TypeInfo<char>::size == sizeof(char));
-    CHECK(detail::TypeInfo<char, short>::size == sizeof(short));
-    CHECK(detail::TypeInfo<int, char, short>::size == sizeof(int));
-    CHECK(detail::TypeInfo<int, char, long long, short>::size == sizeof(long long));
-}
-
-TEST(TypesInfo, Alignment) {
-    CHECK(detail::TypeInfo<>::alignment == 0);
-    CHECK(detail::TypeInfo<char>::alignment == alignof(char));
-    CHECK(detail::TypeInfo<char, short>::alignment == alignof(short));
-    CHECK(detail::TypeInfo<int, char, short>::alignment == alignof(int));
-    CHECK(detail::TypeInfo<int, char, long long, short>::alignment == alignof(long long));
-}
-
-TEST(TypesInfo, Uniqueness) {
-    CHECK(!detail::TypeInfo<int, char, short, int>::allUnique);
-    CHECK(!detail::TypeInfo<int, char, short, int>::allUnique);
-    CHECK(!detail::TypeInfo<short, char, short, int>::allUnique);
-    CHECK(!detail::TypeInfo<char, char, short, int>::allUnique);
-    CHECK(detail::TypeInfo<float, char, short, int>::allUnique);
-    CHECK(!detail::TypeInfo<int, int, int>::allUnique);
-    CHECK(!detail::TypeInfo<int, char, int>::allUnique);
-    CHECK(!detail::TypeInfo<char, int, char>::allUnique);
-    CHECK(!detail::TypeInfo<char, short, char>::allUnique);
-    CHECK(detail::TypeInfo<char, short, int>::allUnique);
-    CHECK(detail::TypeInfo<short, int, char>::allUnique);
-}
-
-TEST(TypesInfo, NoReferences) {
-    CHECK(detail::TypeInfo<short, int, char>::noReferences);
-    CHECK(!detail::TypeInfo<short, int, char&>::noReferences);
-    CHECK(!detail::TypeInfo<short&, int&, char&>::noReferences);
-
-    typedef int &S;
-    CHECK(!detail::TypeInfo<S>::noReferences);
-}
-
 struct T {
     static int n;
     T() {n++;}

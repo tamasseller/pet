@@ -4,8 +4,8 @@ Proper Embedded Templates
 This is a collection of mostly unrelated utilities that are 
 specifically designed to be used in advanced microcontroller firmware.
 
-Some parts of this library use modern (ie post-2011) C++ features, thus it
-**requires a decent compiler with stable C++11 support** (like GCC 5+).
+Some parts of this library use modern C++ features, thus it **requires
+a decent compiler with stable C++17 support** (like GCC 6 or above).
 
 Most of it is implemented as class templates, and some are even variadic.
 But there is some - although very little - code that needs to be compiled and linked in.
