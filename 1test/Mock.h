@@ -129,7 +129,7 @@ inline bool ExpectPool<size>::expect(uintptr_t value)
 {
     if (writeIdx != (readIdx + size) % (2 * size)) {
         pool[writeIdx % size] = value;
-        writeIdx = (writeIdx + 1) % (2 * size);
+        writeIdx = static_cast<uint16_t>((writeIdx + 1) % (2 * size));
         return true;
     } else
         return false;
@@ -140,7 +140,7 @@ inline bool ExpectPool<size>::call(uintptr_t value)
 {
     if (readIdx != writeIdx) {
         bool ret = pool[readIdx % size] == value;
-        readIdx = (readIdx + 1) % (2 * size);
+        readIdx = static_cast<uint16_t>((readIdx + 1) % (2 * size));
         return ret;
     } else
         return false;
