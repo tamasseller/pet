@@ -452,3 +452,26 @@ TEST(NonEmptyLinkedList, IteratorInsertRemoveSwap) {
 	it.step();
 	CHECK(it.current() == 0);
 }
+
+TEST(NonEmptyLinkedList, TakeOver) {
+	LinkedList<SimpleElement> newList;
+
+	SimpleElement e4;
+
+	newList.add(&e4);
+
+	CHECK(!newList.isEmpty());
+
+	newList.take(list);
+
+	CHECK(list.isEmpty());
+
+	auto it = newList.iterator();
+	CHECK(it.current() == &e3);
+	it.step();
+	CHECK(it.current() == &e2);
+	it.step();
+	CHECK(it.current() == &e1);
+	it.step();
+	CHECK(it.current() == 0);
+}

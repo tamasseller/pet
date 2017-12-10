@@ -163,6 +163,14 @@ public:
 	 * 			(ie.: the first element if there is any).
 	 */
 	really inline Iterator iterator();
+
+	/**
+	 * Take over the content of another list.
+	 *
+	 * Drops the current content and takes over the other lists
+	 * content, also sets the other list to be empty.
+	 */
+	really inline void take(LinkedList& other);
 };
 
 template<class Element>
@@ -215,6 +223,12 @@ inline void LinkedList<Element>::clear() {
 template<class Element>
 inline bool LinkedList<Element>::isEmpty() const {
 	return first == nullptr;
+}
+
+template<class Element>
+inline void LinkedList<Element>::take(LinkedList& other) {
+	first = other.first;
+	other.clear();
 }
 
 
