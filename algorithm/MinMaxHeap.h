@@ -20,6 +20,8 @@
 #ifndef MINMAXHEAP_H_
 #define MINMAXHEAP_H_
 
+#include <stddef.h>
+
 namespace pet {
 
 /**
