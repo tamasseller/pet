@@ -14,6 +14,7 @@ SOURCES += ../ubiquitous/PrintfWriter.cpp
 SOURCES += TestAlgoIterate.cpp
 SOURCES += TestAlgoStr.cpp
 SOURCES += TestAlgoMinMaxHeap.cpp
+SOURCES += TestAlgoIntegerDivision.cpp
 SOURCES += TestDataFifo.cpp
 SOURCES += TestDataUnion.cpp
 SOURCES += TestDataBinaryTree.cpp

@@ -67,7 +67,7 @@ class TupleImpl<Sequence<idx...>, T...>: TupleWrapper<idx, T>... {
 
         template<class = enableIf<!sameTypes<TupleImpl, NoRefPair>::value>>
         TupleImpl operator =(const NoRefPair& other) {
-            int unused[] = {(get<idx>() =   other.get<idx>(), 0)...};
+            int unused[] = {(get<idx>() =   other.template get<idx>(), 0)...};
             (void) unused;
             return *this;
         }
@@ -84,10 +84,13 @@ Tuple<T...> makeTuple(T&&... args) {
     return Tuple<T...>(args...);
 }
 
+#if 0
+// GCC 8 says: "sorry, unimplemented: mangling reference_type"
 template<class... T>
 Tuple<T&...> tie(T&... args ) {
     return Tuple<T&...>(args...);
 }
+#endif
 
 }
 

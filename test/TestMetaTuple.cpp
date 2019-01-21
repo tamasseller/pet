@@ -75,6 +75,8 @@ TEST(Tuple, EqualsOperatorReference) {
     CHECK(c == 'a');
 }
 
+#if 0
+// GCC 8 says: "sorry, unimplemented: mangling reference_type"
 TEST(Tuple, Tie) {
     int a = 2;
     char c = 'b';
@@ -83,3 +85,4 @@ TEST(Tuple, Tie) {
     CHECK(a == 1);
     CHECK(c == 'a');
 }
+#endif
