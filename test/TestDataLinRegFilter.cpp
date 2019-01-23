@@ -104,9 +104,9 @@ TEST(LinRegFilter, WithShift2)
     LinRegFilter<3, 5> filt;
 
     int32_t nA, nB, d;
-    filt.update(0 * 1024, 2 * 1024, nA, nB, d);
-    filt.update(1 * 1024, 3 * 1024, nA, nB, d);
-    filt.update(2 * 1024, 4 * 1024, nA, nB, d);
+    filt.update(0 * 1024 / 2, 4 * 1024 / 2, nA, nB, d); // 0 -> 2
+    filt.update(1 * 1024 / 2, 5 * 1024 / 2, nA, nB, d); // 0,5 -> 2,5
+    filt.update(2 * 1024 / 2, 6 * 1024 / 2, nA, nB, d); // 1 -> 3
 
     CHECK(nA / d == 1);
     CHECK(nB / d == 2);
