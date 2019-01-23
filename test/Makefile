@@ -21,6 +21,7 @@ SOURCES += TestDataBinaryTree.cpp
 SOURCES += TestDataBinaryHeap.cpp
 SOURCES += TestDataDoubleList.cpp
 SOURCES += TestDataLinkedList.cpp
+SOURCES += TestDataLinRegFilter.cpp
 SOURCES += TestDataMedianFilter.cpp
 SOURCES += TestDataMutableStorage.cpp
 SOURCES += TestDataPriorityQueue.cpp
