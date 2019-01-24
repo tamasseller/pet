@@ -17,10 +17,11 @@
  *
  *******************************************************************************/
 
-#ifndef FW_LIB_PET_DATA_LINREGFILTER_H_
-#define FW_LIB_PET_DATA_LINREGFILTER_H_
+#ifndef LINREGFILTER_H_
+#define LINREGFILTER_H_
 
 #include <stdint.h>
+#include <stddef.h>
 
 template<size_t n, size_t shift>
 struct LinRegFilter
@@ -69,4 +70,4 @@ struct LinRegFilter
 	}
 };
 
-#endif /* FW_LIB_PET_DATA_LINREGFILTER_H_ */
+#endif /* LINREGFILTER_H_ */

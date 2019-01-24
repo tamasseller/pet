@@ -95,8 +95,8 @@ TEST(LinRegFilter, WithShift1)
     filt.update(0 * 1024, 2 * 1024, nA, nB, d);
     filt.update(1 * 1024, 3 * 1024, nA, nB, d);
 
-    CHECK(nA / d == 1);
-    CHECK(nB / d == 2);
+    CHECK((nA * 1024) / d == 1 * 1024);
+    CHECK((nB * 1024) / d == 2 * 1024);
 }
 
 TEST(LinRegFilter, WithShift2)
@@ -108,6 +108,19 @@ TEST(LinRegFilter, WithShift2)
     filt.update(1 * 1024 / 2, 5 * 1024 / 2, nA, nB, d); // 0,5 -> 2,5
     filt.update(2 * 1024 / 2, 6 * 1024 / 2, nA, nB, d); // 1 -> 3
 
-    CHECK(nA / d == 1);
-    CHECK(nB / d == 2);
+    CHECK((nA * 1024) / d == 1 * 1024);
+    CHECK((nB * 1024) / d == 2 * 1024);
+}
+
+TEST(LinRegFilter, WithShift3)
+{
+    LinRegFilter<3, 5> filt;
+
+    int32_t nA, nB, d;
+    filt.update(0 * 1024 / 2, - 4 * 1024 / 4, nA, nB, d); // 0 -> -1
+    filt.update(1 * 1024 / 2, - 5 * 1024 / 4, nA, nB, d); // 0,5 -> -1.25
+    filt.update(2 * 1024 / 2, - 6 * 1024 / 4, nA, nB, d); // 1 -> -1.5
+
+    CHECK(d / nA == - 2);
+    CHECK((nB * 1024) / d == - 1024);
 }
