@@ -481,4 +481,10 @@ inline void Mock<hash>::disable() {
 /// Mock _call_ method facade for source location injection (see _Mock::expect_ for details).
 #define CALL(name) call(#name, INTERNAL_AT())
 
+/// Mock _expect_ method facade for source location injection (see _Mock::expect_ for details).
+#define EXPECTNC(name) expect(name, INTERNAL_AT())
+
+/// Mock _call_ method facade for source location injection (see _Mock::expect_ for details).
+#define CALLNC(name) call(name, INTERNAL_AT())
+
 #endif /* MOCK_H_ */
