@@ -49,6 +49,7 @@ SOURCES += TestMetaPacks.cpp
 SOURCES += TestMetaRange.cpp
 SOURCES += TestMetaSequence.cpp
 SOURCES += TestMetaSfinae.cpp
+SOURCES += TestMetaStateChange.cpp
 SOURCES += TestMetaTuple.cpp
 SOURCES += TestMetaTypePackInfo.cpp
 SOURCES += TestPoolArena.cpp
