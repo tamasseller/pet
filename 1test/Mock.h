@@ -279,7 +279,7 @@ class MockDecorator {
          *
          * @return Returns a copy of the current object, for further chaining of expectations/calls.
          */
-        inline MockDecorator withParam(void* param, uintptr_t length) {
+        inline MockDecorator withParam(const void* param, uintptr_t length) {
             if (!error && !output(javaHash(static_cast<const char*>(param), length)))
                 error = "Mock - data block parameter error";
 

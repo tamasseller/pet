@@ -146,7 +146,7 @@ protected:
 		Node **origin = 0;
 
 		/// Get the node or null if not present.
-		inline Node *getNode(){return *origin;}
+		inline Node *getNode ()const{return *origin;}
 
 		inline Position (Node* parent, Node** origin): parent(parent), origin(origin) {}
 	};
