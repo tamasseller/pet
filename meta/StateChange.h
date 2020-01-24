@@ -1,13 +1,26 @@
-/*
- * StateChange.h
+/*******************************************************************************
  *
- *  Created on: 2020. jan. 24.
- *      Author: tooma
- */
+ * Copyright (c) 2016, 2017 Seller Tamás. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *******************************************************************************/
 
 #ifndef PET_META_STATECHANGE_H_
 #define PET_META_STATECHANGE_H_
 
+#include "ubiquitous/Compiler.h"
 
 template<class T1, class T2>
 struct Pair {
@@ -17,7 +30,7 @@ struct Pair {
 template<class T1, class T2>
 template<class N1, class N2>
 struct Pair<T1, T2>::Applier<Pair<N1, N2>> {
-    static void apply() {
+	really inline static void apply() {
         T1::template Applier<N1>::apply();
         T2::template Applier<N2>::apply();
     }
@@ -37,7 +50,7 @@ struct Stopper {
 
 template<>
 struct Stopper::Applier<Stopper> {
-    static void apply() {}
+	really inline static void apply() {}
 };
 
 template<>
@@ -50,7 +63,7 @@ template<class... Params> struct Compound
     using Value = typename Pairs<Params...>::Type;
 };
 
-#define STATE(stateVar)                \
+#define STATE(stateVar)                												\
 template<class> struct stateVar;
 
 #define VALUE(stateVar, value)                                                      \
@@ -60,18 +73,33 @@ template<> struct stateVar<value> {                                             
 };                                                                                  \
                                                                                     \
 template<> template<>                                                               \
-struct stateVar<value>::Applier<stateVar<value>> { static void apply() {} };        \
+struct stateVar<value>::Applier<stateVar<value>> {									\
+	really inline static void apply() {} };        									\
                                                                                     \
 template<> template<class otherValue>                                               \
 struct stateVar<value>::Applier<stateVar<otherValue>> {                             \
-    static void apply();                                                            \
+	inline static void apply();                                                     \
 };                                                                                  \
                                                                                     \
 template<> template<class otherValue>                                               \
-void stateVar<value>::Applier<stateVar<otherValue>>::apply()
+really inline void stateVar<value>::Applier<stateVar<otherValue>>::apply()
+
+#define VALUE_FORCED(stateVar, value)                                               \
+class value;                                                                        \
+template<> struct stateVar<value> {                                                 \
+    template<class> struct Applier;                                                 \
+};                                                                                  \
+                                                                                    \
+template<> template<class otherValue>                                               \
+struct stateVar<value>::Applier<stateVar<otherValue>> {                             \
+	inline static void apply();                                                     \
+};                                                                                  \
+                                                                                    \
+template<> template<class otherValue>                                               \
+really inline void stateVar<value>::Applier<stateVar<otherValue>>::apply()
 
 template<class Current, class New>
-static void apply()
+really inline static void apply()
 {
     New::template Applier<Current>::apply();
 }

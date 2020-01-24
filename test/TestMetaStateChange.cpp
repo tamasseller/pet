@@ -9,7 +9,7 @@
 
 #include "meta/StateChange.h"
 
-namespace asd {
+namespace simple {
     STATE(En);
 
     VALUE(En, s0) {
@@ -32,6 +32,18 @@ namespace asd {
 
 }
 
+namespace forced {
+    STATE(En);
+
+    VALUE_FORCED(En, s0) {
+        MOCK(En)::CALL(0);
+    }
+
+    VALUE_FORCED(En, s1) {
+        MOCK(En)::CALL(1);
+    }
+}
+
 STATE(Lo);
 
 VALUE(Lo, s0) {
@@ -42,9 +54,9 @@ VALUE(Lo, s1) {
     MOCK(Lo)::CALL(1);
 }
 
-using MasterState0 = Compound<asd::En<asd::s1>, asd::Start<asd::s1>, Lo<s0>>::Value;
-using MasterState1 = Compound<asd::En<asd::s0>, asd::Start<asd::s1>, Lo<s1>>::Value;
-using MasterState2 = Compound<asd::En<asd::s1>, asd::Start<asd::s0>, Lo<s0>>::Value;
+using MasterState0 = Compound<simple::En<simple::s1>, simple::Start<simple::s1>, Lo<s0>>::Value;
+using MasterState1 = Compound<simple::En<simple::s0>, simple::Start<simple::s1>, Lo<s1>>::Value;
+using MasterState2 = Compound<simple::En<simple::s1>, simple::Start<simple::s0>, Lo<s0>>::Value;
 
 STATE(Plus);
 
@@ -59,7 +71,38 @@ VALUE(Plus, s1) {
 using UberState0 = Compound<MasterState0, Plus<s0>>::Value;
 using UberState1 = Compound<MasterState1, Plus<s1>>::Value;
 
+using RepeatedState1 = Compound<simple::En<simple::s0>, Lo<s1>, simple::En<simple::s1>>::Value;
+using RepeatedState2 = Compound<simple::En<simple::s1>, Lo<s0>, simple::En<simple::s1>>::Value;
+
+using ForceRepeatedState1 = Compound<forced::En<forced::s0>, Lo<s1>, forced::En<forced::s1>>::Value;
+using ForceRepeatedState2 = Compound<forced::En<forced::s1>, Lo<s0>, forced::En<forced::s1>>::Value;
+
 TEST_GROUP(MetaStateChange) {};
+
+TEST(MetaStateChange, Repeat)
+{
+	MOCK(En)::EXPECT(1);
+	MOCK(Lo)::EXPECT(0);
+	apply<RepeatedState1, RepeatedState2>();
+
+	MOCK(En)::EXPECT(0);
+	MOCK(Lo)::EXPECT(1);
+	apply<RepeatedState2, RepeatedState1>();
+}
+
+TEST(MetaStateChange, RepeatForced)
+{
+	MOCK(En)::EXPECT(1);
+	MOCK(Lo)::EXPECT(0);
+	MOCK(En)::EXPECT(1);
+	apply<ForceRepeatedState1, ForceRepeatedState2>();
+
+	MOCK(En)::EXPECT(0);
+	MOCK(Lo)::EXPECT(1);
+	MOCK(En)::EXPECT(1);
+	apply<ForceRepeatedState2, ForceRepeatedState1>();
+}
+
 
 TEST(MetaStateChange, Primitive)
 {
