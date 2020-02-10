@@ -22,7 +22,9 @@
 
 #if defined (__GNUC__)
 #if (__ARM_ARCH == 7)
+#ifndef clz
 #define clz __builtin_clz
+#endif
 #else
 template<typename Type>
 static inline unsigned int clz(Type data) {
