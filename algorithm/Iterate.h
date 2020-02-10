@@ -54,7 +54,7 @@ public:
 	 * @see		The unit test of this class provides some examples of the usage.
 	 */
 	template<class... T>
-	really inline static Element* findByFields(Container* container, pet::finalTypeOf<T...> value, const T&... fields)
+	really_inline static Element* findByFields(Container* container, pet::finalTypeOf<T...> value, const T&... fields)
 	{
 		for(typename Container::Iterator it = container->iterator(); it.current(); it.step())
 			if(pet::access(*it.current(), fields...) == value)
@@ -81,7 +81,7 @@ public:
 		 * @see For details see IterativeSearch.
 		 */
 		template<class... T>
-		really inline Element* findByFields(pet::finalTypeOf<T...> value, const T&... fields) const
+		really_inline Element* findByFields(pet::finalTypeOf<T...> value, const T&... fields) const
 		{
 			return IterativeSearch<Container, Element>::findByFields((Container*) this, value, fields...);
 		}

@@ -283,11 +283,11 @@ struct TemplateExtractor<Template, I, Args...> {
 template<class InputType, template<InputType> class InputTag, InputType inputValue>
 struct ConfigValue {
 		template<class, class...> friend struct detail::ValueExtractor;
-		template<class, class, class, class...> friend struct detail::ValueTagChecker;
+		template<class, class, class, class, class...> friend struct detail::ValueTagChecker;
 		template<class, class...> friend struct detail::TypeExtractor;
-		template<class, class, class, class...> friend struct detail::TypeTagChecker;
+		template<class, class, class, class, class...> friend struct detail::TypeTagChecker;
 		template<class, class...> friend struct detail::TemplateExtractor;
-		template<class, class, class, class...> friend struct detail::TemplateTagChecker;
+		template<class, class, class, class, class...> friend struct detail::TemplateTagChecker;
 
 
 		typedef InputType Type;
@@ -312,11 +312,11 @@ struct ConfigValue {
 template<template<class> class InputTag, class InputType>
 class ConfigType {
         template<class, class...> friend struct detail::ValueExtractor;
-        template<class, class, class, class...> friend struct detail::ValueTagChecker;
+        template<class, class, class, class, class...> friend struct detail::ValueTagChecker;
         template<class, class...> friend struct detail::TypeExtractor;
-        template<class, class, class, class...> friend struct detail::TypeTagChecker;
+        template<class, class, class, class, class...> friend struct detail::TypeTagChecker;
         template<class, class...> friend struct detail::TemplateExtractor;
-        template<class, class, class, class...> friend struct detail::TemplateTagChecker;
+        template<class, class, class, class, class...> friend struct detail::TemplateTagChecker;
 
         typedef InputType type;
 
@@ -337,11 +337,11 @@ class ConfigType {
 template<template<template<class...> class > class InputTag, template<class...> class InputType>
 class ConfigTemplate {
         template<class, class...> friend struct detail::ValueExtractor;
-        template<class, class, class, class...> friend struct detail::ValueTagChecker;
+        template<class, class, class, class, class...> friend struct detail::ValueTagChecker;
         template<class, class...> friend struct detail::TypeExtractor;
-        template<class, class, class, class...> friend struct detail::TypeTagChecker;
+        template<class, class, class, class, class...> friend struct detail::TypeTagChecker;
         template<class, class...> friend struct detail::TemplateExtractor;
-        template<class, class, class, class...> friend struct detail::TemplateTagChecker;
+        template<class, class, class, class, class...> friend struct detail::TemplateTagChecker;
 
 		template<class... X>
         using typeTemplate = InputType<X...>;

@@ -27,17 +27,20 @@ namespace pet {
 /** @cond */
 
 template<class Dummy>
-struct DefaultTracePolicy {
+class DefaultTracePolicy {
+public:
 	constexpr static Level level = Level::None;
 };
 
 template<class Tag>
-struct TracePolicy {
+class TracePolicy {
+public:	
 	constexpr static Level level = DefaultTracePolicy<Global>::level;
 };
 
 template<class Dummy>
-struct TraceWriter {
+class TraceWriter {
+public:
 	template<class T>
 	inline static void write(T val) {}
 };

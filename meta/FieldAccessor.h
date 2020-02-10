@@ -36,7 +36,7 @@ namespace detail {
 	 */
 	template <class T, class... U>
 	struct AccessorHelper {
-		really inline static constexpr valueTypeOf<lastOf<U...>> &access(baseTypeOf<T> &b, const T& field, const U&... otherFields) {
+		really_inline static constexpr valueTypeOf<lastOf<U...>> &access(baseTypeOf<T> &b, const T& field, const U&... otherFields) {
 			return AccessorHelper<U...>::access(b.*field, otherFields...);
 		}
 	};
@@ -52,7 +52,7 @@ namespace detail {
 	 */
 	template <class T>
 	struct AccessorHelper<T> {
-		really inline static constexpr valueTypeOf<T> &access(baseTypeOf<T> &b, const T& field) {
+		really_inline static constexpr valueTypeOf<T> &access(baseTypeOf<T> &b, const T& field) {
 			return b.*field;
 		}
 	};
@@ -71,7 +71,7 @@ namespace detail {
  */
 
 template <class... T>
-really inline static constexpr valueTypeOf<lastOf<T...>> &access(baseTypeOf<firstOf<T...>> &b, const T&... fields) {
+really_inline static constexpr valueTypeOf<lastOf<T...>> &access(baseTypeOf<firstOf<T...>> &b, const T&... fields) {
 	return detail::AccessorHelper<T...>::access(b, fields...);
 }
 

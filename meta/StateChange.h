@@ -30,7 +30,7 @@ struct Pair {
 template<class T1, class T2>
 template<class N1, class N2>
 struct Pair<T1, T2>::Applier<Pair<N1, N2>> {
-	really inline static void apply() {
+	really_inline static void apply() {
         T1::template Applier<N1>::apply();
         T2::template Applier<N2>::apply();
     }
@@ -50,7 +50,7 @@ struct Stopper {
 
 template<>
 struct Stopper::Applier<Stopper> {
-	really inline static void apply() {}
+	really_inline static void apply() {}
 };
 
 template<>
@@ -74,7 +74,7 @@ template<> struct stateVar<value> {                                             
                                                                                     \
 template<> template<>                                                               \
 struct stateVar<value>::Applier<stateVar<value>> {									\
-	really inline static void apply() {} };        									\
+	really_inline static void apply() {} };        									\
                                                                                     \
 template<> template<class otherValue>                                               \
 struct stateVar<value>::Applier<stateVar<otherValue>> {                             \
@@ -82,7 +82,7 @@ struct stateVar<value>::Applier<stateVar<otherValue>> {                         
 };                                                                                  \
                                                                                     \
 template<> template<class otherValue>                                               \
-really inline void stateVar<value>::Applier<stateVar<otherValue>>::apply()
+really_inline void stateVar<value>::Applier<stateVar<otherValue>>::apply()
 
 #define VALUE_FORCED(stateVar, value)                                               \
 class value;                                                                        \
@@ -96,10 +96,10 @@ struct stateVar<value>::Applier<stateVar<otherValue>> {                         
 };                                                                                  \
                                                                                     \
 template<> template<class otherValue>                                               \
-really inline void stateVar<value>::Applier<stateVar<otherValue>>::apply()
+really_inline void stateVar<value>::Applier<stateVar<otherValue>>::apply()
 
 template<class Current, class New>
-really inline static void apply()
+really_inline static void apply()
 {
     New::template Applier<Current>::apply();
 }

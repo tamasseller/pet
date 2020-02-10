@@ -64,21 +64,21 @@ public:
 		friend LinkedList;
 		Element** prevsNext;
 
-		really inline Iterator(Element** prevsNext);
+		really_inline Iterator(Element** prevsNext);
 	public:
 		/**
 		 * Current element or NULL.
 		 *
 		 * @return The current element or NULL if over the end of the list.
 		 */
-		really inline Element* current() const;
+		really_inline Element* current() const;
 
 		/**
 		 * Take a step.
 		 *
 		 * Moves the iterator forward over the list or does nothing if already of the end.
 		 */
-		really inline void step();
+		really_inline void step();
 
 		/**
 		 * Insert before current element.
@@ -90,7 +90,7 @@ public:
 		 * @warning	The behavior is undefined (and probably wrong) if called with an element
 		 * 			that is already in the list and **in this method it is not checked**.
 		 */
-		really inline void insert(Element* elem) const;
+		really_inline void insert(Element* elem) const;
 
 		/**
 		 * Remove current element.
@@ -99,7 +99,7 @@ public:
 		 * The iterator will stand at the next element after the operation.
 		 * Does nothing on an over-the-end iterator.
 		 */
-		really inline void remove() const;
+		really_inline void remove() const;
 	};
 
 	/**
@@ -162,7 +162,7 @@ public:
 	 * @return 	An iterator that is at the foremost possible location
 	 * 			(ie.: the first element if there is any).
 	 */
-	really inline Iterator iterator();
+	really_inline Iterator iterator();
 
 	/**
 	 * Take over the content of another list.
@@ -170,7 +170,7 @@ public:
 	 * Drops the current content and takes over the other lists
 	 * content, also sets the other list to be empty.
 	 */
-	really inline void take(LinkedList& other);
+	really_inline void take(LinkedList& other);
 };
 
 template<class Element>
@@ -233,36 +233,36 @@ inline void LinkedList<Element>::take(LinkedList& other) {
 
 
 template<class Element>
-really inline typename LinkedList<Element>::Iterator
+really_inline typename LinkedList<Element>::Iterator
 LinkedList<Element>::iterator() {
 	return Iterator(&first);
 }
 
 template<class Element>
-really inline LinkedList<Element>::Iterator::Iterator(Element** prevsNext):prevsNext(prevsNext) {}
+really_inline LinkedList<Element>::Iterator::Iterator(Element** prevsNext):prevsNext(prevsNext) {}
 
 template<class Element>
-really inline Element* LinkedList<Element>::Iterator::current() const
+really_inline Element* LinkedList<Element>::Iterator::current() const
 {
 	return *this->prevsNext;
 }
 
 template<class Element>
-really inline void LinkedList<Element>::Iterator::step()
+really_inline void LinkedList<Element>::Iterator::step()
 {
 	if(*this->prevsNext)
 		this->prevsNext = &((*this->prevsNext)->next);
 }
 
 template<class Element>
-really inline void LinkedList<Element>::Iterator::insert(Element* elem) const
+really_inline void LinkedList<Element>::Iterator::insert(Element* elem) const
 {
 	elem->next = *this->prevsNext;
 	*this->prevsNext = elem;
 }
 
 template<class Element>
-really inline void LinkedList<Element>::Iterator::remove() const
+really_inline void LinkedList<Element>::Iterator::remove() const
 {
 	if(*this->prevsNext)
 		*this->prevsNext = (*this->prevsNext)->next;

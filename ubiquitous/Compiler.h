@@ -46,9 +46,13 @@ static inline unsigned int clz(Type data) {
 }
 #endif // __ARM_ARCH == 7
 
-#define	really 		__attribute__((always_inline))
+#define	really_inline __attribute__((always_inline)) inline
 #define section(x) 	__attribute((section(#x)))
 
-#endif // __GNUC__
+#elif defined(_MSC_VER)
+
+#define	really_inline 		__forceinline
+
+#endif 
 
 #endif /* COMPILER_H_ */
