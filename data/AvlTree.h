@@ -138,6 +138,15 @@ public:
 	inline void insert(Position pos, Node* node);
 
 	/**
+	 * Get the position of an element.
+	 *
+	 * Can be used to update the position of an element after modifying the tree.
+	 *
+	 * @param	node the node to be inserted.
+	 */
+	inline Position getPosition(Node* node);
+
+	/**
 	 * Remove the element from a given position.
 	 *
 	 * This is the remove operation only, the result of the prior search needs to be fed into it.
@@ -330,6 +339,11 @@ inline void AvlTree::insert(Position pos, AvlTree::Node* node)
      * Enforce the AVL tree invariant.
      */
     normalize(node);
+}
+
+inline BinaryTree::Position AvlTree::getPosition(Node* node)
+{
+	return Position(node, this->getParentBackref(node));
 }
 
 inline void AvlTree::doRemove(Node* node, BinaryTree::Node** which)
