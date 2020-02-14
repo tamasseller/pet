@@ -20,6 +20,8 @@
 #ifndef COMPILER_H_
 #define COMPILER_H_
 
+#include <cstddef>
+
 #if defined (__GNUC__)
 #if (__ARM_ARCH == 7)
 #ifndef clz

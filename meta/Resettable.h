@@ -22,11 +22,11 @@
 
 #include <stddef.h>
 
-namespace pet
-{
-
 struct NewOperatorDisambiguator{};
 inline void* operator new(size_t _, void* ret, const NewOperatorDisambiguator&) { return ret; }
+
+namespace pet
+{
 
 template<class Child>
 class Resettable
