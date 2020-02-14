@@ -50,11 +50,22 @@ static inline unsigned int clz(Type data) {
 
 #define	really_inline __attribute__((always_inline)) inline
 #define section(x) 	__attribute((section(#x)))
+#define PACKED __attribute__((packed))
+#define BEFORE_PACKED()
+#define AFTER_PACKED()
 
 #elif defined(_MSC_VER)
 
 #define	really_inline 		__forceinline
+#define PACKED
+#define BEFORE_PACKED() __pragma(pack(push, 1))
+#define AFTER_PACKED() __pragma(pack(pop))
 
 #endif 
+
+template <class C, class M>
+static constexpr inline size_t unsafeOffsetof(M C::* member) {
+    return reinterpret_cast<const char*>(&(reinterpret_cast<C*>(0)->*member)) - reinterpret_cast<const char*>(reinterpret_cast<M*>(0));
+}
 
 #endif /* COMPILER_H_ */
