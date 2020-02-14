@@ -17,51 +17,26 @@
  *
  *******************************************************************************/
 
+#include <cstddef>
+
 #ifndef COMPILER_H_
 #define COMPILER_H_
 
-#include <cstddef>
-
 #if defined (__GNUC__)
-#if (__ARM_ARCH == 7)
-#ifndef clz
-#define clz __builtin_clz
-#endif
-#else
-template<typename Type>
-static inline unsigned int clz(Type data) {
-	static constexpr unsigned int bits = sizeof(data) * 8;
-	unsigned int shift, count = bits - 1;
-	Type value;
 
-	if (data == 0)
-		return bits;
-
-	for (shift = bits / 2; shift; shift /= 2) {
-		value = data >> shift;
-
-		if (value) {
-			data = value;
-			count = count - shift;
-		}
-	}
-
-	return count;
-}
-#endif // __ARM_ARCH == 7
-
-#define	really_inline __attribute__((always_inline)) inline
-#define section(x) 	__attribute((section(#x)))
-#define PACKED __attribute__((packed))
-#define BEFORE_PACKED()
-#define AFTER_PACKED()
+#define     clz 				__builtin_clz
+#define	    really_inline 		__attribute__((always_inline)) inline
+#define     section(x) 			__attribute((section(#x)))
+#define     PACKED 				__attribute__((packed))
+#define     BEFORE_PACKED()
+#define     AFTER_PACKED()
 
 #elif defined(_MSC_VER)
 
-#define	really_inline 		__forceinline
-#define PACKED
-#define BEFORE_PACKED() __pragma(pack(push, 1))
-#define AFTER_PACKED() __pragma(pack(pop))
+#define	    really_inline 		__forceinline
+#define     PACKED
+#define     BEFORE_PACKED() 	__pragma(pack(push, 1))
+#define     AFTER_PACKED() 		__pragma(pack(pop))
 
 #endif 
 
