@@ -42,7 +42,7 @@ namespace pet {
  * Function that calculates the java String hash of a C string.
  */
 constexpr uintptr_t javaHash(const char* str = "") {
-    return *str ? (*str + 31 * javaHash(str + 1)) : 1;
+    return *str ? (*str + 31u * javaHash(str + 1)) : 1;
 }
 
 /**

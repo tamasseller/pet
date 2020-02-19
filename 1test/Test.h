@@ -26,8 +26,13 @@
 
 #include "Macro.h"
 
+#if defined (__GNUC__)
 #define TEST(...)               VAR_ARG_MACRO(TEST, ##__VA_ARGS__)
 #define IGNORE_TEST(...)        VAR_ARG_MACRO(IGNORE_TEST, ##__VA_ARGS__)
+#else
+#define TEST(group, name)        TEST2(group, name)
+#define IGNORE_TEST(group, name) IGNORE_TEST2(group, name)
+#endif
 
 #define FAIL(text)              pet::TestRunner::failTest(INTERNAL_AT(), text)
 #define FAIL_ALWAYS(text)       pet::TestRunner::failTestAlways(INTERNAL_AT(), text)

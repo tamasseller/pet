@@ -39,6 +39,8 @@ class TestBase: public Registry<TestInterface>::StaticElement<Child> {
 		static void* operator new(size_t, CtorDtorWrapperHax* r) {
 			return r;
 		}
+
+        void operator delete(void*, CtorDtorWrapperHax*) { } // MSVC compat
 	};
 
 protected:

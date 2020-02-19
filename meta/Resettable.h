@@ -24,6 +24,7 @@
 
 struct NewOperatorDisambiguator{};
 inline void* operator new(size_t _, void* ret, const NewOperatorDisambiguator&) { return ret; }
+inline void operator delete(void*, void*, const NewOperatorDisambiguator&) { } // MSVC compat
 
 namespace pet
 {

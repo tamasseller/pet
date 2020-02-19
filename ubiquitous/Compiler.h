@@ -33,8 +33,16 @@
 
 #elif defined(_MSC_VER)
 
+#include <intrin.h>
+#include <cstdint>
+static inline uint32_t clz(uint32_t x) {
+    unsigned long r = 0;
+    _BitScanReverse(&r, x);
+    return (31 - r);
+}
+
 #define	    really_inline 		__forceinline
-#define     PACKED
+#define     PACKED              __declspec(empty_bases)
 #define     BEFORE_PACKED() 	__pragma(pack(push, 1))
 #define     AFTER_PACKED() 		__pragma(pack(pop))
 
