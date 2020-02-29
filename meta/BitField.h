@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * Copyright (c) 2020 Seller Tamás. All rights reserved.
+ * Copyright (c) 2020 Seller Tamï¿½s. All rights reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,58 +21,54 @@
 #define BITFIELD_H_
 
 #include <stddef.h>
+#include <stdint.h>
 
 namespace pet {
 
 struct BitField
 {
-	template<uint8_t offset, uint8_t length, class Type> struct Params;
+    template<uint8_t offset, uint8_t length, class Type> struct Params;
 
-	template<class Params, class Container, class Wrapper> class Accessor;
-	template<uint8_t offset, uint8_t length, class Type, class Container, class Wrapper>
-	class Accessor<Params<offset, length, Type>, Container, Wrapper>
-	{
-		static constexpr Container baseMask = (1u << length) - 1;
-		static constexpr Container offsetUnmask = (Container)(~(baseMask << offset));
+    template<class Params, class Container, class Wrapper> class Accessor;
+    template<uint8_t offset, uint8_t length, class Type, class Container, class Wrapper>
+    class Accessor<Params<offset, length, Type>, Container, Wrapper>
+    {
+        static constexpr Container baseMask = (1u << length) - 1;
+        static constexpr Container offsetUnmask = (Container)(~(baseMask << offset));
 
-		friend BitField;
-		static_assert(sizeof(Type) <= sizeof(uint32_t));
-		static_assert(sizeof(Type) <= sizeof(Container));
+        friend BitField;
+        static_assert(sizeof(Type) <= sizeof(uint32_t));
+        static_assert(sizeof(Type) <= sizeof(Container));
 
-		Wrapper* const wrapper;
-		Container Wrapper::* const field;
-		constexpr inline Accessor(Wrapper* wrapper, Container Wrapper::* field) : wrapper(wrapper), field(field) {}
-	public:
+    public:
+        static constexpr really_inline Type read(Container Wrapper::* field, Wrapper* wrapper)
+        {
+            Container value = wrapper->*field;
+            auto shiftedValue = value >> offset;
+            auto maskedValue = shiftedValue & baseMask;
+            return static_cast<Type>(maskedValue);
+        }
 
-		constexpr inline operator Type()
-		{
-			Container value = wrapper->*field;
-			auto shiftedValue = value >> offset;
-			auto maskedValue = shiftedValue & baseMask;
-			return static_cast<Type>(maskedValue);
-		}
+        static really_inline void write(Container Wrapper::* field, Wrapper* wrapper, const Type& value)
+        {
+            auto castValue = static_cast<const Container>(value);
+            auto shiftedValue = castValue << offset;
+            wrapper->*field = ((wrapper->*field) & offsetUnmask) | shiftedValue;
+        }
+    };
 
-		inline Type operator =(const Type& value)
-		{
-			auto castValue = static_cast<const Container>(value);
-			auto shiftedValue = castValue << offset;
-			wrapper->*field = ((wrapper->*field) & offsetUnmask) | shiftedValue;
-			return value;
-		}
-	};
+    struct AccessProvider
+    {
+        template<class Params, class Wrapper, class Container, class Type>
+        really_inline void write(Container Wrapper:: *c, Type v) {
+            Accessor<Params, Container, Wrapper>::write(c, static_cast<Wrapper*>(this), v);
+        }
 
-	struct AccessProvider
-	{
-		template<class Params, class Wrapper, class Container>
-		inline constexpr auto access(Container Wrapper:: *c) {
-			return Accessor<Params, Container, Wrapper>(static_cast<Wrapper*>(this), c);
-		}
-
-		template<class Params, class Wrapper, class Container>
-		inline constexpr auto access(Container Wrapper:: *c) const {
-			return Accessor<Params, Container, const Wrapper>(static_cast<const Wrapper*>(this), c);
-		}
-	};
+        template<class Params, class Wrapper, class Container>
+        really_inline constexpr auto read(Container Wrapper:: *c) const {
+            return Accessor<Params, Container, const Wrapper>::read(c, static_cast<const Wrapper*>(this));
+        }
+    };
 };
 
 }
