@@ -23,6 +23,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "ubiquitous/Compiler.h"
+
 namespace pet {
 
 struct BitField
