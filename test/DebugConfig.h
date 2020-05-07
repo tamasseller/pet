@@ -30,7 +30,7 @@
 
 #include <string>
 
-// #include "ubiquitous/ConfigHelper.h"
+#include "ubiquitous/ConfigHelper.h"
 
 extern bool assertMocked;
 extern bool writerMocked;

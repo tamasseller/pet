@@ -11,6 +11,7 @@ SOURCES += ../ubiquitous/PrintfWriter.cpp
 
 #SOURCES += TestAlgoInline.cpp
 
+SOURCES += TestHeapBuddy.cpp
 SOURCES += TestAlgoIterate.cpp
 SOURCES += TestAlgoStr.cpp
 SOURCES += TestAlgoMinMaxHeap.cpp
@@ -62,6 +63,8 @@ SOURCES += TestUbiqFailable.cpp
 SOURCES += TestUbiqError.cpp
 SOURCES += TestUbiqTrace.cpp
 SOURCES += TestModules.cpp
+ifeq (x,)
+endif
 
 # Test support
 
@@ -84,7 +87,7 @@ CXXFLAGS += -g3										# Include all available debug info
 CXXFLAGS += -fno-inline								# Do not inline (coverage again)
 CXXFLAGS += -m32									# Use 32 bit mode (to model the target MCUs)
 CXXFLAGS += -fmax-errors=5							# Avoid blowing up the console
-CXXFLAGS += -rdynamic								# Allows meaningful backrtaces 
+CXXFLAGS += -rdynamic								# Allows meaningful backtraces 
 CXXFLAGS += --coverage								# Generate program flow data and inject profiling code
 CXXFLAGS += -fno-exceptions
 CXXFLAGS += -fdelete-null-pointer-checks
