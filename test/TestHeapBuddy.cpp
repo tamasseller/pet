@@ -28,19 +28,23 @@ TEST_GROUP(Buddy)
 
     pet::BuddyAllocator<2, 2> uut;
 
-    template<size_t N>
-    bool isUnique(void* (&ptrs)[N])
+    bool isUnique(void** ptrs, size_t n)
     {
-        for(int n = 1; n <= N; n++)
+        for(int i = 1; i <= n; i++)
         {
-            for(int i = 0; i<n; i++)
+            for(int j = 0; j<j; j++)
             {
-                if(ptrs[i] == ptrs[n])
+                if(ptrs[i] == ptrs[j])
                     return false;
             }
         }
 
         return true;
+    }
+
+    template<size_t N>
+    bool isUnique(void* (&ptrs)[N]) {
+        return isUnique(ptrs, N);
     }
 };
 
@@ -51,7 +55,11 @@ TEST(Buddy, Abuse)
     CHECK(!uut.init(mem, mem + 1));
 
     CHECK(uut.init(mem, mem + size));
+    uut.free(nullptr);
+
     CHECK(!uut.allocate(10000000));
+
+    CHECK(uut.allocate(1));
 }
 
 TEST(Buddy, Sanity)
@@ -135,4 +143,114 @@ TEST(Buddy, PassBigger)
             CHECK(uut.allocate(small));
         }
     }
+}
+
+TEST(Buddy, RandomStress)
+{
+    void* ptrs[14];
+    int idx = 0;
+    int a = 1, b = 1;
+
+    CHECK(uut.init(mem, mem + size));
+
+    for(int round = 0; round < 1000; round++)
+    {
+        while(true)
+        {
+            auto size = a;
+            size = (a + b) % 31;
+            b = a;
+            a = size;
+
+            CHECK(idx < 14);
+
+            if(auto x = uut.allocate(size))
+                ptrs[idx++] = x;
+            else
+                break;
+        }
+
+        CHECK(isUnique(ptrs, idx));
+
+        for(int i = 0; i < idx / 2; i++)
+            uut.free(ptrs[--idx]);
+    }
+}
+
+TEST(Buddy, Grow)
+{
+    CHECK(uut.init(mem, mem + size));
+    auto x = uut.allocate(4);
+    auto y = uut.allocate(4);
+    auto z = uut.allocate(4);
+    CHECK(!uut.adjust(x, 8));
+    CHECK(!uut.adjust(y, 8));
+    CHECK(uut.adjust(z, 8));
+
+    uut.free(y);
+    CHECK(uut.adjust(x, 8));
+    CHECK(!uut.adjust(x, 32));
+
+    uut.free(z);
+    CHECK(uut.adjust(x, 32));
+
+    uut.free(x);
+
+    CHECK(uut.allocate(32));
+    CHECK(uut.allocate(16));
+    CHECK(uut.allocate(8));
+    CHECK(!uut.allocate(1));
+}
+
+TEST(Buddy, Shrink)
+{
+    CHECK(uut.init(mem, mem + size));
+    auto x = uut.allocate(32);
+    auto y = uut.allocate(16);
+    auto z = uut.allocate(8);
+    CHECK(!uut.allocate(1));
+
+    CHECK(uut.adjust(x, 4));
+
+    auto t = uut.allocate(4);
+    auto u = uut.allocate(8);
+    auto v = uut.allocate(16);
+    CHECK(!uut.allocate(1));
+
+    uut.free(x);
+    uut.free(y);
+    uut.free(z);
+    uut.free(t);
+    uut.free(u);
+    uut.free(v);
+
+    CHECK(uut.allocate(32));
+    CHECK(uut.allocate(16));
+    CHECK(uut.allocate(8));
+    CHECK(!uut.allocate(1));
+}
+
+TEST(Buddy, GrowAndShrink)
+{
+    CHECK(uut.init(mem, mem + size));
+    auto x = uut.allocate(16);
+    CHECK(uut.adjust(x, 32));
+
+    auto y = uut.allocate(8);
+
+    CHECK(uut.adjust(x, 16));
+
+    auto z = uut.allocate(16);
+
+    CHECK(!uut.adjust(x, 32));
+    uut.free(z);
+
+    CHECK(uut.adjust(x, 32));
+
+    uut.free(x);
+    uut.free(y);
+    CHECK(uut.allocate(32));
+    CHECK(uut.allocate(16));
+    CHECK(uut.allocate(8));
+    CHECK(!uut.allocate(1));
 }

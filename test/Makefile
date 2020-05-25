@@ -12,6 +12,7 @@ SOURCES += ../ubiquitous/PrintfWriter.cpp
 #SOURCES += TestAlgoInline.cpp
 
 SOURCES += TestHeapBuddy.cpp
+ifeq (x,)
 SOURCES += TestAlgoIterate.cpp
 SOURCES += TestAlgoStr.cpp
 SOURCES += TestAlgoMinMaxHeap.cpp
@@ -63,7 +64,6 @@ SOURCES += TestUbiqFailable.cpp
 SOURCES += TestUbiqError.cpp
 SOURCES += TestUbiqTrace.cpp
 SOURCES += TestModules.cpp
-ifeq (x,)
 endif
 
 # Test support

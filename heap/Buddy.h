@@ -127,8 +127,8 @@ class BuddyAllocator
         tree[byteIdx] = cleared | ((uintptr_t)state) << (bitShift);
     }
 
-    inline size_t ptr2idx(char* ptr) {
-        return (1 << maxLevel) + ((ptr - start) >> minBlockSizeLog);
+    inline size_t ptr2idx(void* ptr) {
+        return (1 << maxLevel) + ((reinterpret_cast<char*>(ptr) - start) >> minBlockSizeLog);
     }
 
     static inline auto baseIdx(size_t level) {
@@ -150,12 +150,17 @@ class BuddyAllocator
         return idx >> 1;
     }
 
-    inline void indicateUsed(size_t idx)
+    inline void indicateUsed(size_t idx, size_t limit = 0)
     {
         setState(idx, NodeState::Used);
 
-        while((idx = parent(idx)) != 0)
-            setState(idx, NodeState::Partial);
+        if(idx != limit)
+        {
+            while((idx = parent(idx)) != limit)
+            {
+                setState(idx, NodeState::Partial);
+            }
+        }
     }
 
     inline auto checkParent(size_t idx)
@@ -170,33 +175,58 @@ class BuddyAllocator
         return idx;
     }
 
-    inline auto findActual(char* ptr)
+    inline auto findActual(void* ptr)
     {
-        auto idx = ptr2idx(ptr);
+        if(start <= ptr && ptr < end)
+        {
+            auto idx = ptr2idx(ptr);
 
-        while(getState(idx) != NodeState::Used)
-            idx = parent(idx);
+            while(getState(idx) != NodeState::Used)
+                idx = parent(idx);
 
-        return idx;
+            if(idx2ptr(idx) == ptr)
+                return idx;
+        }
+
+        return decltype(ptr2idx(nullptr))(0);
     }
 
     static inline auto sibling(size_t idx) {
         return idx ^ 1;
     }
 
-    inline void indicateUnused(size_t idx)
+    inline size_t indicateUnused(size_t idx, size_t limit = 0)
     {
         do
         {
             setState(idx, NodeState::Free);
+
+            if(getState(sibling(idx)) != NodeState::Free)
+                return idx;
+
             idx = parent(idx);
         }
-        while(idx && getState(sibling(idx)) == NodeState::Free);
+        while(idx != limit);
+
+        return limit;
     }
 
     template<class T>
     constexpr static inline T* align(T* ptr, size_t nBytes) {
         return reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(ptr) & ~(nBytes - 1));
+    }
+
+    inline bool size2level(size_t size, size_t &level)
+    {
+        auto sBits = 32 - clz(size - 1);
+
+        auto invLevel = (sBits <= minBlockSizeLog) ? 0 : sBits - minBlockSizeLog;
+
+        if(invLevel > maxLevel)
+            return false;
+
+        level = maxLevel - invLevel;
+        return true;
     }
 
 public:
@@ -236,14 +266,11 @@ public:
     {
         if(x)
         {
-            auto sBits = 32 - clz(x - 1);
+            size_t searchLevel;
 
-            auto invLevel = (sBits <= minBlockSizeLog) ? 0 : sBits - minBlockSizeLog;
-
-            if(invLevel > maxLevel)
+            if(!size2level(x, searchLevel))
                 return nullptr;
 
-            auto searchLevel = maxLevel - invLevel;
             auto searchStart = baseIdx(searchLevel);
             auto searchEnd = searchStart << 1;
 
@@ -269,13 +296,58 @@ public:
 
     inline void free(void* ptr)
     {
-        // TODO check if start <= ptr && ptr < end
+        if(auto idx = findActual(ptr))
+        {
+            indicateUnused(idx);
+        }
+        else
+        {
+            // TODO report error
+        }
+    }
 
-        auto idx = findActual(reinterpret_cast<char*>(ptr));
+    inline bool adjust(void* ptr, size_t x)
+    {
+        size_t newLevel;
 
-        // TODO check if idx2ptr(idx) == ptr
+        if(size2level(x, newLevel))
+        {
+            if(auto idx = findActual(ptr))
+            {
+                auto oldLevel = level(idx);
 
-        indicateUnused(idx);
+                if(oldLevel > newLevel)
+                {
+                    // Grow
+
+                    auto newIdx = idx >> (oldLevel - newLevel);
+                    if(indicateUnused(idx, newIdx) == newIdx)
+                    {
+                        setState(newIdx, NodeState::Used);
+                        return true;
+                    }
+                    else
+                    {
+                        indicateUsed(idx, newIdx >> 1);
+                        return false;
+                    }
+                }
+                else if(oldLevel < newLevel)
+                {
+                    // Shrink
+
+                    auto newIdx = ptr2idx(ptr) >> (maxLevel - newLevel);
+                    indicateUsed(newIdx, idx >> 1);
+                    return true;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 };
 
