@@ -10,6 +10,7 @@ SOURCES += TestGroups.cpp
 SOURCES += TestMock.cpp
 SOURCES += TestNoGroup.cpp
 SOURCES += TestFailureInjector.cpp
+SOURCES += TestGenericSuite.cpp
 
 # Test support
 
@@ -34,7 +35,6 @@ CXXFLAGS += -fdelete-null-pointer-checks
 
 LIBS += gcov
 
-CXX=x86_64-linux-gnu-g++-6
 LD=$(CXX) 
 
 include ../ultimate-makefile/Makefile.ultimate	

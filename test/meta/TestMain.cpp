@@ -50,7 +50,7 @@ struct FailureRecord {
 
 bool printActualFailureRecords = false;
 
-int normalExpected = 43;
+int normalExpected = 53;
 int syntheticExpected = 9;
 
 std::list<FailureRecord> expectedFailures{
@@ -77,7 +77,11 @@ std::list<FailureRecord> expectedFailures{
     FailureRecord("Incomplete@Mock", "TestMock.cpp:30", "--- Finalization ---", "Mock - unmet expectations"),
     FailureRecord("SetupNotOk@OtherGroup", "TestGroups.cpp:60", "TestGroups.cpp:56", "User message"),
     FailureRecord("BodyNotOk@Group", "TestGroups.cpp:47", "TestGroups.cpp:28", "Expectation: 'ok' failed"),
-    FailureRecord("TeardownNotOk@Group", "TestGroups.cpp:44", "TestGroups.cpp:28", "Expectation: 'ok' failed")
+    FailureRecord("TeardownNotOk@Group", "TestGroups.cpp:44", "TestGroups.cpp:28", "Expectation: 'ok' failed"),
+    FailureRecord("ParametricTest2@ParametricGroup1", "TestGenericSuite.cpp:41", "TestGenericSuite.cpp:43", "Expectation: '!this->ok' failed"),
+    FailureRecord("ParametricTest3@ParametricGroup2", "TestGenericSuite.cpp:51", "TestGenericSuite.cpp:53", "Expectation: 'this->ok' failed"),
+    FailureRecord("ParametricTest2@ParametricGroup1", "TestGenericSuite.cpp:41", "TestGenericSuite.cpp:43", "Expectation: '!this->ok' failed"),
+    FailureRecord("ParametricTest3@ParametricGroup2", "TestGenericSuite.cpp:51", "TestGenericSuite.cpp:53", "Expectation: 'this->ok' failed"),
 };
 
 ////
