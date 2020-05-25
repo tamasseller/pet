@@ -12,7 +12,6 @@ SOURCES += ../ubiquitous/PrintfWriter.cpp
 #SOURCES += TestAlgoInline.cpp
 
 SOURCES += TestHeapBuddy.cpp
-ifeq (x,)
 SOURCES += TestAlgoIterate.cpp
 SOURCES += TestAlgoStr.cpp
 SOURCES += TestAlgoMinMaxHeap.cpp
@@ -64,6 +63,7 @@ SOURCES += TestUbiqFailable.cpp
 SOURCES += TestUbiqError.cpp
 SOURCES += TestUbiqTrace.cpp
 SOURCES += TestModules.cpp
+ifeq (x,)
 endif
 
 # Test support
@@ -92,8 +92,9 @@ CXXFLAGS += --coverage								# Generate program flow data and inject profiling 
 CXXFLAGS += -fno-exceptions
 CXXFLAGS += -fdelete-null-pointer-checks
 
-#TEST_CMD_PREFIX=LD_LIBRARY_PATH=/opt/gcc-5.3.0/lib32/
-#CXX=/opt/gcc-5.3.0/bin/g++
+LIBS += gcov
+
 LD=$(CXX) 
+LDFLAGS += -m32
 
 include ultimate-makefile/Makefile.ultimate	
