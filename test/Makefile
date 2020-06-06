@@ -59,6 +59,7 @@ SOURCES += TestPoolPool.cpp
 SOURCES += TestPoolStack.cpp
 SOURCES += TestPoolStaticStack.cpp
 SOURCES += TestPoolStringStorage.cpp
+SOURCES += TestUbiqDelegate.cpp
 SOURCES += TestUbiqFailable.cpp
 SOURCES += TestUbiqError.cpp
 SOURCES += TestUbiqTrace.cpp
@@ -81,7 +82,7 @@ INCLUDE_DIRS += failure-injector
 
 # Flags
 
-CXXFLAGS += -std=c++17								# Use the c++ standard released in 2011
+CXXFLAGS += -std=c++17								# Use the c++ standard released in 2017
 CXXFLAGS += -O0 									# Avoid optimizer screwing up coverage data
 CXXFLAGS += -g3										# Include all available debug info
 CXXFLAGS += -fno-inline								# Do not inline (coverage again)
