@@ -116,6 +116,11 @@ class Delegate<Retval(Args...)>
 
 public:
     /**
+     * Potentially dangerous default contructor that leaves the fields uninitialzed.
+     */
+    inline Delegate() = default;
+
+    /**
      * Constructor method for a free-standing function target.
      */
     template<TPtr StaticFunctionPointer>
@@ -140,7 +145,7 @@ public:
     /**
      * The invocation operator, that transfers control to the target.
      */
-    inline Retval operator()(Args... args) {
+    inline Retval operator()(Args... args) const {
         return f(this->data, args...);
     }
 };
