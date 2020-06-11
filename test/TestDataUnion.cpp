@@ -46,7 +46,7 @@ struct V {
 
 int T::n=0, U::n=0, V::n=0;
 
-void* operator new(unsigned int s, void* self){ return self; }
+inline void* operator new(size_t s, void* self){ return self; }
 
 TEST_GROUP(Union) {};
 

@@ -58,7 +58,7 @@ namespace IdentifierRegistryInternals{
 		inline Hstring(const char* str);
 
 		/** Placement new operator */
-		inline void* operator new(unsigned int, void*);
+		inline void* operator new(size_t, void*);
 
 		/**
 		 * The string after the header.
@@ -257,7 +257,7 @@ inline int IdentifierRegistryInternals::Hstring::operator - (const Hstring& o) c
 	return pet::Str::cmp(str(), o.str());
 }
 
-inline void* IdentifierRegistryInternals::Hstring::operator new(unsigned int u, void* ret){
+inline void* IdentifierRegistryInternals::Hstring::operator new(size_t u, void* ret){
 	return ret;
 }
 

@@ -30,7 +30,7 @@ using namespace pet;
 
 struct HstringHelper: public IdentifierRegistryInternals::Hstring {
 	inline HstringHelper(const char* str): IdentifierRegistryInternals::Hstring(str){}
-	inline void* operator new(unsigned int u, void* ret){
+	inline void* operator new(size_t u, void* ret){
 		return ret;
 	}
 

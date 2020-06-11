@@ -3,4 +3,4 @@
 .settings
 test/.o
 test/coverage
-test/pet-test
+test/pet-test*

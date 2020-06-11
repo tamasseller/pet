@@ -135,7 +135,7 @@ TEST(DynamicPool, SingleFrameAllocFree) {
 
 TEST(DynamicPool, MultiFrameRandomAllocFree) {
 	InstrumentedDynamicPool uut;
-	unsigned int seed = 1245;
+	unsigned int state = 1245;
 
 	for(int n = 1; n <= NRUN; n++){
 		while(npointers<NALLOC){
@@ -149,8 +149,10 @@ TEST(DynamicPool, MultiFrameRandomAllocFree) {
 				*pointers[i] = (int)0;
 
 		while(npointers--){
-			if(npointers){
-				int n = rand_r(&seed) % npointers;
+			if(npointers)
+			{
+				state = state * 1103515245 + 12345;
+				int n = (state >> 16) % npointers;
 				swap<int*>(pointers[npointers], pointers[n]);
 			}
 			if(pointers[npointers])

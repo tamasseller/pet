@@ -55,7 +55,7 @@ TEST_GROUP(StringStorageInstrumented) {
 			this->put("123");
 
 			char *s1 = (char*)this->peek()+ss;
-			CHECK((char*)strcmp(s1, "123") == 0);
+			CHECK(strcmp(s1, "123") == 0);
 
 			this->put('4');
 

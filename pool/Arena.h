@@ -40,7 +40,7 @@ class Arena {
 		Frame* prev;
 		char elements[countPerFrame][sizeof(Element)];
 
-		void* operator new(unsigned int s, void* self){
+		void* operator new(size_t s, void* self){
 			return self;
 		}
 

@@ -160,8 +160,9 @@ public:
 	 * @param	key	The key to be looked up.
 	 * @return	Pointer to the mutable value inside the node or NULL if not found.
 	 */
-	ValueType* get(const KeyType key) const{
-		BinaryTree::Position pos = BinaryTree::seek<KeyType, ImmutableTreeMap<KeyType, ValueType>::comparator>(key);
+	ValueType* get(const KeyType key) const
+	{
+		BinaryTree::Position pos = BinaryTree::seek<KeyType, &ImmutableTreeMap<KeyType, ValueType>::comparator>(key);
 		if(pos.getNode())
 			return &((Node*)pos.getNode())->value;
 
@@ -209,7 +210,8 @@ public:
 	 * @param	key with which the specified value is to be associated
 	 * @param 	value to be associated with the specified key
 	 */
-	bool put(const KeyType &key, const ValueType &value){
+	bool put(const KeyType &key, const ValueType &value)
+	{
 		BinaryTree::Position pos = BinaryTree::seek<KeyType, ImmutableTreeMap<KeyType, ValueType>::comparator>(key);
 		if(pos.getNode()){
 			((Node*)pos.getNode())->setValue(value);
@@ -222,6 +224,8 @@ public:
 			Node* nnode = new(ptr) Node(key, value);
 			AvlTree::insert(pos, nnode);
 		}
+		
+		return true;
 	}
 
 	/**

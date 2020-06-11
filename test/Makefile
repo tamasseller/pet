@@ -10,8 +10,6 @@ SOURCES += ../ubiquitous/PrintfWriter.cpp
 # Test code
 
 #SOURCES += TestAlgoInline.cpp
-
-SOURCES += TestHeapBuddy.cpp
 SOURCES += TestAlgoIterate.cpp
 SOURCES += TestAlgoStr.cpp
 SOURCES += TestAlgoMinMaxHeap.cpp
@@ -28,18 +26,7 @@ SOURCES += TestDataMutableStorage.cpp
 SOURCES += TestDataPriorityQueue.cpp
 SOURCES += TestDataCircularBuffer.cpp
 SOURCES += TestDataOrderedDoubleList.cpp
-SOURCES += TestHeapAvlStress.cpp
-SOURCES += TestHeapBestFitStress.cpp
-SOURCES += TestHeapHost1.cpp
-SOURCES += TestHeapHost2.cpp
-SOURCES += TestHeapHost3.cpp
-SOURCES += TestHeapHost4.cpp
-SOURCES += TestHeapHost5.cpp
-SOURCES += TestHeapHost6.cpp
-SOURCES += TestHeapTlsfStress.cpp
-SOURCES += TestHeapTlsf.cpp
 SOURCES += TestManagedHstring.cpp
-SOURCES += TestManagedRegistry.cpp
 SOURCES += TestManagedTreeMap.cpp
 SOURCES += TestMetaConfiguration.cpp
 SOURCES += TestMetaExpLog.cpp
@@ -64,7 +51,19 @@ SOURCES += TestUbiqFailable.cpp
 SOURCES += TestUbiqError.cpp
 SOURCES += TestUbiqTrace.cpp
 SOURCES += TestModules.cpp
-ifeq (x,)
+ifeq (USE64BIT,)
+SOURCES += TestManagedRegistry.cpp
+SOURCES += TestHeapBuddy.cpp
+SOURCES += TestHeapAvlStress.cpp
+SOURCES += TestHeapBestFitStress.cpp
+SOURCES += TestHeapHost1.cpp
+SOURCES += TestHeapHost2.cpp
+SOURCES += TestHeapHost3.cpp
+SOURCES += TestHeapHost4.cpp
+SOURCES += TestHeapHost5.cpp
+SOURCES += TestHeapHost6.cpp
+SOURCES += TestHeapTlsfStress.cpp
+SOURCES += TestHeapTlsf.cpp
 endif
 
 # Test support
@@ -86,7 +85,6 @@ CXXFLAGS += -std=c++17								# Use the c++ standard released in 2017
 CXXFLAGS += -O0 									# Avoid optimizer screwing up coverage data
 CXXFLAGS += -g3										# Include all available debug info
 CXXFLAGS += -fno-inline								# Do not inline (coverage again)
-CXXFLAGS += -m32									# Use 32 bit mode (to model the target MCUs)
 CXXFLAGS += -fmax-errors=5							# Avoid blowing up the console
 CXXFLAGS += -rdynamic								# Allows meaningful backtraces 
 CXXFLAGS += --coverage								# Generate program flow data and inject profiling code
@@ -96,6 +94,10 @@ CXXFLAGS += -fdelete-null-pointer-checks
 LIBS += gcov
 
 LD=$(CXX) 
+
+ifeq (USE64BIT,)
+CXXFLAGS += -m32
 LDFLAGS += -m32
+endif
 
 include ultimate-makefile/Makefile.ultimate	

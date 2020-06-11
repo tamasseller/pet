@@ -9,7 +9,6 @@
 #define HEAPSTRESS_H_
 
 #include <cstdio>
-#include <cstdlib>
 #include <cstring>
 
 #include "ubiquitous/Trace.h"
@@ -57,11 +56,15 @@ class HeapStress: pet::Trace<HeapStressTestTraceTag> {
 
 	BlockDb db;
 
-	unsigned int seed = 1234;
-	unsigned int random(unsigned int l, unsigned int h) {
-		if(h > l)
-			return l + rand_r(&seed) % (h-l);
-
+	uint32_t state = 1234;
+	unsigned int random(unsigned int l, unsigned int h) 
+	{
+		if(h > l) 
+		{
+		    state = state * 1103515245 + 12345;
+			return 1 + (state >> 16) % (h-l);
+		}
+		
 		return 0;
 	}
 
