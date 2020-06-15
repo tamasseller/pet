@@ -29,6 +29,23 @@ namespace detail {
     template<typename T> struct remove_reference { typedef T type; };
     template<typename T> struct remove_reference<T&> { typedef T type; };
     template<typename T> struct remove_reference<T&&> { typedef T type; };
+
+    struct false_type { static constexpr auto value = false; };
+    struct true_type { static constexpr auto value = true; };
+    template<typename> struct is_lvalue_reference: public false_type { };
+    template<typename _Tp> struct is_lvalue_reference<_Tp&>: public true_type { };
+}
+
+template<typename T>
+constexpr T&& forward(typename detail::remove_reference<T>::type& t) {
+    return static_cast<T&&>(t);
+}
+
+template<typename T>
+constexpr T&& forward(typename detail::remove_reference<T>::type&& t)
+{
+    static_assert(!detail::is_lvalue_reference<T>::value, "template argument substituting T is an lvalue reference type");
+    return static_cast<T&&>(t);
 }
 
 template<typename T> constexpr typename detail::remove_reference<T>::type&& move(T&& t) noexcept {

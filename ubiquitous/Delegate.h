@@ -88,7 +88,7 @@ class Delegate<Retval(Args...)>
     struct StaticCallHelper
     {
         static inline auto call(uintptr_t data, Args... args) {
-            return StaticFunctionPointer(args...);
+            return StaticFunctionPointer(pet::forward<Args>(args)...);
         }
     };
 
@@ -99,7 +99,7 @@ class Delegate<Retval(Args...)>
     struct MemberCallHelper
     {
         static inline auto call(uintptr_t data, Args... args) {
-            return (reinterpret_cast<EnclosingType*>(data)->*PointerToMember)(args...);
+            return (reinterpret_cast<EnclosingType*>(data)->*PointerToMember)(pet::forward<Args>(args)...);
         }
     };
 
@@ -110,7 +110,7 @@ class Delegate<Retval(Args...)>
     struct LambdaCallHelper
     {
         static inline auto call(uintptr_t data, Args... args) {
-            return reinterpret_cast<LambdaType*>(&data)->operator()(args...);
+            return reinterpret_cast<LambdaType*>(&data)->operator()(pet::forward<Args>(args)...);
         }
     };
 
@@ -145,8 +145,9 @@ public:
     /**
      * The invocation operator, that transfers control to the target.
      */
-    inline Retval operator()(Args... args) const {
-        return f(this->data, args...);
+    template<class... InvokeArgs>
+    inline Retval operator()(InvokeArgs&&... args) const {
+        return f(this->data, pet::forward<Args>(args)...);
     }
 };
 

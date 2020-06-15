@@ -59,6 +59,14 @@ TEST_GROUP(Delegate)
     static inline auto apply(int x, pet::Delegate<int(int)> f) {
         return f(x);
     }
+
+    static inline auto applyByRef(int &x, pet::Delegate<int(int&)> f) {
+        return f(x);
+    }
+
+    static inline auto applyByRvalRef(int &&x, pet::Delegate<int(int&&)> f) {
+        return f(x);
+    }
 };
 
 TEST(Delegate, Sanity)
@@ -138,6 +146,16 @@ TEST(Delegate, PassAsArgument)
 {
     CHECK(apply(1, [](int x){ return 2 * x; }) == 2);
     CHECK(apply(2, [](int x){ return 3 * x; }) == 6);
+
+    int x = 1;
+    CHECK(applyByRef(x, [](int &x){ return x *= 2; }) == 2);
+    CHECK(x == 2);
+    CHECK(applyByRef(x, [](int &x){ return x *= 3; }) == 6);
+    CHECK(x == 6);
+
+    int y = 10;
+    CHECK(applyByRvalRef(pet::move(y), [](int &&x){ return x = 0; }) == 0);
+    CHECK(y == 0);
 }
 
 TEST(Delegate, ConstInstance)
