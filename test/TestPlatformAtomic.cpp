@@ -40,7 +40,7 @@ TEST(Atomic, AtomicSet)
 {
     pet::Atomic<uintptr_t> a(123);
 
-    a([](uintptr_t o, uintptr_t &n){ n = 234; return true; });
+    CHECK(123 == a([](uintptr_t o, uintptr_t &n){ n = 234; return true; }));
 
     CHECK(a == 234);
 }
@@ -49,7 +49,7 @@ TEST(Atomic, AtomicSetDenied)
 {
     pet::Atomic<uintptr_t> a(123);
 
-    a([](uintptr_t o, uintptr_t &n){ n = 234; return false; });
+    CHECK(123 == a([](uintptr_t o, uintptr_t &n){ n = 234; return false; }));
 
     CHECK(a == 123);
 }
@@ -58,7 +58,7 @@ TEST(Atomic, AtomicSquare)
 {
     pet::Atomic<uintptr_t> a(5);
 
-    a([](uintptr_t o, uintptr_t &n){ n = o * o; return true; });
+    CHECK(5 == a([](uintptr_t o, uintptr_t &n){ n = o * o; return true; }));
 
     CHECK(a == 25);
 }
@@ -83,7 +83,7 @@ TEST(Atomic, ImmobileCapture)
 
     pet::Atomic<uintptr_t> a(1);
 
-    a(pet::move(immo));
+    CHECK(1 == a(pet::move(immo)));
 
     CHECK(a == 2);
 

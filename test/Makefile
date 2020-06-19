@@ -28,6 +28,7 @@ SOURCES += TestDataCircularBuffer.cpp
 SOURCES += TestDataOrderedDoubleList.cpp
 SOURCES += TestManagedHstring.cpp
 SOURCES += TestManagedTreeMap.cpp
+SOURCES += TestManagedRefCnt.cpp
 SOURCES += TestMetaConfiguration.cpp
 SOURCES += TestMetaExpLog.cpp
 SOURCES += TestMetaExpRange.cpp
@@ -65,6 +66,9 @@ SOURCES += TestHeapHost5.cpp
 SOURCES += TestHeapHost6.cpp
 SOURCES += TestHeapTlsfStress.cpp
 SOURCES += TestHeapTlsf.cpp
+endif
+
+ifeq (_,)
 endif
 
 # Test support
