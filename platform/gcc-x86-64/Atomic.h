@@ -22,10 +22,21 @@
 
 #include "../x86-64-common/AtomicCommon.h"
 
-namespace home {
+namespace pet {
+
+namespace detail
+{
+    struct CasHolder
+    {
+        template<class T>
+        static inline bool cas(volatile T *ptr, T oldval, T newval) {
+            return __sync_bool_compare_and_swap(ptr, oldval, newval);
+        }
+    };
+}
 
 template<class Data>
-using Atomic = IntelArchCommon::Atomic<Data, &__sync_bool_compare_and_swap>;
+using Atomic = IntelArchCommon::Atomic<Data, detail::CasHolder>;
 
 }
 

@@ -19,6 +19,6 @@
 
 #include "Atomic.h"
 
-volatile bool home::detail::exclusiveMonitor = false;
+volatile bool pet::detail::exclusiveMonitor = false;
 
 

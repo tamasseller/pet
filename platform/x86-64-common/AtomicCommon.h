@@ -20,11 +20,11 @@
 #ifndef ATOMICCOMMON_H_
 #define ATOMICCOMMON_H_
 
-namespace home {
+namespace pet {
 
 namespace IntelArchCommon {
 
-template<class Value, bool (*cas)(volatile Value*, Value, Value)>
+template<class Value, class CasHolder>
 class Atomic {
 	volatile Value data;
 public:
@@ -49,7 +49,7 @@ public:
 			if(!op(old, result, args...))
 				break;
 
-		} while(!cas(&this->data, old, result));
+		} while(!CasHolder::cas(&this->data, old, result));
 
 		return old;
 	}

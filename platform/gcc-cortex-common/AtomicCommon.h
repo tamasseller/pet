@@ -20,7 +20,7 @@
 #ifndef ATOMICCOMMON_H_
 #define ATOMICCOMMON_H_
 
-namespace home {
+namespace pet {
 
 namespace CortexCommon {
 

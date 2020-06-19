@@ -40,6 +40,7 @@ SOURCES += TestMetaSfinae.cpp
 SOURCES += TestMetaStateChange.cpp
 SOURCES += TestMetaTuple.cpp
 SOURCES += TestMetaTypePackInfo.cpp
+SOURCES += TestPlatformAtomic.cpp
 SOURCES += TestPoolArena.cpp
 SOURCES += TestPoolFifo.cpp
 SOURCES += TestPoolPool.cpp

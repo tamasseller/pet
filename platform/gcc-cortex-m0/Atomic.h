@@ -24,7 +24,7 @@
 
 #include <stdint.h>
 
-namespace home {
+namespace pet {
 
 namespace detail {
 
