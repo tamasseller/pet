@@ -20,7 +20,7 @@
 #ifndef LINKEDLIST_H_
 #define LINKEDLIST_H_
 
-#include "ubiquitous/Compiler.h"
+#include "platform/Compiler.h"
 #include "meta/FieldAccessor.h"
 #include "algorithm/Iterate.h"
 

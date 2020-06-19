@@ -20,7 +20,7 @@
 #ifndef PET_META_STATECHANGE_H_
 #define PET_META_STATECHANGE_H_
 
-#include "ubiquitous/Compiler.h"
+#include "platform/Compiler.h"
 
 template<class T1, class T2>
 struct Pair {

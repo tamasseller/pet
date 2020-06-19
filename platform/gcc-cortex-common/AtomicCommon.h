@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * Copyright (c) 2016, 2017 Seller Tamás. All rights reserved.
+ * Copyright (c) 2017 Seller Tamás. All rights reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,33 +17,49 @@
  *
  *******************************************************************************/
 
-#ifndef GENERAL_H_
-#define GENERAL_H_
+#ifndef ATOMICCOMMON_H_
+#define ATOMICCOMMON_H_
 
-#include "platform/Clz.h"
+namespace home {
 
-struct General {
-	constexpr inline static unsigned int log2floorConst(const unsigned int x) {
-		return ((x==0)?
-					(32):
-					((x==1)?
-							0:
-							(log2floorConst(x/2)+1)
-					)
-				);
+namespace CortexCommon {
+
+template<class Value, Value (*ldrex)(volatile Value*), bool (*strex)(volatile Value*, Value), void (*clrex)()>
+class AtomicCommon
+{
+	volatile Value data;
+public:
+	inline AtomicCommon(): data(0) {}
+
+	inline AtomicCommon(Value value) {
+		data = value;
+		clrex();        // TODO is this ok (for example: preempted between write and clrex)?
 	}
 
-	__attribute__ ((always_inline))
-	inline static unsigned int log2floor(unsigned int x) {
-		return 31-clz(x);
+	inline operator Value() {
+		return data;
+	}
+
+	template<class Op, class... Args>
+	inline Value operator()(Op&& op, Args... args)
+	{
+		Value old, result;
+		do {
+			old = ldrex(&this->data);
+
+			if(!op(old, result, args...)) {
+				clrex();
+				break;
+			}
+
+		} while(!strex(&this->data, result));
+
+		return old;
 	}
 };
 
-template<typename T>
-void swap(T& a, T& b){
-	T temp = a;
-	a = b;
-	b = temp;
 }
 
-#endif /* GENERAL_H_ */
+}
+
+#endif /* ATOMICCOMMON_H_ */

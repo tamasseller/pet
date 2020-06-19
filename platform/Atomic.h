@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * Copyright (c) 2016, 2017 Seller Tamás. All rights reserved.
+ * Copyright (c) 2020 Seller Tamás. All rights reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,33 +17,24 @@
  *
  *******************************************************************************/
 
-#ifndef GENERAL_H_
-#define GENERAL_H_
+#ifndef ATOMIC_H_
+#define ATOMIC_H_
 
-#include "platform/Clz.h"
+#include "Compiler.h"
 
-struct General {
-	constexpr inline static unsigned int log2floorConst(const unsigned int x) {
-		return ((x==0)?
-					(32):
-					((x==1)?
-							0:
-							(log2floorConst(x/2)+1)
-					)
-				);
-	}
+#if defined(PET_COMPILER_IS_MSVC) && defined(PET_TARGET_IS_PC)
 
-	__attribute__ ((always_inline))
-	inline static unsigned int log2floor(unsigned int x) {
-		return 31-clz(x);
-	}
-};
 
-template<typename T>
-void swap(T& a, T& b){
-	T temp = a;
-	a = b;
-	b = temp;
-}
+#include "msvc-x86-64/Atomic.h"
 
-#endif /* GENERAL_H_ */
+#elif defined(PET_COMPILER_IS_GCC) && defined(PET_TARGET_IS_PC)
+
+#include "gcc-x86-64/Atomic.h"
+
+#elif defined(PET_COMPILER_IS_GCC) && defined(PET_TARGET_IS_CM0)
+
+#include "gcc-cortex-m0/Atomic.h"
+
+#endif
+
+#endif /* ATOMIC_H_ */

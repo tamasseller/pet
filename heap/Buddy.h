@@ -23,7 +23,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "ubiquitous/Compiler.h"
+#include "platform/Clz.h"
 
 namespace pet {
 

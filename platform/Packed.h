@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * Copyright (c) 2016, 2017 Seller Tamás. All rights reserved.
+ * Copyright (c) 2020 Seller Tamás. All rights reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,33 +17,23 @@
  *
  *******************************************************************************/
 
-#ifndef GENERAL_H_
-#define GENERAL_H_
+#ifndef PACKED_H_
+#define PACKED_H_
 
-#include "platform/Clz.h"
+#include "Compiler.h"
 
-struct General {
-	constexpr inline static unsigned int log2floorConst(const unsigned int x) {
-		return ((x==0)?
-					(32):
-					((x==1)?
-							0:
-							(log2floorConst(x/2)+1)
-					)
-				);
-	}
+#if defined(PET_COMPILER_IS_GCC)
 
-	__attribute__ ((always_inline))
-	inline static unsigned int log2floor(unsigned int x) {
-		return 31-clz(x);
-	}
-};
+#define     PACKED              __attribute__((packed))
+#define     BEFORE_PACKED()
+#define     AFTER_PACKED()
 
-template<typename T>
-void swap(T& a, T& b){
-	T temp = a;
-	a = b;
-	b = temp;
-}
+#elif defined(PET_COMPILER_IS_MSVC)
 
-#endif /* GENERAL_H_ */
+#define     PACKED              __declspec(empty_bases)
+#define     BEFORE_PACKED()     __pragma(pack(push, 1))
+#define     AFTER_PACKED()      __pragma(pack(pop))
+
+#endif
+
+#endif /* PACKED_H_ */

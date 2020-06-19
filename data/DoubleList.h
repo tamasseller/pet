@@ -20,7 +20,7 @@
 #ifndef DOUBLELIST_H_
 #define DOUBLELIST_H_
 
-#include "ubiquitous/Compiler.h"
+#include "platform/Compiler.h"
 #include "meta/FieldAccessor.h"
 #include "algorithm/Iterate.h"
 

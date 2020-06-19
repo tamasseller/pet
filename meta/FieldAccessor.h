@@ -20,7 +20,7 @@
 #ifndef FIELDACCESSOR_H_
 #define FIELDACCESSOR_H_
 
-#include "ubiquitous/Compiler.h"
+#include "platform/Compiler.h"
 #include "meta/MemberPointers.h"
 
 namespace pet {

@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * Copyright (c) 2016, 2017 Seller Tamás. All rights reserved.
+ * Copyright (c) 2020 Seller Tamás. All rights reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,33 +17,16 @@
  *
  *******************************************************************************/
 
-#ifndef GENERAL_H_
-#define GENERAL_H_
+#ifndef ATOMIC_IMPL_H_
+#define ATOMIC_IMPL_H_
 
-#include "platform/Clz.h"
+#include "../x86-64-common/AtomicCommon.h"
 
-struct General {
-	constexpr inline static unsigned int log2floorConst(const unsigned int x) {
-		return ((x==0)?
-					(32):
-					((x==1)?
-							0:
-							(log2floorConst(x/2)+1)
-					)
-				);
-	}
+namespace home {
 
-	__attribute__ ((always_inline))
-	inline static unsigned int log2floor(unsigned int x) {
-		return 31-clz(x);
-	}
-};
+template<class Data>
+using Atomic = IntelArchCommon::Atomic<Data, &__sync_bool_compare_and_swap>;
 
-template<typename T>
-void swap(T& a, T& b){
-	T temp = a;
-	a = b;
-	b = temp;
 }
 
-#endif /* GENERAL_H_ */
+#endif /* ATOMIC_IMPL_H_ */

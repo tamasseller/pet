@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * Copyright (c) 2016, 2017 Seller Tamás. All rights reserved.
+ * Copyright (c) 2020 Seller Tamás. All rights reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,21 +17,16 @@
  *
  *******************************************************************************/
 
-#include <cstddef>
+#ifndef CLZ_H_
+#define CLZ_H_
 
-#ifndef COMPILER_H_
-#define COMPILER_H_
+#include "Compiler.h"
 
-#if defined (__GNUC__)
+#if defined(PET_COMPILER_IS_GCC)
 
-#define     clz 				__builtin_clz
-#define	    really_inline 		__attribute__((always_inline)) inline
-#define     section(x) 			__attribute((section(#x)))
-#define     PACKED 				__attribute__((packed))
-#define     BEFORE_PACKED()
-#define     AFTER_PACKED()
+#define     clz                 __builtin_clz
 
-#elif defined(_MSC_VER)
+#elif defined(PET_COMPILER_IS_MSVC)
 
 #include <intrin.h>
 #include <cstdint>
@@ -41,16 +36,6 @@ static inline uint32_t clz(uint32_t x) {
     return (31 - r);
 }
 
-#define	    really_inline 		__forceinline
-#define     PACKED              __declspec(empty_bases)
-#define     BEFORE_PACKED() 	__pragma(pack(push, 1))
-#define     AFTER_PACKED() 		__pragma(pack(pop))
+#endif
 
-#endif 
-
-template <class C, class M>
-static constexpr inline size_t unsafeOffsetof(M C::* member) {
-    return reinterpret_cast<const char*>(&(reinterpret_cast<C*>(0)->*member)) - reinterpret_cast<const char*>(reinterpret_cast<M*>(0));
-}
-
-#endif /* COMPILER_H_ */
+#endif /* CLZ_H_ */
