@@ -39,6 +39,9 @@ TEST_GROUP(RefCnt)
             MOCK(Target)::CALL(Dtor);
         }
     };
+
+    static_assert(sizeof(Target) == sizeof(void*));
+    static_assert(sizeof(Target::Ptr) == sizeof(void*));
 };
 
 TEST(RefCnt, Sanity)

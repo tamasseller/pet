@@ -22,6 +22,11 @@
 
 #include "ubiquitous/Delegate.h"
 
+static_assert(sizeof(pet::Delegate<void()>) == 2 * sizeof(void*));
+static_assert(sizeof(pet::Delegate<void()>) == sizeof(pet::Delegate<int()>));
+static_assert(sizeof(pet::Delegate<void()>) == sizeof(pet::Delegate<int(int)>));
+static_assert(sizeof(pet::Delegate<void()>) == sizeof(pet::Delegate<void(int)>));
+
 TEST_GROUP(Delegate)
 {
     struct P
@@ -169,6 +174,8 @@ TEST(Delegate, CtorDtor)
             MOCK(TestTarget)::CALL(Dtor).withParam(live);
         }
     } t;
+
+    pet::Delegate<void()> empty;
 
     {
         MOCK(TestTarget)::EXPECT(Dtor).withParam(false);
