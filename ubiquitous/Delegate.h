@@ -40,19 +40,20 @@ template<class Retval, class... Args>
 class Delegate<Retval(Args...)>
 {
     /**
-     * The type of a to a free-standing function whose signature is the same as the delegate's
+     * The type of a pointer to a free-standing function whose signature is the same as the delegate's
      */
     using TPtr = Retval (*)(Args...);
 
-    /**
-     * The type of a pointer to the trampoline function used internally to call the actual target.
-     */
-    using FPtr = Retval (*)(uintptr_t, Args...);
+    struct VTable
+    {
+        Retval (*const call)(uintptr_t*, Args...);
+        void (*const destroy)(uintptr_t*);
+    };
 
     /**
      * Pointer to the automatically generated trampoline function used to pass control to the target.
      */
-    FPtr f;
+    const VTable* f = nullptr;
 
     /**
      * Single-pointer sized data storage used by the trampoline in a target type dependent way.
@@ -60,48 +61,14 @@ class Delegate<Retval(Args...)>
     uintptr_t data;
 
     /**
-     * Constructor for the free-standing function target case, the data element is not used,
-     * thus it is not initialized.
-     */
-    inline constexpr Delegate(FPtr f): f(f) {}
-
-    /**
-     * Constructor for the member function target case, the data element contains
-     * a pointer to instance the member is to be called on.
-     */
-    inline constexpr Delegate(FPtr f, uintptr_t data): data(data), f(f) {}
-
-    /**
      * Constructor for the lambda target case, the data element contains a copy of the lambda object.
      */
     template<class C>
-    inline Delegate(FPtr f, C&& c): f(f)
+    inline Delegate(const VTable *f, C&& c): f(f)
     {
         static_assert(sizeof(C) <= sizeof(uintptr_t));
-        new(&this->data, NewOperatorDisambiguator()) C(pet::move(c));
+        new(&this->data, NewOperatorDisambiguator()) C(pet::forward<C>(c));
     }
-
-    /**
-     * Trampoline implementation for the free-standing function target case.
-     */
-    template<TPtr StaticFunctionPointer>
-    struct StaticCallHelper
-    {
-        static inline auto call(uintptr_t data, Args... args) {
-            return StaticFunctionPointer(pet::forward<Args>(args)...);
-        }
-    };
-
-    /**
-     * Trampoline implementation for the member function case.
-     */
-    template<class MemberPointerType, MemberPointerType PointerToMember, class EnclosingType>
-    struct MemberCallHelper
-    {
-        static inline auto call(uintptr_t data, Args... args) {
-            return (reinterpret_cast<EnclosingType*>(data)->*PointerToMember)(pet::forward<Args>(args)...);
-        }
-    };
 
     /**
      * Trampoline implementation for the lambda target case.
@@ -109,45 +76,46 @@ class Delegate<Retval(Args...)>
     template<class LambdaType>
     struct LambdaCallHelper
     {
-        static inline auto call(uintptr_t data, Args... args) {
-            return reinterpret_cast<LambdaType*>(&data)->operator()(pet::forward<Args>(args)...);
+        static inline auto call(uintptr_t *data, Args... args) {
+            return reinterpret_cast<LambdaType*>(data)->operator()(pet::forward<Args>(args)...);
         }
+
+        static inline void destroy(uintptr_t *data) {
+            reinterpret_cast<LambdaType*>(data)->~LambdaType();
+        }
+
+        static constexpr const inline auto vtable = VTable{&call, &destroy};
     };
 
 public:
     /**
-     * Potentially dangerous default contructor that leaves the fields uninitialzed.
+     * Potentially dangerous default contructor that leaves the data field uninitialzed.
      */
     inline Delegate() = default;
-
-    /**
-     * Constructor method for a free-standing function target.
-     */
-    template<TPtr StaticFunctionPointer>
-    static inline constexpr Delegate create() {
-        return Delegate(&StaticCallHelper<StaticFunctionPointer>::call);
-    }
-
-    /**
-     * Constructor method for a mebmer function target.
-     */
-    template<class MemberPointerType, MemberPointerType PointerToMember, class EnclosingType>
-    static inline constexpr Delegate create(EnclosingType* instance) {
-        return Delegate(&MemberCallHelper<MemberPointerType, PointerToMember, EnclosingType>::call, reinterpret_cast<uintptr_t>(instance));
-    }
 
     /**
      * Implicit constructor for a lambda target.
      */
     template<class C>
-    inline Delegate(C &&c): Delegate(&LambdaCallHelper<C>::call, pet::move(c)) {}
+    inline Delegate(C &&c): Delegate(&LambdaCallHelper<C>::vtable, pet::move(c)) {}
 
     /**
      * The invocation operator, that transfers control to the target.
      */
     template<class... InvokeArgs>
-    inline Retval operator()(InvokeArgs&&... args) const {
-        return f(this->data, pet::forward<Args>(args)...);
+    inline Retval operator()(InvokeArgs&&... args) {
+        return (f->call)(&this->data, pet::forward<Args>(args)...);
+    }
+
+    /**
+     * Destructor that take care of delegating the destructor call to the captured data.
+     */
+    inline ~Delegate()
+    {
+        if(f)
+        {
+            (f->destroy)(&this->data);
+        }
     }
 };
 
@@ -178,26 +146,6 @@ namespace detail
 }
 
 #if __cplusplus >= 201703L
-
-/**
- * Delegate builder method with automatic type deduction for a free-standing function (requires C++17).
- */
-template<auto StaticFunctionPointer>
-static inline constexpr auto delegate()
-{
-    using T = Delegate<typename detail::template StripStaticSignature<decltype(StaticFunctionPointer)>::Type>;
-    return T::template create<StaticFunctionPointer>();
-}
-
-/**
- * Delegate builder method with automatic type deduction for a member function (requires C++17).
- */
-template<auto Member, class Type>
-static inline constexpr auto delegate(Type* instance)
-{
-    using T = Delegate<typename detail::template StripMemberSignature<decltype(Member)>::Type>;
-    return T::template create<decltype(Member), Member, Type>(instance);
-}
 
 /**
  * Delegate builder method with automatic type deduction for a lambda target (requires C++17).

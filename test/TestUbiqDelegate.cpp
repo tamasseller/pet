@@ -71,8 +71,8 @@ TEST_GROUP(Delegate)
 
 TEST(Delegate, Sanity)
 {
-    auto f = pet::delegate<&P::f>(&p1);
-    auto g = pet::delegate<&P::g>(&p1);
+    auto f = pet::delegate([this](){return p1.f();});
+    auto g = pet::delegate([this](int x) {p1.g(x); });
 
     MOCK(P)::EXPECT(f);
     MOCK(P)::EXPECT(g).withParam(123);
@@ -82,12 +82,12 @@ TEST(Delegate, Sanity)
 
 TEST(Delegate, DifferentInstances)
 {
-    auto f1 = pet::delegate<&P::f>(&p1);
-    auto f2 = pet::delegate<&P::f>(&p2);
-    auto g1 = pet::delegate<&P::g>(&p1);
-    auto g2 = pet::delegate<&P::g>(&p2);
-    auto h1 = pet::delegate<&P::h>(&p1);
-    auto h2 = pet::delegate<&P::h>(&p2);
+    auto f1 = pet::delegate([this](){return p1.f();});
+    auto f2 = pet::delegate([this](){return p1.f();});
+    auto g1 = pet::delegate([this](int x){p1.g(x);});
+    auto g2 = pet::delegate([this](int x){p1.g(x);});
+    auto h1 = pet::delegate([this](P& p, int y){p1.h(p, y);});
+    auto h2 = pet::delegate([this](P& p, int y){p1.h(p, y);});
 
     MOCK(P)::EXPECT(h).withParam(&p2).withParam(321);
     MOCK(P)::EXPECT(f);
@@ -104,20 +104,10 @@ TEST(Delegate, DifferentInstances)
 
 TEST(Delegate, StaticFunction)
 {
-    auto a = pet::delegate<&add>();
+    auto a = pet::delegate([](int a, int b){return add(a, b);});
 
     MOCK(S)::EXPECT(add).withParam(1).withParam(2);
-    a(1, 2);
-}
-
-TEST(Delegate, FreeStandingLambda)
-{
-    auto l = pet::delegate([](int x, char c, void* v){
-        MOCK(L)::CALL(op).withParam(x).withParam(c).withParam(v);
-    });
-
-    MOCK(L)::EXPECT(op).withParam(1).withParam('d').withParam(&l);
-    l(1, 'd', &l);
+    CHECK(3 == a(1, 2));
 }
 
 TEST(Delegate, MemberCallInLambda)
@@ -163,6 +153,31 @@ TEST(Delegate, ConstInstance)
     const auto* c = &p1;
     CHECK(c->c() == -123);
 
-    auto d = pet::delegate<&P::c>(c);
+    auto d = pet::delegate([c](){return c->c();});
     CHECK(d() == -123);
+}
+
+TEST(Delegate, CtorDtor)
+{
+    struct TestTarget
+    {
+        bool live = true;
+        TestTarget() = default;
+        TestTarget(TestTarget &&o): live(o.live) { o.live = false; }
+        TestTarget(const TestTarget&) = delete;
+        ~TestTarget() {
+            MOCK(TestTarget)::CALL(Dtor).withParam(live);
+        }
+    } t;
+
+    {
+        MOCK(TestTarget)::EXPECT(Dtor).withParam(false);
+
+        auto d = pet::delegate([u{pet::move(t)}](){return u.live;});
+
+        CHECK(!t.live);
+        CHECK(d());
+        MOCK(TestTarget)::EXPECT(Dtor).withParam(true);
+    }
+    MOCK(TestTarget)::EXPECT(Dtor).withParam(false);
 }
