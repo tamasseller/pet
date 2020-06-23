@@ -48,7 +48,8 @@ constexpr T&& forward(typename detail::remove_reference<T>::type&& t)
     return static_cast<T&&>(t);
 }
 
-template<typename T> constexpr typename detail::remove_reference<T>::type&& move(T&& t) noexcept {
+template<typename T>
+constexpr typename detail::remove_reference<T>::type&& move(T&& t) {
     return static_cast<typename detail::remove_reference<T>::type&&>(t);
 }
 

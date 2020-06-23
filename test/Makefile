@@ -26,6 +26,7 @@ SOURCES += TestDataMutableStorage.cpp
 SOURCES += TestDataPriorityQueue.cpp
 SOURCES += TestDataCircularBuffer.cpp
 SOURCES += TestDataOrderedDoubleList.cpp
+SOURCES += TestIntegrationRefCntDelegate.cpp
 SOURCES += TestManagedHstring.cpp
 SOURCES += TestManagedTreeMap.cpp
 SOURCES += TestManagedRefCnt.cpp

@@ -31,7 +31,7 @@ namespace pet
 template<class Target, class Allocator>
 class RefCnt
 {
-    Atomic<uintptr_t> counter = 1;
+    Atomic<uintptr_t> counter = 0;
 
 public:
     class Ptr: pet::Resettable<Ptr>
@@ -57,7 +57,9 @@ public:
         }
 
         friend RefCnt;
-        inline Ptr(Target* target): target(target) {}
+        inline Ptr(Target* target) {
+            acquire(target);
+        }
 
     public:
         inline Ptr() = default;
@@ -142,6 +144,11 @@ public:
     template<class... Args>
     static inline Ptr make(Args&&... args) {
         return new (Allocator::alloc(sizeof(Target))) Target(pet::forward<Args>(args)...);
+    }
+
+    template<class... Args>
+    inline Ptr self() {
+        return static_cast<Target*>(this);
     }
 };
 

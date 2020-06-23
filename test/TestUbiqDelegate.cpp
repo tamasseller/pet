@@ -70,8 +70,22 @@ TEST_GROUP(Delegate)
     }
 
     static inline auto applyByRvalRef(int &&x, pet::Delegate<int(int&&)> f) {
-        return f(x);
+        return f(pet::move(x));
     }
+
+    struct MovableTestTarget
+    {
+        bool live = true;
+        const uint16_t gen = 0;
+        const uint16_t id = 0;
+        MovableTestTarget() = default;
+        MovableTestTarget(int id): id(id) {}
+        MovableTestTarget(MovableTestTarget &&o): live(o.live), gen(o.gen + 1), id(o.id) { o.live = false; }
+        MovableTestTarget(const MovableTestTarget&) = delete;
+        ~MovableTestTarget() {
+            MOCK(TestTarget)::CALL(Dtor).withParam(live).withParam(gen);
+        }
+    };
 };
 
 TEST(Delegate, Sanity)
@@ -162,29 +176,64 @@ TEST(Delegate, ConstInstance)
     CHECK(d() == -123);
 }
 
-TEST(Delegate, CtorDtor)
+TEST(Delegate, Empty)
 {
-    struct TestTarget
-    {
-        bool live = true;
-        TestTarget() = default;
-        TestTarget(TestTarget &&o): live(o.live) { o.live = false; }
-        TestTarget(const TestTarget&) = delete;
-        ~TestTarget() {
-            MOCK(TestTarget)::CALL(Dtor).withParam(live);
-        }
-    } t;
-
     pet::Delegate<void()> empty;
+    empty.clear();
+}
+
+TEST(Delegate, CtorDtorMoveOnlyTarget)
+{
+    MovableTestTarget t;
 
     {
-        MOCK(TestTarget)::EXPECT(Dtor).withParam(false);
-
+        MOCK(TestTarget)::EXPECT(Dtor).withParam(false).withParam(1); // original lambda object
         auto d = pet::delegate([u{pet::move(t)}](){return u.live;});
 
         CHECK(!t.live);
         CHECK(d());
-        MOCK(TestTarget)::EXPECT(Dtor).withParam(true);
+        MOCK(TestTarget)::EXPECT(Dtor).withParam(true).withParam(2); // lambda object captured inside delegate
     }
-    MOCK(TestTarget)::EXPECT(Dtor).withParam(false);
+
+    MOCK(TestTarget)::EXPECT(Dtor).withParam(false).withParam(0); // local variable t
+}
+
+TEST(Delegate, DelegateMoving)
+{
+    MovableTestTarget t;
+
+    {
+        MOCK(TestTarget)::EXPECT(Dtor).withParam(false).withParam(1); // original lambda object
+        auto d = pet::delegate([u{pet::move(t)}](){return u.live;});
+        MOCK(TestTarget)::EXPECT(Dtor).withParam(false).withParam(2); // lambda object captured inside d
+        auto e = pet::move(d);
+        MOCK(TestTarget)::EXPECT(Dtor).withParam(false).withParam(3); // lambda object captured inside e
+        auto f(pet::move(e));
+
+        CHECK(!t.live);
+        CHECK(f());
+        MOCK(TestTarget)::EXPECT(Dtor).withParam(true).withParam(4); // lambda object captured inside f
+    }
+
+    MOCK(TestTarget)::EXPECT(Dtor).withParam(false).withParam(0); // local variable t
+}
+
+TEST(Delegate, DelegateOverwrite)
+{
+    MovableTestTarget t1(1), t2(2);
+
+    {
+        MOCK(TestTarget)::EXPECT(Dtor).withParam(false).withParam(1); // original lambda object
+        auto d = pet::delegate([u{pet::move(t1)}](){return u.id;});
+        MOCK(TestTarget)::EXPECT(Dtor).withParam(true).withParam(2); // overwritten lambda object
+        MOCK(TestTarget)::EXPECT(Dtor).withParam(false).withParam(2); // new temporary lambda object
+        MOCK(TestTarget)::EXPECT(Dtor).withParam(false).withParam(1); // original lambda object
+        d = pet::delegate([u{pet::move(t2)}](){return u.id;});
+
+        CHECK(d() == 2);
+        MOCK(TestTarget)::EXPECT(Dtor).withParam(true).withParam(3); // lambda object captured inside d
+    }
+
+    MOCK(TestTarget)::EXPECT(Dtor).withParam(false).withParam(0); // local variable t2
+    MOCK(TestTarget)::EXPECT(Dtor).withParam(false).withParam(0); // local variable t1
 }

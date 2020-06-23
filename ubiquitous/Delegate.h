@@ -39,14 +39,10 @@ template<class C> class Delegate;
 template<class Retval, class... Args>
 class Delegate<Retval(Args...)>
 {
-    /**
-     * The type of a pointer to a free-standing function whose signature is the same as the delegate's
-     */
-    using TPtr = Retval (*)(Args...);
-
     struct VTable
     {
         Retval (*const call)(uintptr_t*, Args...);
+        void (*const relocate)(uintptr_t*, uintptr_t*);
         void (*const destroy)(uintptr_t*);
     };
 
@@ -67,7 +63,7 @@ class Delegate<Retval(Args...)>
     inline Delegate(const VTable *f, C&& c): f(f)
     {
         static_assert(sizeof(C) <= sizeof(uintptr_t));
-        new(&this->data, NewOperatorDisambiguator()) C(pet::forward<C>(c));
+        new(&this->data, NewOperatorDisambiguator()) C(pet::move(c));
     }
 
     /**
@@ -80,18 +76,50 @@ class Delegate<Retval(Args...)>
             return reinterpret_cast<LambdaType*>(data)->operator()(pet::forward<Args>(args)...);
         }
 
+        static inline void move(uintptr_t *old, uintptr_t *current) {
+            new(current, NewOperatorDisambiguator()) LambdaType(pet::move(*(reinterpret_cast<LambdaType*>(old))));
+            reinterpret_cast<LambdaType*>(old)->~LambdaType();
+        }
+
         static inline void destroy(uintptr_t *data) {
             reinterpret_cast<LambdaType*>(data)->~LambdaType();
         }
 
-        static constexpr const inline auto vtable = VTable{&call, &destroy};
+        static constexpr const inline auto vtable = VTable{&call, &move, &destroy};
     };
 
 public:
     /**
-     * Potentially dangerous default contructor that leaves the data field uninitialzed.
+     * Potentially dangerous default constructor that leaves the data field uninitialized.
      */
     inline Delegate() = default;
+
+    /**
+     * Copying is forbidden in order to relax requirements on the type of the captured object.
+     */
+    inline Delegate(const Delegate&) = delete;
+    inline Delegate& operator =(const Delegate&) = delete;
+
+    /**
+     * Moving is allowed and constructor is forwarded accordingly to the captured object, thus
+     * it is required to be movable.
+     */
+    inline Delegate(Delegate&& o): f(o.f)
+    {
+        f->relocate(&o.data, &data);
+        o.f = nullptr;
+    }
+
+    inline Delegate& operator =(Delegate&& o)
+    {
+        if(f)
+            f->destroy(&data);
+
+        f = o.f;
+        f->relocate(&o.data, &data);
+        o.f = nullptr;
+        return *this;
+    }
 
     /**
      * Implicit constructor for a lambda target.
@@ -104,7 +132,16 @@ public:
      */
     template<class... InvokeArgs>
     inline Retval operator()(InvokeArgs&&... args) {
-        return (f->call)(&this->data, pet::forward<Args>(args)...);
+        return (f->call)(&this->data, pet::forward<InvokeArgs>(args)...);
+    }
+
+    inline void clear()
+    {
+        if(f)
+        {
+            (f->destroy)(&this->data);
+            f = nullptr;
+        }
     }
 
     /**
