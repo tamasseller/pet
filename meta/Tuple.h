@@ -9,6 +9,7 @@
 
 #include "meta/Sequence.h"
 #include "meta/TypeManipulation.h"
+#include "meta/Utility.h"
 
 namespace pet {
 
@@ -17,7 +18,9 @@ namespace detail {
 template<int x, class T>
 struct TupleWrapper {
     T value;
-    inline TupleWrapper(const T& value): value(value) {}
+
+    template<class A>
+    inline TupleWrapper(A&& value): value(pet::forward<A>(value)) {}
 };
 
 template<int, class...> struct TypeAt;
@@ -41,7 +44,8 @@ class TupleImpl<Sequence<idx...>, T...>: TupleWrapper<idx, T>... {
 
         typedef TupleImpl<Sequence<idx...>, removeReference<T>...> NoRefPair;
     public:
-        inline TupleImpl(T... args): TupleWrapper<idx, T>(args)... {}
+        template<class... Args>
+        inline TupleImpl(nullptr_t, Args&&... args): TupleWrapper<idx, T>(pet::forward<Args>(args))... {}
 
         template<int n>
         inline decltype(Member<n>::value) &get() {
@@ -55,23 +59,34 @@ class TupleImpl<Sequence<idx...>, T...>: TupleWrapper<idx, T>... {
 
         template<class Element>
         inline void extract(Element* elements) {
-                int unused[] = {(elements[idx] = get<idx>(), 0)...};
-                (void) unused;
+            int unused[] = {(elements[idx] = get<idx>(), 0)...};
+            (void) unused;
         }
 
-        TupleImpl operator =(const TupleImpl& other) {
-            int unused[] = {(get<idx>() =   other.get<idx>(), 0)...};
+        inline TupleImpl operator =(const TupleImpl& other) {
+            int unused[] = {(get<idx>() = other.get<idx>(), 0)...};
             (void) unused;
             return *this;
         }
 
         template<class = enableIf<!sameTypes<TupleImpl, NoRefPair>::value>>
-        TupleImpl operator =(const NoRefPair& other) {
+        inline TupleImpl operator =(const NoRefPair& other) {
             int unused[] = {(get<idx>() =   other.template get<idx>(), 0)...};
             (void) unused;
             return *this;
         }
 
+        template<class C>
+        inline decltype(auto) moveApply(C&& c) &&
+        {
+            return c(pet::move(get<idx>())...);
+        }
+
+        template<class C>
+        inline decltype(auto) copyApply(C&& c)
+        {
+            return c(pet::forward<T>(get<idx>())...);
+        }
 };
 
 }
@@ -80,8 +95,8 @@ template<class... T>
 using Tuple = detail::TupleImpl<sequence<0, sizeof...(T)>, T...>;
 
 template<class... T>
-Tuple<T...> makeTuple(T&&... args) {
-    return Tuple<T...>(args...);
+auto makeTuple(T&&... args) {
+    return Tuple<T...>(nullptr, pet::forward<T>(args)...);
 }
 
 #if 0
