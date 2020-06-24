@@ -237,3 +237,12 @@ TEST(Delegate, DelegateOverwrite)
     MOCK(TestTarget)::EXPECT(Dtor).withParam(false).withParam(0); // local variable t2
     MOCK(TestTarget)::EXPECT(Dtor).withParam(false).withParam(0); // local variable t1
 }
+
+TEST(Delegate, DelegateArg)
+{
+    auto d = pet::delegate([](pet::Delegate<int(int)> f){return f(3);});
+    CHECK(9 == d([](int x){ return x * x;}));
+
+    auto e = pet::delegate([](int x){ return x + x ;});
+    CHECK(6 == d(pet::move(e)));
+}
