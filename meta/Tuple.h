@@ -16,8 +16,11 @@ namespace pet {
 namespace detail {
 
 template<int x, class T>
-struct TupleWrapper {
+struct TupleWrapper
+{
     T value;
+
+    inline TupleWrapper() = default;
 
     template<class A>
     inline TupleWrapper(A&& value): value(pet::forward<A>(value)) {}
@@ -47,6 +50,7 @@ class TupleImpl<Sequence<idx...>, T...>: TupleWrapper<idx, T>... {
         template<class... Args>
         inline TupleImpl(nullptr_t, Args&&... args): TupleWrapper<idx, T>(pet::forward<Args>(args))... {}
 
+        inline TupleImpl() = default;
         inline TupleImpl(TupleImpl&&) = default;
         inline TupleImpl(const TupleImpl&) = default;
 

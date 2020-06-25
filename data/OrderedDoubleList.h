@@ -43,12 +43,12 @@ public:
 	inline void add(Element* elem);
 	inline void addLowest(Element* elem);
 	inline void addHighest(Element* elem);
-	inline void remove(Element* elem);
 	inline Element* lowest();
 	inline Element* highest();
 	inline Element* popLowest();
 	inline Element* popHighest();
 
+    using OrderedDoubleList::DoubleList::remove;
 	using DoubleList<Element>::contains;
 };
 
@@ -74,11 +74,6 @@ void OrderedDoubleList<Element, compare>::addLowest(Element* elem) {
 template<class Element, bool (*compare)(const Element&, const Element&)>
 void OrderedDoubleList<Element, compare>::addHighest(Element* elem) {
 	this->fastAddBack(elem);
-}
-
-template<class Element, bool (*compare)(const Element&, const Element&)>
-void OrderedDoubleList<Element, compare>::remove(Element* elem) {
-	this->fastRemove(elem);
 }
 
 template<class Element, bool (*compare)(const Element&, const Element&)>
