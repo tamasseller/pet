@@ -47,6 +47,9 @@ class TupleImpl<Sequence<idx...>, T...>: TupleWrapper<idx, T>... {
         template<class... Args>
         inline TupleImpl(nullptr_t, Args&&... args): TupleWrapper<idx, T>(pet::forward<Args>(args))... {}
 
+        inline TupleImpl(TupleImpl&&) = default;
+        inline TupleImpl(const TupleImpl&) = default;
+
         template<int n>
         inline decltype(Member<n>::value) &get() {
             return static_cast<Member<n>*>(this)->value;
@@ -86,6 +89,12 @@ class TupleImpl<Sequence<idx...>, T...>: TupleWrapper<idx, T>... {
         inline decltype(auto) copyApply(C&& c)
         {
             return c(pet::forward<T>(get<idx>())...);
+        }
+
+        template<class... Args>
+        static inline TupleImpl create(Args&&... args)
+        {
+            return TupleImpl(nullptr, pet::forward<Args>(args)...);
         }
 };
 
