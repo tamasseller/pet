@@ -70,15 +70,21 @@ class TupleImpl<Sequence<idx...>, T...>: TupleWrapper<idx, T>... {
             (void) unused;
         }
 
-        inline TupleImpl operator =(const TupleImpl& other) {
+        inline TupleImpl &operator =(const TupleImpl& other) {
             int unused[] = {(get<idx>() = other.get<idx>(), 0)...};
             (void) unused;
             return *this;
         }
 
+        inline TupleImpl &operator =(TupleImpl&& other) {
+            int unused[] = {(get<idx>() = pet::move(other.get<idx>()), 0)...};
+            (void) unused;
+            return *this;
+        }
+
         template<class = enableIf<!sameTypes<TupleImpl, NoRefPair>::value>>
-        inline TupleImpl operator =(const NoRefPair& other) {
-            int unused[] = {(get<idx>() =   other.template get<idx>(), 0)...};
+        inline TupleImpl &operator =(const NoRefPair& other) {
+            int unused[] = {(get<idx>() = other.template get<idx>(), 0)...};
             (void) unused;
             return *this;
         }
@@ -96,7 +102,7 @@ class TupleImpl<Sequence<idx...>, T...>: TupleWrapper<idx, T>... {
         }
 
         template<class... Args>
-        static inline TupleImpl create(Args&&... args)
+        static inline auto create(Args&&... args)
         {
             return TupleImpl(nullptr, pet::forward<Args>(args)...);
         }
