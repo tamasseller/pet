@@ -137,10 +137,14 @@ public:
 
     inline void clear()
     {
-        if(f)
+    	/*
+    	 * Copy content in order to allow the destructor to free an object that happens to
+    	 * contain the delegate itself without the risk of heap corruption.
+    	 */
+        if(auto temp = f)
         {
-            (f->destroy)(&this->data);
-            f = nullptr;
+        	f = nullptr;
+            (temp->destroy)(&this->data);
         }
     }
 
