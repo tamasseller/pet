@@ -48,7 +48,7 @@ namespace pet {
  */
 template<class Element>
 class LinkedList: public pet::IterativeSearch<LinkedList<Element>, Element>::Decorator {
-	Element* first = nullptr;
+	decltype(Element::next) first = nullptr;
 public:
 	/**
 	 * Forward iterator.
@@ -64,16 +64,16 @@ public:
 	 */
 	class Iterator {
 		friend LinkedList;
-		Element** prevsNext;
+		decltype(Element::next)* prevsNext;
 
-		really_inline Iterator(Element** prevsNext);
+		really_inline Iterator(decltype(Element::next)* prevsNext);
 	public:
 		/**
 		 * Current element or NULL.
 		 *
 		 * @return The current element or NULL if over the end of the list.
 		 */
-		really_inline Element* current() const;
+		really_inline decltype(Element::next) current() const;
 
 		/**
 		 * Take a step.
@@ -92,7 +92,7 @@ public:
 		 * @warning	The behavior is undefined (and probably wrong) if called with an element
 		 * 			that is already in the list and **in this method it is not checked**.
 		 */
-		really_inline void insert(Element* elem) const;
+		really_inline void insert(decltype(Element::next) elem) const;
 
 		/**
 		 * Remove current element.
@@ -114,7 +114,7 @@ public:
 	 *
 	 * @param	elem Is a pointer to the element to be added.
 	 */
-	inline void fastAdd(Element* elem);
+	inline void fastAdd(decltype(Element::next) elem);
 
 	/**
 	 * Add to front.
@@ -125,7 +125,7 @@ public:
 	 * @param	elem is a pointer to the element to add.
 	 * @return 	True if successful.
 	 */
-	inline bool add(Element* elem);
+	inline bool add(decltype(Element::next) elem);
 
 	/**
 	 * Add to back.
@@ -136,7 +136,7 @@ public:
 	 * @param	elem is a pointer to the element to add.
 	 * @return 	True if successful.
 	 */
-	inline bool addBack(Element* elem);
+	inline bool addBack(decltype(Element::next) elem);
 
 	/**
 	 * Remove an element.
@@ -146,7 +146,7 @@ public:
 	 * @param	elem is a pointer to the element to remove.
 	 * @return 	True if successful.
 	 */
-	inline bool remove(Element* elem);
+	inline bool remove(decltype(Element::next) elem);
 
 	/**
 	 * Remove all elements.
@@ -176,13 +176,13 @@ public:
 };
 
 template<class Element>
-inline void LinkedList<Element>::fastAdd(Element* elem)
+inline void LinkedList<Element>::fastAdd(decltype(Element::next) elem)
 {
 	iterator().insert(elem);
 }
 
 template<class Element>
-inline bool LinkedList<Element>::add(Element* elem)
+inline bool LinkedList<Element>::add(decltype(Element::next) elem)
 {
 	for(Iterator it=iterator(); it.current(); it.step())
 		if(it.current() == elem)
@@ -193,7 +193,7 @@ inline bool LinkedList<Element>::add(Element* elem)
 }
 
 template<class Element>
-inline bool LinkedList<Element>::addBack(Element* elem)
+inline bool LinkedList<Element>::addBack(decltype(Element::next) elem)
 {
 	Iterator it = iterator();
 	for(; it.current(); it.step())
@@ -205,7 +205,7 @@ inline bool LinkedList<Element>::addBack(Element* elem)
 }
 
 template<class Element>
-inline bool LinkedList<Element>::remove(Element* elem)
+inline bool LinkedList<Element>::remove(decltype(Element::next) elem)
 {
 	for(Iterator it = iterator(); it.current(); it.step()) {
 		if(it.current() == elem) {
@@ -241,10 +241,10 @@ LinkedList<Element>::iterator() {
 }
 
 template<class Element>
-really_inline LinkedList<Element>::Iterator::Iterator(Element** prevsNext):prevsNext(prevsNext) {}
+really_inline LinkedList<Element>::Iterator::Iterator(decltype(Element::next)* prevsNext):prevsNext(prevsNext) {}
 
 template<class Element>
-really_inline Element* LinkedList<Element>::Iterator::current() const
+really_inline decltype(Element::next) LinkedList<Element>::Iterator::current() const
 {
 	return *this->prevsNext;
 }
@@ -257,7 +257,7 @@ really_inline void LinkedList<Element>::Iterator::step()
 }
 
 template<class Element>
-really_inline void LinkedList<Element>::Iterator::insert(Element* elem) const
+really_inline void LinkedList<Element>::Iterator::insert(decltype(Element::next) elem) const
 {
 	elem->next = *this->prevsNext;
 	*this->prevsNext = elem;
