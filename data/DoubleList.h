@@ -24,6 +24,8 @@
 #include "meta/FieldAccessor.h"
 #include "algorithm/Iterate.h"
 
+#include "PrettyPrinter.h"
+
 namespace pet {
 
 /**

@@ -39,7 +39,6 @@
 #endif
 
 #define	    really_inline 		__attribute__((always_inline)) inline
-#define     section(x) 			__attribute((section(#x)))
 
 #elif defined(_MSC_VER)
 
