@@ -9,15 +9,13 @@
 #define TYPEPACKINFO_H_
 
 #include "meta/ApplyToPack.h"
+#include "meta/TypeManipulation.h"
 
 namespace pet {
 
 template<class T> struct IsSomeReference { static constexpr bool value = false; };
 template<class T> struct IsSomeReference<T&> { static constexpr bool value = true; };
 template<class T> struct IsSomeReference<T&&> { static constexpr bool value = true; };
-
-template<class T, class U> struct sameTypes {static constexpr bool value = false;};
-template<class T> struct sameTypes<T, T> {static constexpr bool value = true;};
 
 template<class... T> class TypePackInfo {
     template<class C> struct FindPosition {
