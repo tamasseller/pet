@@ -21,6 +21,7 @@
 #define UNION_H_
 
 #include "meta/TypePackInfo.h"
+#include "meta/Utility.h"
 
 namespace pet {
 

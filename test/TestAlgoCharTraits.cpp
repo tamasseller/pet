@@ -199,7 +199,7 @@ TEST(CharTraits, CloseBox)
 
 TEST(CharTraits, Backslah)
 {
-	test(&CharTraits::isBackslah, [](char c)
+	test(&CharTraits::isBackslash, [](char c)
 	{
 		return c == '\\';
 	});
