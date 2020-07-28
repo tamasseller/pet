@@ -27,7 +27,7 @@ namespace pet {
 template<class... T>
 class Union {
     static_assert(TypePackInfo<T...>::allUnique, "All types of Union must be unique");
-    static_assert(TypePackInfo<T...>::noReferences, "Refernces are not allowed in Unions.");
+    static_assert(TypePackInfo<T...>::noReferences, "References are not allowed in Unions.");
     static_assert(sizeof...(T) < 255, "No more than 254 can be used for a Union");
 
     char data[(TypePackInfo<T...>::size + sizeof(char) - 1) / sizeof(char)] alignas(TypePackInfo<T...>::alignment);
@@ -76,7 +76,7 @@ public:
         static_assert(TypePackInfo<T...>::template Position<R>::value != -1, "Can not initialize as non-contained type.");
         this->~Union();
         tag = TypePackInfo<T...>::template Position<R>::value;
-        new(data) R(args...);
+        new(data) R(pet::forward<Args>(args)...);
     }
 
     template<class R>
