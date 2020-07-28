@@ -10,6 +10,8 @@ SOURCES += ../ubiquitous/PrintfWriter.cpp
 # Test code
 
 #SOURCES += TestAlgoInline.cpp
+SOURCES += TestAlgoCharLookup.cpp
+SOURCES += TestAlgoCharTraits.cpp
 SOURCES += TestAlgoIterate.cpp
 SOURCES += TestAlgoStr.cpp
 SOURCES += TestAlgoMinMaxHeap.cpp
