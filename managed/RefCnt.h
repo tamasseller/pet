@@ -141,9 +141,9 @@ public:
         }
     };
 
-    template<class... Args>
+    template<class T = Target, class... Args>
     static inline Ptr make(Args&&... args) {
-        return new (Allocator::alloc(sizeof(Target))) Target(pet::forward<Args>(args)...);
+        return new (Allocator::alloc(sizeof(T))) T(pet::forward<Args>(args)...);
     }
 
     template<class... Args>
