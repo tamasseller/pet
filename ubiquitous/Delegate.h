@@ -148,6 +148,10 @@ public:
         }
     }
 
+    inline operator bool() {
+		return f;
+    }
+
     /**
      * Destructor that take care of delegating the destructor call to the captured data.
      */
