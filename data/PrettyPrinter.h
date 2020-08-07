@@ -39,9 +39,26 @@ class linkedListPrinter:
             it = it["next"]
         return "list with " + str(n) + " elements"
 
+class unionPrinter:
+    def __init__(self, val):
+        self.val = val
+	
+    def display_hint(self):
+        return None
+
+    def to_string (self):
+        tag = self.val["tag"]
+
+        if tag < 0:
+            return "uninitialized union"
+
+        daddr=val["data"].address
+        return daddr.cast(val.type.template_argument(tag).pointer()).dereference()
+
 pp = gdb.printing.RegexpCollectionPrettyPrinter("pet")
 pp.add_printer('LinkedList', '^pet::LinkedList.*$', linkedListPrinter)
 pp.add_printer('DoubleList', '^pet::DoubleList.*$', linkedListPrinter)
+pp.add_printer('Union', '^pet::Union.*$', unionPrinter)
 gdb.printing.register_pretty_printer(gdb.current_objfile(), pp)
 
 class linkedListIndexerWorker(gdb.xmethod.XMethodWorker):
