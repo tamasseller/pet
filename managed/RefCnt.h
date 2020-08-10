@@ -56,7 +56,6 @@ class RefCnt
     	}
 
 		inline PtrBase() = default;
-        inline PtrBase(nullptr_t): PtrBase() {}
 
         inline PtrBase& operator =(nullptr_t) {
             *this = PtrBase();
@@ -136,6 +135,11 @@ public:
     	}
 
     public:
+        inline Ptr() = default;
+        inline Ptr(nullptr_t): PtrBase() {}
+        inline Ptr(const PtrBase &other): PtrBase(other) {}
+        inline Ptr(PtrBase &&other): PtrBase(pet::move(other)) {}
+
     	using PtrBase::PtrBase;
     	using PtrBase::operator=;
     	using PtrBase::reset;
