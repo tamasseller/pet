@@ -55,10 +55,25 @@ class unionPrinter:
         daddr=val["data"].address
         return daddr.cast(val.type.template_argument(tag).pointer()).dereference()
 
+class smartPtrPrinter:
+    def __init__(self, val):
+        self.val = val
+	
+    def display_hint(self):
+        return None
+
+    def to_string (self):
+        target=self.val["target"]
+        if target == 0:
+            return "null"
+        
+        return "target=" + str(target) + " [reference count:" + str(target.dereference()["counter"]["data"]) + "]"
+
 pp = gdb.printing.RegexpCollectionPrettyPrinter("pet")
 pp.add_printer('LinkedList', '^pet::LinkedList.*$', linkedListPrinter)
 pp.add_printer('DoubleList', '^pet::DoubleList.*$', linkedListPrinter)
 pp.add_printer('Union', '^pet::Union.*$', unionPrinter)
+pp.add_printer('Union', '^pet::RefCnt.*::Ptr.*$', smartPtrPrinter)
 gdb.printing.register_pretty_printer(gdb.current_objfile(), pp)
 
 class linkedListIndexerWorker(gdb.xmethod.XMethodWorker):

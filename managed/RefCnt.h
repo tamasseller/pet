@@ -34,9 +34,10 @@ class RefCnt
     Atomic<uintptr_t> counter = 0;
 
 public:
-    class Ptr: pet::Resettable<Ptr>
+    template<class T = Target>
+    class Ptr: pet::Resettable<Ptr<T>>
     {
-        friend pet::Resettable<Ptr>;
+        friend pet::Resettable<Ptr<T>>;
         Target* target = nullptr;
 
         inline void acquire(Target* newTarget)
@@ -104,16 +105,16 @@ public:
             this->Ptr::Resettable::reset();
         }
 
-        inline Target* operator ->() const {
-            return target;
+        inline T* operator ->() const {
+            return static_cast<T*>(target);
         }
 
-        inline Target* get() const {
-            return target;
+        inline T* get() const {
+            return static_cast<T*>(target);
         }
 
-        inline Target& operator *() const {
-            return *target;
+        inline T& operator *() const {
+            return *static_cast<T*>(target);
         }
 
         inline bool operator ==(const Ptr& o) const {
@@ -142,13 +143,13 @@ public:
     };
 
     template<class T = Target, class... Args>
-    static inline Ptr make(Args&&... args) {
+    static inline Ptr<T> make(Args&&... args) {
         return new (Allocator::alloc(sizeof(T))) T(pet::forward<Args>(args)...);
     }
 
-    template<class... Args>
-    inline Ptr self() {
-        return static_cast<Target*>(this);
+    template<class T=Target>
+    inline Ptr<T> self() {
+        return static_cast<T*>(this);
     }
 };
 

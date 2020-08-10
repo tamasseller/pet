@@ -35,13 +35,21 @@ TEST_GROUP(RefCnt)
             MOCK(Target)::CALL(f);
         }
 
-        inline ~Target() {
+        inline virtual ~Target() {
             MOCK(Target)::CALL(Dtor);
         }
     };
 
-    static_assert(sizeof(Target) == sizeof(void*));
-    static_assert(sizeof(Target::Ptr) == sizeof(void*));
+    struct SubTarget: Target
+    {
+    	SubTarget::Ptr<SubTarget> strg;
+        inline SubTarget(int x, char y): Target(x, y) {}
+        inline virtual ~SubTarget() = default;
+    };
+
+    //								counter + vptr
+    static_assert(sizeof(Target) == sizeof(void*) + sizeof(void*));
+    static_assert(sizeof(Target::Ptr<Target>) == sizeof(void*));
 };
 
 TEST(RefCnt, Sanity)
@@ -116,7 +124,7 @@ TEST(RefCnt, MoveEq)
 TEST(RefCnt, CopyCtor)
 {
     struct {
-        inline void f(Target::Ptr q)
+        inline void f(Target::Ptr<Target> q)
         {
             q->f();
         }
@@ -147,7 +155,7 @@ TEST(RefCnt, CopyEmpty)
 TEST(RefCnt, MoveCtor)
 {
     struct {
-        inline void f(Target::Ptr &&q)
+        inline void f(Target::Ptr<Target> &&q)
         {
             Target::Ptr r(pet::move(q));
 
@@ -238,4 +246,27 @@ TEST(RefCnt, Compare)
     CHECK(!(empty != nullptr));
 
     MOCK(Target)::EXPECT(Dtor);
+}
+
+TEST(RefCnt, Subclass)
+{
+    MOCK(Target)::EXPECT(Ctor).withParam(1).withParam('a');
+    MOCK(Target)::EXPECT(Ctor).withParam(2).withParam('b');
+
+    SubTarget::Ptr<SubTarget> *strga;
+
+    {
+        auto a = SubTarget::make<SubTarget>(1, 'a');
+        auto b = SubTarget::make<SubTarget>(2, 'b');
+
+        a->strg = b;
+        b->strg = a;
+
+        strga = &a->strg;
+    }
+
+    MOCK(Target)::EXPECT(Dtor);
+    MOCK(Target)::EXPECT(Dtor);
+
+    *strga = nullptr;
 }
