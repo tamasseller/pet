@@ -56,7 +56,7 @@ TEST(RefCnt, Sanity)
 {
     MOCK(Target)::EXPECT(Ctor).withParam(1).withParam('a');
     {
-        Target::Ptr ptr;
+        Target::Ptr<Target> ptr;
 
         CHECK(ptr == nullptr);
 
@@ -73,7 +73,7 @@ TEST(RefCnt, Sanity)
 TEST(RefCnt, CopyEq)
 {
     {
-        Target::Ptr q;
+        Target::Ptr<Target> q;
 
         MOCK(Target)::EXPECT(Ctor).withParam(1).withParam('a');
         {
@@ -100,7 +100,7 @@ TEST(RefCnt, CopyEq)
 TEST(RefCnt, MoveEq)
 {
     {
-        Target::Ptr q;
+        Target::Ptr<Target> q;
 
         MOCK(Target)::EXPECT(Ctor).withParam(1).withParam('a');
         {
@@ -148,7 +148,7 @@ TEST(RefCnt, CopyCtor)
 
 TEST(RefCnt, CopyEmpty)
 {
-    Target::Ptr p;
+    Target::Ptr<Target> p;
     auto q = p;
 }
 
@@ -157,7 +157,7 @@ TEST(RefCnt, MoveCtor)
     struct {
         inline void f(Target::Ptr<Target> &&q)
         {
-            Target::Ptr r(pet::move(q));
+            Target::Ptr<Target> r(pet::move(q));
 
             q->f();
             CHECK(Allocator::count == 1);
@@ -180,7 +180,7 @@ TEST(RefCnt, Access)
 {
     MOCK(Target)::EXPECT(Ctor).withParam(1).withParam('a');
 
-    Target::Ptr empty;
+    Target::Ptr<Target> empty;
 
     auto ptr = Target::make(1, 'a');
 
@@ -232,7 +232,7 @@ TEST(RefCnt, Compare)
     MOCK(Target)::EXPECT(Ctor).withParam(1).withParam('a');
 
     auto ptr = Target::make(1, 'a');
-    Target::Ptr empty;
+    Target::Ptr<Target> empty;
 
     CHECK(ptr);
     CHECK(!empty);

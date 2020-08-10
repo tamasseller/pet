@@ -33,91 +33,71 @@ class RefCnt
 {
     Atomic<uintptr_t> counter = 0;
 
-public:
-    template<class T = Target>
-    class Ptr: pet::Resettable<Ptr<T>>
+    class PtrBase
     {
-        friend pet::Resettable<Ptr<T>>;
-        Target* target = nullptr;
+    protected:
+    	Target* target = nullptr;
 
-        inline void acquire(Target* newTarget)
-        {
-            if((target = newTarget) != nullptr)
-            {
-                target->counter([](auto o, auto &n) { n = o + 1; return true;});
-            }
+    	inline void acquire(Target* newTarget)
+    	{
+			if((target = newTarget) != nullptr)
+			{
+			   target->counter([](auto o, auto &n) { n = o + 1; return true;});
+			}
+    	}
+
+    	inline void release()
+    	{
+    		if(target && 1 == target->counter([](auto o, auto &n) { n = o - 1; return true;}))
+    		{
+    			target->~Target();
+    			Allocator::free(target);
+    		}
+    	}
+
+		inline PtrBase() = default;
+        inline PtrBase(nullptr_t): PtrBase() {}
+
+        inline PtrBase& operator =(nullptr_t) {
+            *this = PtrBase();
+            return *this;
         }
 
-        inline void release()
-        {
-            if(target && 1 == target->counter([](auto o, auto &n) { n = o - 1; return true;}))
-            {
-                target->~Target();
-                Allocator::free(target);
-            }
-        }
-
-        friend RefCnt;
-        inline Ptr(Target* target) {
-            acquire(target);
-        }
-
-    public:
-        inline Ptr() = default;
-
-        inline Ptr(const Ptr &other) {
+        inline PtrBase(const PtrBase &other) {
             acquire(other.target);
         }
 
-        inline Ptr(nullptr_t): Ptr(static_cast<Target*>(nullptr)) {}
-
-        inline Ptr(Ptr &&other): target(other.target) {
-            other.Ptr::Resettable::reset();
-        }
-
-        inline Ptr& operator =(const Ptr &other)
+        inline PtrBase& operator =(const PtrBase &other)
         {
             release();
             acquire(other.target);
             return *this;
         }
 
-        inline Ptr& operator =(nullptr_t) {
-            *this = Ptr(nullptr);
-            return *this;
+        inline PtrBase(PtrBase &&other): target(other.target) {
+        	new(&other, NewOperatorDisambiguator()) PtrBase();
         }
 
-        inline Ptr& operator =(Ptr &&other)
+        template<class U>
+        inline PtrBase& operator =(PtrBase &&other)
         {
             release();
             target = other.target;
-            other.Ptr::Resettable::reset();
+            new(&other, NewOperatorDisambiguator()) Ptr<U>();
             return *this;
         }
 
-        inline ~Ptr() {
+        inline ~PtrBase() {
             release();
         }
 
         inline void reset()
         {
             release();
-            this->Ptr::Resettable::reset();
+            new(this, NewOperatorDisambiguator()) PtrBase();
         }
 
-        inline T* operator ->() const {
-            return static_cast<T*>(target);
-        }
-
-        inline T* get() const {
-            return static_cast<T*>(target);
-        }
-
-        inline T& operator *() const {
-            return *static_cast<T*>(target);
-        }
-
-        inline bool operator ==(const Ptr& o) const {
+        inline bool operator ==(const PtrBase& o) const {
             return target == o.target;
         }
 
@@ -125,7 +105,7 @@ public:
             return !target;
         }
 
-        inline bool operator !=(const Ptr& o) const {
+        inline bool operator !=(const PtrBase& o) const {
             return target != o.target;
         }
 
@@ -142,14 +122,49 @@ public:
         }
     };
 
+public:
+    template<class T = Target>
+    class Ptr: public PtrBase
+    {
+    	friend RefCnt;
+
+    	static inline Ptr init(Target* target)
+    	{
+    		Ptr ret;
+    		ret.acquire(target);
+    		return ret;
+    	}
+
+    public:
+    	using PtrBase::PtrBase;
+    	using PtrBase::operator=;
+    	using PtrBase::reset;
+    	using PtrBase::operator==;
+    	using PtrBase::operator!=;
+    	using PtrBase::operator!;
+    	using PtrBase::operator bool;
+
+        inline T* operator ->() const {
+            return static_cast<T*>(this->target);
+        }
+
+        inline T* get() const {
+            return static_cast<T*>(this->target);
+        }
+
+        inline T& operator *() const {
+            return *static_cast<T*>(this->target);
+        }
+    };
+
     template<class T = Target, class... Args>
     static inline Ptr<T> make(Args&&... args) {
-        return new (Allocator::alloc(sizeof(T))) T(pet::forward<Args>(args)...);
+        return Ptr<T>::init(new (Allocator::alloc(sizeof(T))) T(pet::forward<Args>(args)...));
     }
 
     template<class T=Target>
     inline Ptr<T> self() {
-        return static_cast<T*>(this);
+        return Ptr<T>::init(static_cast<Target*>(this));
     }
 };
 

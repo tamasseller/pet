@@ -132,7 +132,7 @@ TEST(RefCntDelegateIntegration, BackAndForthCall)
 
 TEST(RefCntDelegateIntegration, RegisteredCallbackUnregisterDestroy)
 {
-    TestEntity::Ptr server;
+    TestEntity::Ptr<TestEntity> server;
     void *cliAddr, *srvAddr;
 
     {
@@ -159,7 +159,7 @@ TEST(RefCntDelegateIntegration, RegisteredCallbackUnregisterDestroy)
 
 TEST(RefCntDelegateIntegration, RegisteredCallbackCascadeDestroy)
 {
-    TestEntity::Ptr server;
+    TestEntity::Ptr<TestEntity> server;
     void *cliAddr, *srvAddr;
 
     {
