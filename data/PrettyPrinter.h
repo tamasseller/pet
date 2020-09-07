@@ -99,8 +99,6 @@ class linkedListIndexerMatcher(gdb.xmethod.XMethodMatcher):
         gdb.xmethod.XMethodMatcher.__init__(self, 'linkedListIndexerMatcher')
  
     def match(self, class_type, method_name):
-        print(class_type)
-        print(method_name)
         if re.match('pet::DoubleList<[ \t\n]*[_a-zA-Z][ :_a-zA-Z0-9]*>', class_type.tag) and method_name == 'operator[]':
             return linkedListIndexerWorker(class_type)
 
