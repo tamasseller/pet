@@ -1,8 +1,5 @@
-#ifndef __PRETTY_data
-#define __PRETTY_data
-
 __attribute__((section(".debug_gdb_scripts"), used))
-static inline const char __gdb_pretty_printer_data[] = R"foo(gdb.inlined-script
+const char __gdb_pretty_printer_data[] = R"foo(gdb.inlined-script
 import gdb.xmethod
 import re
 
@@ -73,7 +70,7 @@ pp = gdb.printing.RegexpCollectionPrettyPrinter("pet")
 pp.add_printer('LinkedList', '^pet::LinkedList.*$', linkedListPrinter)
 pp.add_printer('DoubleList', '^pet::DoubleList.*$', linkedListPrinter)
 pp.add_printer('Union', '^pet::Union.*$', unionPrinter)
-pp.add_printer('Union', '^pet::RefCnt.*::Ptr.*$', smartPtrPrinter)
+pp.add_printer('RefCnt', '^pet::RefCnt.*::Ptr.*$', smartPtrPrinter)
 gdb.printing.register_pretty_printer(gdb.current_objfile(), pp)
 
 class linkedListIndexerWorker(gdb.xmethod.XMethodWorker):
@@ -105,5 +102,3 @@ class linkedListIndexerMatcher(gdb.xmethod.XMethodMatcher):
 gdb.xmethod.register_xmethod_matcher(None, linkedListIndexerMatcher())
 
 )foo";
-
-#endif
