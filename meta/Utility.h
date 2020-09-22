@@ -53,6 +53,9 @@ constexpr typename detail::remove_reference<T>::type&& move(T&& t) {
     return static_cast<typename detail::remove_reference<T>::type&&>(t);
 }
 
+template<typename T>
+constexpr T declval();
+
 }
 
-#endif /* UTILITY_H_ */
+#endif
