@@ -188,7 +188,7 @@ class PrioQueueBase {
  * ---------
  *
  * The heap structure is interpreted such, that every stored element is a
- * node in a full binary tree, that has all of its levels full expcept for
+ * node in a full binary tree, that has all of its levels full except for
  * the last one, that - depending on the current number of elements - may
  * be filled only partially. The shape of the tree is never modified by the
  * ordering operations.
@@ -260,12 +260,12 @@ namespace detail {
             /// Pointer to the buffer that is being sorted.
             T* data;
 
-            /// Inverse comparator, needed due to order revesal of extraction.
+            /// Inverse comparator, needed due to order reversal of extraction.
             inline bool compareElement(size_t a, size_t b) {
                 return !compare(this->data[a], this->data[b]);
             }
 
-            /// 'Make heap' contructor.
+            /// 'Make heap' constructor.
             PrioQueueWorker(T* data, size_t n): data(data) {
                 for(size = 2; size < n; size++) {
                     Base::heapUp(size - 1);

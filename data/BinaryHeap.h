@@ -157,6 +157,8 @@ class BinaryHeap: PrioQueueBase<BinaryHeap<compare>, HeapNode*> {
 				high = mid - 1;
 		}
 
+		// ^^^ TODO replace with clz based approach ^^^
+
 		/*
 		 * Follow the path defined by the number of elements to reach the
 		 * parent of the last element. At every bit position, zero bits mean
