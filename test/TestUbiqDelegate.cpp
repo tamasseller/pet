@@ -246,3 +246,19 @@ TEST(Delegate, DelegateArg)
     auto e = pet::delegate([](int x){ return x + x ;});
     CHECK(6 == d(pet::move(e)));
 }
+
+TEST(Delegate, EmptyOverwrite)
+{
+	pet::Delegate<void()> a;
+	a = pet::Delegate<void()>();
+}
+
+TEST(Delegate, EmptyMoveCtor)
+{
+	struct S{
+		static void f(pet::Delegate<void()> a) {}
+	};
+
+	pet::Delegate<void()> a;
+	S::f(pet::move(a));
+}

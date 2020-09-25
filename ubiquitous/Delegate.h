@@ -106,7 +106,9 @@ public:
      */
     inline Delegate(Delegate&& o): f(o.f)
     {
-        f->relocate(&o.data, &data);
+    	if(f)
+    		f->relocate(&o.data, &data);
+
         o.f = nullptr;
     }
 
@@ -116,7 +118,10 @@ public:
             f->destroy(&data);
 
         f = o.f;
-        f->relocate(&o.data, &data);
+
+        if(f)
+        	f->relocate(&o.data, &data);
+
         o.f = nullptr;
         return *this;
     }
@@ -158,9 +163,7 @@ public:
     inline ~Delegate()
     {
         if(f)
-        {
             (f->destroy)(&this->data);
-        }
     }
 };
 
