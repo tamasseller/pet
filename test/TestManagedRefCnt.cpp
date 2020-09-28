@@ -47,6 +47,25 @@ TEST_GROUP(RefCnt)
         inline virtual ~SubTarget() = default;
     };
 
+    struct FirstSuperclass
+    {
+    	char someData[123];
+    	inline virtual ~FirstSuperclass() {
+    		MOCK(Target)::CALL(FirstSuperclassDtor);
+    	}
+    };
+
+    struct NonFirstSuperClass: pet::RefCnt<NonFirstSuperClass, Allocator> {
+    	inline virtual ~NonFirstSuperClass() = default;
+    };
+
+    struct NonFirstRefPtrSuperclassTarget: FirstSuperclass, NonFirstSuperClass
+    {
+        inline virtual ~NonFirstRefPtrSuperclassTarget() {
+            MOCK(Target)::CALL(ChildDtor);
+        }
+    };
+
     //								counter + vptr
     static_assert(sizeof(Target) == sizeof(void*) + sizeof(void*));
     static_assert(sizeof(Target::Ptr<Target>) == sizeof(void*));
@@ -269,4 +288,12 @@ TEST(RefCnt, Subclass)
     MOCK(Target)::EXPECT(Dtor);
 
     *strga = nullptr;
+}
+
+
+TEST(RefCnt, NonFirst)
+{
+	NonFirstSuperClass::Ptr<NonFirstSuperClass> ptr = NonFirstRefPtrSuperclassTarget::make<NonFirstRefPtrSuperclassTarget>();
+    MOCK(Target)::EXPECT(ChildDtor);
+	MOCK(Target)::EXPECT(FirstSuperclassDtor);
 }

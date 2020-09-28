@@ -49,10 +49,7 @@ class RefCnt
     	inline void release()
     	{
     		if(target && 1 == target->counter([](auto o, auto &n) { n = o - 1; return true;}))
-    		{
-    			target->~Target();
-    			Allocator::free(target);
-    		}
+    			delete target;
     	}
 
 		inline PtrBase() = default;
@@ -160,6 +157,11 @@ public:
             return *static_cast<T*>(this->target);
         }
     };
+
+public:
+    inline void operator delete(void* ptr) {
+        Allocator::free(ptr);
+    }
 
     template<class T = Target, class... Args>
     static inline Ptr<T> make(Args&&... args) {
