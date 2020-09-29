@@ -26,7 +26,7 @@
 
 #include "Macro.h"
 
-#if defined (__GNUC__)
+#if defined (__GNUC__) && !defined(__ECLIPSE__)
 #define TEST(...)                   VAR_ARG_MACRO(TEST, ##__VA_ARGS__)
 #define BEGIN_TEST_CASE(...)        VAR_ARG_MACRO(BEGIN_SPLIT, ##__VA_ARGS__)
 #define IGNORE_TEST(...)            VAR_ARG_MACRO(IGNORE_TEST, ##__VA_ARGS__)

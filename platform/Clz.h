@@ -38,4 +38,9 @@ static inline uint32_t clz(uint32_t x) {
 
 #endif
 
+template<typename N>
+constexpr static inline size_t ilog2(N n) {
+	return (n<2) ? 0 : 1 + ilog2((n + 1) / 2);
+}
+
 #endif /* CLZ_H_ */
