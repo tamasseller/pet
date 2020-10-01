@@ -29,11 +29,10 @@ namespace pet {
 
 static jmp_buf jmpBuff;
 
-LinkedList<TestPlugin> TestRunner::plugins;
+LinkedPtrList<TestPlugin*> TestRunner::plugins;
 TestInterface* TestRunner::currentTest;
 TestOutput* TestRunner::output;
 bool TestRunner::isSynthetic;
-
 
 int TestRunner::runAllTests(TestOutput* output)
 {

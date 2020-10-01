@@ -21,8 +21,6 @@
 #define LINKEDLIST_H_
 
 #include "platform/Compiler.h"
-#include "meta/FieldAccessor.h"
-#include "algorithm/Iterate.h"
 
 namespace pet {
 
@@ -44,9 +42,9 @@ namespace pet {
  *
  * @note 	An object can be added to a list only once.
  */
-template<class Element>
-class LinkedList: public pet::IterativeSearch<LinkedList<Element>, Element>::Decorator {
-	decltype(Element::next) first = nullptr;
+template<class Ptr>
+class LinkedPtrList {
+	Ptr first = nullptr;
 public:
 	/**
 	 * Forward iterator.
@@ -61,17 +59,17 @@ public:
 	 * 			this usage is entirely up to the user.
 	 */
 	class Iterator {
-		friend LinkedList;
-		decltype(Element::next)* prevsNext;
+		friend LinkedPtrList;
+		Ptr* prevsNext;
 
-		really_inline Iterator(decltype(Element::next)* prevsNext);
+		really_inline Iterator(Ptr* prevsNext);
 	public:
 		/**
 		 * Current element or NULL.
 		 *
 		 * @return The current element or NULL if over the end of the list.
 		 */
-		really_inline decltype(Element::next) current() const;
+		really_inline Ptr current() const;
 
 		/**
 		 * Take a step.
@@ -90,7 +88,7 @@ public:
 		 * @warning	The behavior is undefined (and probably wrong) if called with an element
 		 * 			that is already in the list and **in this method it is not checked**.
 		 */
-		really_inline void insert(decltype(Element::next) elem) const;
+		really_inline void insert(Ptr elem) const;
 
 		/**
 		 * Remove current element.
@@ -112,7 +110,7 @@ public:
 	 *
 	 * @param	elem Is a pointer to the element to be added.
 	 */
-	inline void fastAdd(decltype(Element::next) elem);
+	inline void fastAdd(Ptr elem);
 
 	/**
 	 * Add to front.
@@ -123,7 +121,7 @@ public:
 	 * @param	elem is a pointer to the element to add.
 	 * @return 	True if successful.
 	 */
-	inline bool add(decltype(Element::next) elem);
+	inline bool add(Ptr elem);
 
 	/**
 	 * Add to back.
@@ -134,7 +132,7 @@ public:
 	 * @param	elem is a pointer to the element to add.
 	 * @return 	True if successful.
 	 */
-	inline bool addBack(decltype(Element::next) elem);
+	inline bool addBack(Ptr elem);
 
 	/**
 	 * Remove an element.
@@ -144,7 +142,7 @@ public:
 	 * @param	elem is a pointer to the element to remove.
 	 * @return 	True if successful.
 	 */
-	inline bool remove(decltype(Element::next) elem);
+	inline bool remove(Ptr elem);
 
 	/**
 	 * Remove all elements.
@@ -170,17 +168,17 @@ public:
 	 * Drops the current content and takes over the other lists
 	 * content, also sets the other list to be empty.
 	 */
-	really_inline void take(LinkedList& other);
+	really_inline void take(LinkedPtrList& other);
 };
 
-template<class Element>
-inline void LinkedList<Element>::fastAdd(decltype(Element::next) elem)
+template<class Ptr>
+inline void LinkedPtrList<Ptr>::fastAdd(Ptr elem)
 {
 	iterator().insert(elem);
 }
 
-template<class Element>
-inline bool LinkedList<Element>::add(decltype(Element::next) elem)
+template<class Ptr>
+inline bool LinkedPtrList<Ptr>::add(Ptr elem)
 {
 	for(Iterator it=iterator(); it.current(); it.step())
 		if(it.current() == elem)
@@ -190,8 +188,8 @@ inline bool LinkedList<Element>::add(decltype(Element::next) elem)
 	return true;
 }
 
-template<class Element>
-inline bool LinkedList<Element>::addBack(decltype(Element::next) elem)
+template<class Ptr>
+inline bool LinkedPtrList<Ptr>::addBack(Ptr elem)
 {
 	Iterator it = iterator();
 	for(; it.current(); it.step())
@@ -202,8 +200,8 @@ inline bool LinkedList<Element>::addBack(decltype(Element::next) elem)
 	return true;
 }
 
-template<class Element>
-inline bool LinkedList<Element>::remove(decltype(Element::next) elem)
+template<class Ptr>
+inline bool LinkedPtrList<Ptr>::remove(Ptr elem)
 {
 	for(Iterator it = iterator(); it.current(); it.step()) {
 		if(it.current() == elem) {
@@ -215,58 +213,61 @@ inline bool LinkedList<Element>::remove(decltype(Element::next) elem)
 	return false;
 }
 
-template<class Element>
-inline void LinkedList<Element>::clear() {
+template<class Ptr>
+inline void LinkedPtrList<Ptr>::clear() {
 	first = nullptr;
 }
 
-template<class Element>
-inline bool LinkedList<Element>::isEmpty() const {
+template<class Ptr>
+inline bool LinkedPtrList<Ptr>::isEmpty() const {
 	return first == nullptr;
 }
 
-template<class Element>
-inline void LinkedList<Element>::take(LinkedList& other) {
+template<class Ptr>
+inline void LinkedPtrList<Ptr>::take(LinkedPtrList& other) {
 	first = other.first;
 	other.clear();
 }
 
 
-template<class Element>
-really_inline typename LinkedList<Element>::Iterator
-LinkedList<Element>::iterator() {
+template<class Ptr>
+really_inline typename LinkedPtrList<Ptr>::Iterator
+LinkedPtrList<Ptr>::iterator() {
 	return Iterator(&first);
 }
 
-template<class Element>
-really_inline LinkedList<Element>::Iterator::Iterator(decltype(Element::next)* prevsNext):prevsNext(prevsNext) {}
+template<class Ptr>
+really_inline LinkedPtrList<Ptr>::Iterator::Iterator(Ptr* prevsNext):prevsNext(prevsNext) {}
 
-template<class Element>
-really_inline decltype(Element::next) LinkedList<Element>::Iterator::current() const
+template<class Ptr>
+really_inline Ptr LinkedPtrList<Ptr>::Iterator::current() const
 {
 	return *this->prevsNext;
 }
 
-template<class Element>
-really_inline void LinkedList<Element>::Iterator::step()
+template<class Ptr>
+really_inline void LinkedPtrList<Ptr>::Iterator::step()
 {
 	if(*this->prevsNext)
 		this->prevsNext = &((*this->prevsNext)->next);
 }
 
-template<class Element>
-really_inline void LinkedList<Element>::Iterator::insert(decltype(Element::next) elem) const
+template<class Ptr>
+really_inline void LinkedPtrList<Ptr>::Iterator::insert(Ptr elem) const
 {
 	elem->next = *this->prevsNext;
 	*this->prevsNext = elem;
 }
 
-template<class Element>
-really_inline void LinkedList<Element>::Iterator::remove() const
+template<class Ptr>
+really_inline void LinkedPtrList<Ptr>::Iterator::remove() const
 {
 	if(*this->prevsNext)
 		*this->prevsNext = (*this->prevsNext)->next;
 }
+
+template<class Element>
+using LinkedList = LinkedPtrList<decltype(Element::next)>;
 
 }
 

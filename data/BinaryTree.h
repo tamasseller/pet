@@ -20,8 +20,6 @@
 #ifndef TREE_H_
 #define TREE_H_
 
-#include "algorithm/Iterate.h"
-
 #include "ubiquitous/Trace.h"
 
 namespace pet {

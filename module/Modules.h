@@ -13,7 +13,7 @@
 namespace pet {
 
 class Modules {
-        typedef LinkedList<ModuleInterface> InitList;
+        typedef LinkedPtrList<ModuleInterface*> InitList;
 
         static inline bool recurse(InitList& initList, ModuleInterface* current);
     public:

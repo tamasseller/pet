@@ -9,10 +9,8 @@ SOURCES += ../ubiquitous/PrintfWriter.cpp
 
 # Test code
 
-#SOURCES += TestAlgoInline.cpp
 SOURCES += TestAlgoCharLookup.cpp
 SOURCES += TestAlgoCharTraits.cpp
-SOURCES += TestAlgoIterate.cpp
 SOURCES += TestAlgoStr.cpp
 SOURCES += TestAlgoMinMaxHeap.cpp
 SOURCES += TestAlgoIntegerDivision.cpp
@@ -30,13 +28,11 @@ SOURCES += TestDataPriorityQueue.cpp
 SOURCES += TestDataCircularBuffer.cpp
 SOURCES += TestDataOrderedDoubleList.cpp
 SOURCES += TestIntegrationRefCntDelegate.cpp
-SOURCES += TestManagedHstring.cpp
 SOURCES += TestManagedTreeMap.cpp
 SOURCES += TestManagedRefCnt.cpp
 SOURCES += TestMetaConfiguration.cpp
 SOURCES += TestMetaExpLog.cpp
 SOURCES += TestMetaExpRange.cpp
-SOURCES += TestMetaFieldAccessor.cpp
 SOURCES += TestMetaMetaString.cpp
 SOURCES += TestMetaPacks.cpp
 SOURCES += TestMetaRange.cpp
@@ -58,7 +54,6 @@ SOURCES += TestUbiqError.cpp
 SOURCES += TestUbiqTrace.cpp
 SOURCES += TestModules.cpp
 ifeq (USE64BIT,)
-SOURCES += TestManagedRegistry.cpp
 SOURCES += TestHeapBuddy.cpp
 SOURCES += TestHeapAvlStress.cpp
 SOURCES += TestHeapBestFitStress.cpp

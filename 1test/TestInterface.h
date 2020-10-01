@@ -26,7 +26,7 @@ namespace pet {
 
 class TestRunner;
 
-template<class> class LinkedList;
+template<class> class LinkedPtrList;
 
 class TestInterface
 {

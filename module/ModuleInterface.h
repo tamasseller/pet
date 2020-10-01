@@ -13,7 +13,7 @@ class ModuleInterface {
     bool visited = false;
 	bool locked = false;
 
-    friend class LinkedList<ModuleInterface>;
+    friend class LinkedPtrList<ModuleInterface*>;
     ModuleInterface *next = nullptr;
 
     friend class Modules;

@@ -21,8 +21,6 @@
 #define DOUBLELIST_H_
 
 #include "platform/Compiler.h"
-#include "meta/FieldAccessor.h"
-#include "algorithm/Iterate.h"
 
 namespace pet {
 
@@ -44,7 +42,7 @@ namespace pet {
  * @note 	An object can be added to a list only once.
  */
 template<class Element>
-class DoubleList: public pet::IterativeSearch<DoubleList<Element>, Element>::Decorator {
+class DoubleList {
 	Element* first = nullptr;
 	Element* last = nullptr;
 public:

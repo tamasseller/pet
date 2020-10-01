@@ -26,14 +26,16 @@
 
 namespace pet {
 
+template<class> class LinkedPtrList;
+
 class TestRunner {
-	template<class>
-	friend class TestBase;
+	template<class> friend class TestBase;
+	template<class> friend class LinkedPtrList;
 
 	static TestInterface* currentTest;
 	static TestOutput* output;
 	static bool isSynthetic;
-	static LinkedList<TestPlugin> plugins;
+	static LinkedPtrList<TestPlugin*> plugins;
 public:
 	static bool installPlugin(TestPlugin*);
 

@@ -11,16 +11,18 @@
 namespace pet {
 
 class TestRunner;
-template<class> class LinkedList;
+template<class> class LinkedPtrList;
 
-class TestPlugin {
-	friend LinkedList<TestPlugin>;
+class TestPlugin
+{
+	friend LinkedPtrList<TestPlugin*>;
 	TestPlugin *next;
-private:
+
 	friend TestRunner;
 	virtual void beforeTest() = 0;
 	virtual void afterTest() = 0;
 public:
+
 	inline virtual ~TestPlugin() {}
 };
 

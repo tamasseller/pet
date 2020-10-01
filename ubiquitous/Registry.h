@@ -28,7 +28,7 @@ template<class Interface>
 class Registry {
 public:
 	class ElementBase: public Interface {
-		friend LinkedList<ElementBase>;
+		friend LinkedPtrList<ElementBase*>;
 		ElementBase *next;
 	protected:
 		ElementBase() {
@@ -37,7 +37,7 @@ public:
 	};
 
 private:
-	typedef LinkedList<ElementBase> List;
+	typedef LinkedPtrList<ElementBase*> List;
     static List list;
 public:
 	template <class Child>
@@ -54,7 +54,7 @@ public:
 	    list.clear();
 	}
 
-	static typename LinkedList<ElementBase>::Iterator iterator() {
+	static typename LinkedPtrList<ElementBase*>::Iterator iterator() {
 		return list.iterator();
 	}
 };
