@@ -21,8 +21,8 @@ class Prng
     static constexpr auto stateWidth  = 32;
     static constexpr auto outputWidth = 16;
     static constexpr auto rotWidth    = 4;
-    static constexpr auto truncShift  = outputWidth - rotWidth;
-    static constexpr auto mixShift    = (stateWidth - truncShift) / 2;
+    static constexpr auto truncShift  = outputWidth - rotWidth;			// 12
+    static constexpr auto mixShift    = (stateWidth - truncShift) / 2;	// 10
 
     inline uint32_t ensureNonZero(uint32_t x)
     {
@@ -48,12 +48,34 @@ public:
     {
         const auto value = step();
 
+        /*
+         * 	pppppppp qqqqqqqq rrrrrrrr ssssssss
+         * 	|  |
+         * 	+--+
+         * 	ROT
+         */
         const auto rot          = value >> (stateWidth - rotWidth);
+
+        /*
+         * 	pppppppp qqqqqqqq rrrrrrrr ssssssss
+         *
+         * XOR
+         *
+		 *  00000000 00pppppp ppqqqqqq qqrrrrrr
+		 *      |      	         |
+		 *      +----------------+
+		 *          truncated
+		 */
         const auto mixed        = value ^ (value >> mixShift);
         const auto truncated    = (uint16_t)(mixed >> truncShift);
+
         const auto extended     = ((uint32_t)truncated << 16) | truncated;
 
+<<<<<<< Updated upstream
         return extended >> rot;
+=======
+        return rotr32(extended, rot); // TODO is same as extended >> rot ??
+>>>>>>> Stashed changes
     }
 
     inline uint16_t rand16(uint16_t range) {
