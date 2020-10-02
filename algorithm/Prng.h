@@ -44,8 +44,8 @@ class Prng
 public:
     inline Prng (uint32_t seed, uint32_t increment): state(ensureNonZero(seed)), increment(ensureNonZero(increment)) 
     {
-        step();
-        step();
+		for(int i=0; i<3; i++)
+			step();
     }
 
     inline uint16_t rand16()
