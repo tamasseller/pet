@@ -27,16 +27,30 @@ class Prng
     static inline constexpr uint32_t rotr32(uint32_t x, uint32_t r) {
         return x >> r | x << (-r & 31);
     }
+    
+    inline uint32_t ensureNonZero(uint32_t x)
+    {
+		const auto foldTop = (x ^ (x >> 1));
+		return (foldTop << 1) + 1;
+	}
+	
+	inline uint32_t step()
+	{
+		const auto ret = state;
+		state = state * multiplier + increment;
+		return ret;
+	}
 
 public:
-    inline Prng (uint32_t seed, uint32_t increment): state(seed), increment((increment << 1) + 1) {
-        rand16();
+    inline Prng (uint32_t seed, uint32_t increment): state(ensureNonZero(seed)), increment(ensureNonZero(increment)) 
+    {
+        step();
+        step();
     }
 
     inline uint16_t rand16()
     {
-        const auto value = state;
-        state = value * multiplier + increment;
+        const auto value = step();
 
         const auto rot          = value >> (stateWidth - rotWidth);
         const auto mixed        = value ^ (value >> mixShift);
