@@ -71,11 +71,7 @@ public:
 
         const auto extended     = ((uint32_t)truncated << 16) | truncated;
 
-<<<<<<< Updated upstream
         return extended >> rot;
-=======
-        return rotr32(extended, rot); // TODO is same as extended >> rot ??
->>>>>>> Stashed changes
     }
 
     inline uint16_t rand16(uint16_t range) {
