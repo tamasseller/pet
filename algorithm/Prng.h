@@ -24,10 +24,6 @@ class Prng
     static constexpr auto truncShift  = outputWidth - rotWidth;
     static constexpr auto mixShift    = (stateWidth - truncShift) / 2;
 
-    static inline constexpr uint32_t rotr32(uint32_t x, uint32_t r) {
-        return x >> r | x << (-r & 31);
-    }
-    
     inline uint32_t ensureNonZero(uint32_t x)
     {
 		const auto foldTop = (x ^ (x >> 1));
@@ -57,7 +53,7 @@ public:
         const auto truncated    = (uint16_t)(mixed >> truncShift);
         const auto extended     = ((uint32_t)truncated << 16) | truncated;
 
-        return rotr32(extended, rot);
+        return extended >> rot;
     }
 
     inline uint16_t rand16(uint16_t range) {
