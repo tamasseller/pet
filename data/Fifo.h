@@ -387,12 +387,12 @@ public:
 		return true;
 	}
 
-	DataType &access(const typename TypedFifoBase::FifoBase::Iterator& it) {
-		return static_cast<Child*>(this)->getBuffer() + *it;
+	DataType *access(uint16_t idx) {
+		return static_cast<Child*>(this)->getBuffer() + idx;
 	}
 
-	inline const DataType &access(const typename TypedFifoBase::FifoBase::Iterator& it) const {
-		return static_cast<const Child*>(this)->getBuffer() + *it;
+	inline const DataType *access(uint16_t idx) const {
+		return static_cast<const Child*>(this)->getBuffer() + idx;
 	}
 };
 
