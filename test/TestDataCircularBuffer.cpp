@@ -60,4 +60,22 @@ TEST(CircularWindow, Wrap) {
     w.replace(7);
 };
 
+TEST(CircularWindow, Iterator) {
+    CircularBuffer<int, 3> w;
 
+    w.replace(1);
+    w.replace(2);
+    w.replace(3);
+
+    CHECK(w.front() == 1);
+    w.replace(4);
+
+    CHECK(w.front() == 2);
+    w.replace(5);
+
+    CHECK(w.front() == 3);
+    w.replace(6);
+
+    CHECK(w.front() == 4);
+    w.replace(7);
+};

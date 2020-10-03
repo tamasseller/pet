@@ -475,3 +475,44 @@ TEST(NonEmptyLinkedList, TakeOver) {
 	it.step();
 	CHECK(it.current() == 0);
 }
+
+
+TEST(NonEmptyLinkedList, StlStyleIterators)
+{
+	LinkedList<SimpleElement> l;
+
+	CHECK(l.end() == l.end());
+	CHECK(l.begin() == l.end());
+	CHECK(l.begin() == l.begin());
+	CHECK(l.end() == l.begin());
+
+	for(auto e: l)
+		FAIL("should be empty");
+
+	SimpleElement es[4];
+
+	for(auto &e: es)
+		l.addBack(&e);
+
+	CHECK(l.end() == l.end());
+	CHECK(l.begin() != l.end());
+	CHECK(l.begin() == l.begin());
+	CHECK(l.end() != l.begin());
+
+	CHECK(++l.begin() != l.end());
+	CHECK(++l.begin() != l.begin());
+
+	int i = 0;
+	for(auto e: l)
+		CHECK(e == es + i++);
+
+	l.clear();
+
+	CHECK(l.end() == l.end());
+	CHECK(l.begin() == l.end());
+	CHECK(l.begin() == l.begin());
+	CHECK(l.end() == l.begin());
+
+	for(auto e: l)
+		FAIL("should be empty");
+}

@@ -68,7 +68,8 @@ namespace pet {
  *  ahead of the reader by exactly the size of the buffer.
  */
 template<uint16_t size>
-class FifoBase{
+class FifoBase
+{
 	uint16_t readIdx = 0, writeIdx = 0;
 public:
 	/**
@@ -118,7 +119,7 @@ public:
 	/**
 	 * Is there data to be read?
 	 *
-	 * Checks whether the fifo is empty.
+	 * Checks whether the FIFO is empty.
 	 *
 	 * @return True if there is no data to be read.
 	 */
@@ -127,12 +128,70 @@ public:
 	/**
 	 * Is there free space to be written?
 	 *
-	 * Checks whether the fifo is full.
+	 * Checks whether the FIFO is full.
 	 *
 	 * @return True if there is no more free space that can be written to.
 	 */
 	inline bool isFull() const;
 
+	/**
+	 * An (almost) STL style iterator that can be used to iterate over the contents of the FIFO.
+	 */
+	class Iterator
+	{
+		/**
+		 * The extended index (as used internally) of the current element.
+		 */
+		uint16_t idx;
+
+
+		/**
+		 * Initializing constructor used only internally to produce begin and end iterators.
+		 */
+		inline Iterator(uint16_t idx): idx(idx) {}
+		friend FifoBase;
+	public:
+		/**
+		 * Default constructor that creates an invalid iterator.
+		 */
+		inline Iterator() = default;
+
+		/**
+		 * Copy constructor, that works as expected.
+		 */
+		inline Iterator(const Iterator&) = default;
+
+		/**
+		 * Copy assignment, that works as expected.
+		 */
+		inline Iterator& operator=(const Iterator&) = default;
+
+		/**
+		 * Target access iterator that returns the real index of the element to be accesed.
+		 */
+		inline auto operator*() const { return idx % size; }
+		inline auto operator==(const Iterator& o) const { return idx == o.idx; }
+		inline auto operator!=(const Iterator& o) const { return idx != o.idx; }
+		inline auto operator++() { return idx = (idx + 1) % (2 * size); }
+	};
+
+	/**
+	 * Get an iterator pointing to the start of readable data.
+	 *
+	 * @note Iterators are not guaranteed to be validated after mutations.
+	 */
+	inline Iterator begin() const {
+		return {readIdx};
+	}
+
+	/**
+	 * Get an iterator pointing to the end of readable data.
+	 *
+	 * @note Iterators are not guaranteed to be validated after mutations.
+	 */
+	inline Iterator end() const {
+		return {writeIdx};
+	}
 };
 
 template<uint16_t size>
@@ -146,7 +205,8 @@ inline bool FifoBase<size>::isFull() const
 }
 
 template<uint16_t size>
-inline bool FifoBase<size>::isEmpty() const{
+inline bool FifoBase<size>::isEmpty() const
+{
 	/*
 	 * If the reader and writer are at the same index, the FIFO is empty.
 	 */
@@ -226,12 +286,14 @@ inline uint16_t FifoBase<size>::nextWritableIdx(uint16_t &idx) const
 }
 
 template<uint16_t size>
-inline void FifoBase<size>::doneReading(uint16_t length) {
+inline void FifoBase<size>::doneReading(uint16_t length)
+{
 	readIdx = (readIdx + length) % (2 * size);
 }
 
 template<uint16_t size>
-inline void FifoBase<size>::doneWriting(uint16_t length) {
+inline void FifoBase<size>::doneWriting(uint16_t length)
+{
 	writeIdx = (writeIdx + length) % (2 * size);
 }
 
@@ -239,7 +301,8 @@ inline void FifoBase<size>::doneWriting(uint16_t length) {
  * Type injection helper.
  */
 template<uint32_t size, class DataType, class Child>
-class TypedFifoBase: protected FifoBase<size> {
+class TypedFifoBase: protected FifoBase<size>
+{
 
 	typedef FifoBase<size> Base;
 
@@ -254,7 +317,8 @@ public:
 	 * @return The number of data items available (or zero if none).
 	 * @see FifoBase::nextReadableIdx
 	 */
-	uint16_t nextReadable(DataType* &buff) {
+	inline uint16_t nextReadable(DataType* &buff)
+	{
 		uint16_t idx, ret = this->nextReadableIdx(idx);
 		buff = static_cast<Child*>(this)->getBuffer() + idx;
 		return ret;
@@ -270,7 +334,8 @@ public:
 	 * @return The number of data items available (or zero if none).
 	 * @see FifoBase::nextWritableIdx
 	 */
-	uint16_t nextWritable(DataType* &buff) {
+	inline uint16_t nextWritable(DataType* &buff)
+	{
 		uint16_t idx, ret = this->nextWritableIdx(idx);
 		buff = static_cast<Child*>(this)->getBuffer() + idx;
 		return ret;
@@ -280,6 +345,8 @@ public:
 	using Base::doneWriting;
 	using Base::isEmpty;
 	using Base::isFull;
+	using Base::begin;
+	using Base::end;
 
 	/**
 	 * Read single data element.
@@ -289,8 +356,10 @@ public:
  	 * @param data The variable into which element is read.
 	 * @return True on success, false if already empty.
 	 */
-	bool readOne(DataType &data) {
+	inline bool readOne(DataType &data)
+	{
 		DataType *from;
+
 		if(!nextReadable(from))
 			return false;
 
@@ -307,7 +376,8 @@ public:
  	 * @param data The element to be stored.
 	 * @return True on success, false if already full.
 	 */
-	bool writeOne(const DataType &data) {
+	inline bool writeOne(const DataType &data)
+	{
 		DataType *to;
 		if(!nextWritable(to))
 			return false;
@@ -317,6 +387,13 @@ public:
 		return true;
 	}
 
+	DataType &access(const typename TypedFifoBase::FifoBase::Iterator& it) {
+		return static_cast<Child*>(this)->getBuffer() + *it;
+	}
+
+	inline const DataType &access(const typename TypedFifoBase::FifoBase::Iterator& it) const {
+		return static_cast<const Child*>(this)->getBuffer() + *it;
+	}
 };
 
 /**
@@ -336,6 +413,10 @@ class StaticFifo: public TypedFifoBase<size, DataType, StaticFifo<size, DataType
 	DataType buffer[size];
 
 	inline DataType* getBuffer() {
+		return buffer;
+	}
+
+	inline const DataType* getBuffer() const {
 		return buffer;
 	}
 };
@@ -359,6 +440,10 @@ class IndirectFifo: public TypedFifoBase<size, DataType, IndirectFifo<size, Data
 	DataType* buffer;
 
 	inline DataType* getBuffer() {
+		return buffer;
+	}
+
+	inline const DataType* getBuffer() const{
 		return buffer;
 	}
 public:

@@ -67,7 +67,7 @@ class smartPtrPrinter:
         return "target=" + str(target) + " [reference count:" + str(target.dereference()["counter"]["data"]) + "]"
 
 pp = gdb.printing.RegexpCollectionPrettyPrinter("pet")
-pp.add_printer('LinkedList', '^pet::LinkedList.*$', linkedListPrinter)
+pp.add_printer('LinkedList', '^pet::LinkedPtrList.*$', linkedListPrinter)
 pp.add_printer('DoubleList', '^pet::DoubleList.*$', linkedListPrinter)
 pp.add_printer('Union', '^pet::Union.*$', unionPrinter)
 pp.add_printer('RefCnt', '^pet::RefCnt.*::Ptr.*$', smartPtrPrinter)

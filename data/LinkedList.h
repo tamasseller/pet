@@ -98,6 +98,14 @@ public:
 		 * Does nothing on an over-the-end iterator.
 		 */
 		really_inline void remove() const;
+
+		/**
+		 * Operators for STL style iterator usage.
+		 */
+		inline Ptr operator*() const;
+		inline bool operator==(const Iterator& o) const;
+		inline bool operator!=(const Iterator& o) const;
+		inline Iterator& operator++();
 	};
 
 	/**
@@ -161,6 +169,16 @@ public:
 	 * 			(ie.: the first element if there is any).
 	 */
 	really_inline Iterator iterator();
+
+	/**
+	 * STL style iterator getter for the beginning of the list.
+	 */
+	really_inline Iterator begin();
+
+	/**
+	 * STL style iterator getter for the beginning of the list.
+	 */
+	really_inline Iterator end();
 
 	/**
 	 * Take over the content of another list.
@@ -229,11 +247,22 @@ inline void LinkedPtrList<Ptr>::take(LinkedPtrList& other) {
 	other.clear();
 }
 
-
 template<class Ptr>
 really_inline typename LinkedPtrList<Ptr>::Iterator
 LinkedPtrList<Ptr>::iterator() {
 	return Iterator(&first);
+}
+
+template<class Ptr>
+really_inline typename LinkedPtrList<Ptr>::Iterator
+LinkedPtrList<Ptr>::begin() {
+	return Iterator(&first);
+}
+
+template<class Ptr>
+really_inline typename LinkedPtrList<Ptr>::Iterator
+LinkedPtrList<Ptr>::end() {
+	return Iterator(nullptr);
 }
 
 template<class Ptr>
@@ -250,6 +279,28 @@ really_inline void LinkedPtrList<Ptr>::Iterator::step()
 {
 	if(*this->prevsNext)
 		this->prevsNext = &((*this->prevsNext)->next);
+}
+
+template<class Ptr>
+inline Ptr LinkedPtrList<Ptr>::Iterator::operator*() const {
+	return *this->prevsNext;
+}
+
+template<class Ptr>
+inline bool LinkedPtrList<Ptr>::Iterator::operator==(const Iterator& o) const {
+	return (this->prevsNext ? *this->prevsNext : nullptr) == (o.prevsNext ? *o.prevsNext : nullptr);
+}
+
+template<class Ptr>
+inline bool LinkedPtrList<Ptr>::Iterator::operator!=(const Iterator& o) const {
+	return !(*this == o);
+}
+
+template<class Ptr>
+inline typename LinkedPtrList<Ptr>::Iterator& LinkedPtrList<Ptr>::Iterator::operator++()
+{
+	this->prevsNext = &((*this->prevsNext)->next);
+	return *this;
 }
 
 template<class Ptr>

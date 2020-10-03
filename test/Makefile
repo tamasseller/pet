@@ -1,12 +1,5 @@
 OUTPUT = pet-test
 
-# Library sources
-
-SOURCES += ../1test/TestRunner.cpp
-SOURCES += ../1test/TraceOutput.cpp
-SOURCES += ../1test/FailureInjector.cpp
-SOURCES += ../ubiquitous/PrintfWriter.cpp
-
 # Test code
 
 SOURCES += TestAlgoCharLookup.cpp
@@ -80,7 +73,6 @@ SOURCES += TestMain.cpp
 # Includes
 
 INCLUDE_DIRS += .
-INCLUDE_DIRS += ..
 INCLUDE_DIRS += failure-injector
 
 # Flags
@@ -104,4 +96,5 @@ CXXFLAGS += -m32
 LDFLAGS += -m32
 endif
 
+include ../mod.mk
 include ultimate-makefile/Makefile.ultimate	
