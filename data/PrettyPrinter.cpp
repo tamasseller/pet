@@ -49,8 +49,8 @@ class unionPrinter:
         if tag < 0:
             return "uninitialized union"
 
-        daddr=val["data"].address
-        return daddr.cast(val.type.template_argument(tag).pointer()).dereference()
+        daddr=self.val["data"].address
+        return daddr.cast(self.val.type.template_argument(tag).pointer()).dereference()
 
 class smartPtrPrinter:
     def __init__(self, val):
