@@ -19,10 +19,10 @@ typedef AvlHeap<uint32_t, 2, true> TestHeap;
 
 #include <iostream>
 
-struct IntrumentedHeap: public TestHeap {
+struct InstrumentedHeap: public TestHeap {
 	using TestHeap::AvlTreePolicy<uint32_t, 2>::HeapBase<uint32_t, 2>::Block;
 
-	IntrumentedHeap(void* space, unsigned int size): Heap(space, size) {}
+	using TestHeap::TestHeap;
 
 	void treeDump() {
 		for(BinaryTree::Iterator it = this->BinaryTree::iterator(); it.current(); it.step())
@@ -49,7 +49,8 @@ TEST_GROUP(AvlTrace) {
 };
 
 TEST(AvlTrace, Trace1) {
-	IntrumentedHeap heap(space, sizeof(space));
+	InstrumentedHeap heap;
+	heap.init(space, sizeof(space));
 	auto x2 = heap.alloc(16);
 	CHECK(!x2.failed());
 	auto x3 = heap.alloc(16);

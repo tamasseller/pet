@@ -396,7 +396,7 @@ class Heap:	public Policy,
     using Base::encode;
     using Base::decode;
 
-	Block end; //!< Tricky one, points over the end, never dereferenced (ie. no setter or getter methods called on it).
+	Block end = 0; //!< Tricky one, points over the end, never dereferenced (ie. no setter or getter methods called on it).
 
     static constexpr unsigned int maxBlockSize = decode(~sizeMsb);
 
@@ -404,7 +404,7 @@ class Heap:	public Policy,
 
 	public:
     	/** @cond */
-		bool dump(void *start) {
+    	inline bool dump(void *start) {
 			bool ok = true;
 			Block block = (char*)start + Block::headerSize;
         	while(1) {
@@ -440,7 +440,13 @@ class Heap:	public Policy,
     	 * @param	space The pointer to the start of the heap space.
     	 * @param	size The size of the heap space.
     	 */
-    	Heap(void* space, unsigned int size);
+		inline void init(void* space, unsigned int size);
+		inline Heap(void* space, unsigned int size);
+
+    	/**
+    	 * Create an uninitialized heap, must be set up before use with the **init** method.
+    	 */
+		inline Heap() = default;
 
     	/**
     	 * Allocate memory.
@@ -451,7 +457,7 @@ class Heap:	public Policy,
     	 * @param	size The amount (in bytes) to be allocated.
     	 * @return	A pointer to the start of the allocated region or NULL on failure.
     	 */
-    	pet::FailPointer<void> alloc(unsigned int size);
+		inline pet::FailPointer<void> alloc(unsigned int size);
 
     	/**
     	 * Release used memory.
@@ -461,7 +467,7 @@ class Heap:	public Policy,
     	 * @param	ptr	The pointer to the block that is to be freed.
     	 * 			It has to be a pointer returned by the method alloc, without any offset!
     	 */
-    	void free(void* ptr);
+		inline void free(void* ptr);
 
     	/**
     	 * Shrinks block.
@@ -479,13 +485,18 @@ class Heap:	public Policy,
     	 * 			_shrunkSize_ parameter, however it is never smaller than the smaller
     	 * 			of the current size and the requested size.
     	 */
-    	unsigned int shrink(void* ptr, unsigned int shrunkSize);
+		inline unsigned int shrink(void* ptr, unsigned int shrunkSize);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<class Policy, class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline Heap<Policy, SizeType, alignmentBits, useChecksum>::Heap(void* start, unsigned int size): end(0) {
+inline Heap<Policy, SizeType, alignmentBits, useChecksum>::Heap(void* start, unsigned int size)  {
+	init(start, size);
+}
+
+template<class Policy, class SizeType, unsigned int alignmentBits, bool useChecksum>
+inline void Heap<Policy, SizeType, alignmentBits, useChecksum>::init(void* start, unsigned int size){
 	end.ptr = (SizeType*)((char*)start + size + Block::headerSize);
 	unsigned int initialIndent = align(Block::headerSize);
 	Block first((char*)start + initialIndent);
@@ -496,6 +507,7 @@ inline Heap<Policy, SizeType, alignmentBits, useChecksum>::Heap(void* start, uns
 	Policy::add(first);
 	info << "Heap created at: " << start << " - " << (void*)(((char*)start) + size) << "\n";
 }
+
 
 template<class Policy, class SizeType, unsigned int alignmentBits, bool useChecksum>
 inline pet::FailPointer<void> Heap<Policy, SizeType, alignmentBits, useChecksum>::alloc(unsigned int sizeParam)
