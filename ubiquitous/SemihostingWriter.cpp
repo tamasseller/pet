@@ -84,6 +84,8 @@ namespace pet {
 	}
 
 	void SemihostingWriter::write(const void* val) {
-		write((uintptr_t)val);
+		char temp[16];
+		pet::Str::utoa<16>((uintptr_t)val, temp, sizeof(temp));
+		write(temp);
 	}
 }

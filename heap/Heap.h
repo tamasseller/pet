@@ -515,7 +515,7 @@ inline pet::FailPointer<void> Heap<Policy, SizeType, alignmentBits, useChecksum>
     unsigned int size = sizeParam;
 
 	if(size > maxBlockSize) {
-    	warn << "Heap::alloc(): Too large block requested !\n";
+		fail << "Heap::alloc(): Too large block requested !\n";
         return 0;
     }
 
@@ -540,7 +540,7 @@ inline pet::FailPointer<void> Heap<Policy, SizeType, alignmentBits, useChecksum>
     	Policy::add(leftover);
 	}
 
-	info << "Heap::alloc(" <<  sizeParam << "): " << ret.ptr << "\n";
+	info << "Heap::alloc(" << sizeParam << "): " << ret.ptr << "\n";
 
 	ret.setFree(false);
 	ret.updateChecksum();
@@ -721,7 +721,6 @@ HeapHostBase<SizeType, alignmentBits, useChecksum>::Block::split(unsigned int si
 	leftover.setFree(true);
 	return leftover;
 }
-
 
 template<class SizeType, unsigned int alignmentBits, bool useChecksum>
 constexpr unsigned int HeapHostBase<SizeType, alignmentBits, useChecksum>::encode(unsigned int x) {
