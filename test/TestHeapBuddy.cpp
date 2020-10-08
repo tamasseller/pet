@@ -46,13 +46,38 @@ TEST_GROUP(Buddy)
     bool isUnique(void* (&ptrs)[N]) {
         return isUnique(ptrs, N);
     }
+
+    void steppingShuffle(int size)
+    {
+        void* ptrs[1024], **p = ptrs;
+
+        do {
+            *p = uut.allocate(size);
+        } while(*p++);
+
+        CHECK(isUnique(ptrs, p - ptrs));
+
+        for(int n = 1; n < p - ptrs; n++)
+        {
+            CHECK(!uut.allocate(size));
+
+            for(int i = 0; i < n; i++)
+                uut.free(ptrs[i]);
+
+            for(int i = 0; i < n; i++) {
+                ptrs[i] = uut.allocate(size);
+                CHECK(ptrs[i]);
+            }
+
+            CHECK(isUnique(ptrs));
+        }
+    }
 };
 
 TEST(Buddy, Abuse)
 {
     CHECK(!uut.init(mem, mem));
     CHECK(!uut.init(mem, mem - size));
-    CHECK(!uut.init(mem, mem + 1));
 
     CHECK(uut.init(mem, mem + size));
     uut.free(nullptr);
@@ -75,60 +100,15 @@ TEST(Buddy, Sanity)
 TEST(Buddy, AllSmallsSteppingShuffle)
 {
     CHECK(uut.init(mem, mem + size));
-
-    void* ptrs[14];
-
-    for(int i = 0; i < 14; i++) {
-        ptrs[i] = uut.allocate(1);
-        CHECK(ptrs[i]);
-    }
-
-    CHECK(isUnique(ptrs));
-
-    for(int n = 1; n <= 14; n++)
-    {
-        CHECK(!uut.allocate(1));
-
-        for(int i = 0; i < n; i++)
-            uut.free(ptrs[i]);
-
-        for(int i = 0; i < n; i++) {
-            ptrs[i] = uut.allocate(1);
-            CHECK(ptrs[i]);
-        }
-
-        CHECK(isUnique(ptrs));
-    }
+    steppingShuffle(1);
 }
 
 TEST(Buddy, AllBiggerSteppingShuffle)
 {
     CHECK(uut.init(mem, mem + size));
-
-    void* ptrs[7];
-
-    for(int i = 0; i < 7; i++) {
-        ptrs[i] = uut.allocate(8);
-        CHECK(ptrs[i]);
-    }
-
-    CHECK(isUnique(ptrs));
-
-    for(int n = 1; n <= 7; n++)
-    {
-        CHECK(!uut.allocate(8));
-
-        for(int i = 0; i < n; i++)
-            uut.free(ptrs[i]);
-
-        for(int i = 0; i < n; i++) {
-            ptrs[i] = uut.allocate(8);
-            CHECK(ptrs[i]);
-        }
-
-        CHECK(isUnique(ptrs));
-    }
+    steppingShuffle(8);
 }
+
 
 TEST(Buddy, PassBigger)
 {
@@ -147,7 +127,7 @@ TEST(Buddy, PassBigger)
 
 TEST(Buddy, RandomStress)
 {
-    void* ptrs[14];
+    void* ptrs[1024];
     int idx = 0;
     int a = 1, b = 1;
 
@@ -162,7 +142,7 @@ TEST(Buddy, RandomStress)
             b = a;
             a = size;
 
-            CHECK(idx < 14);
+            CHECK(idx < sizeof(ptrs)/sizeof(*ptrs));
 
             if(auto x = uut.allocate(size))
                 ptrs[idx++] = x;
@@ -172,7 +152,8 @@ TEST(Buddy, RandomStress)
 
         CHECK(isUnique(ptrs, idx));
 
-        for(int i = 0; i < idx / 2; i++)
+        const auto nFree = idx / 2;
+        for(int i = 0; i < nFree; i++)
             uut.free(ptrs[--idx]);
     }
 }

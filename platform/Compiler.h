@@ -26,7 +26,7 @@
 
 #define PET_COMPILER_IS_GCC
 
-#if defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64)
+#if defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64) || defined(__i686)
 #define PET_TARGET_IS_PC
 #elif defined(__arm__) && defined(__thumb__)
 #if defined (__ARM_ARCH_6M__)

@@ -86,71 +86,71 @@ namespace pet {
  *   ^   ^   ^   ^       ^   ^   ^   ^       ^   ^   ^   ^        ^   ^   ^   ^
  */
 
-template<uintptr_t minBlockSizeLog, uintptr_t maxAlignBits>
+template<uint32_t minBlockSizeLog, uint32_t maxAlignBits>
 class BuddyAllocator
 {
     static constexpr auto minBlockSize = 1 << minBlockSizeLog;
     static constexpr auto nBitsPerCell = 2;
     static constexpr auto nCellsPerByte = 8 / nBitsPerCell;
-    static constexpr uintptr_t nBytesPerWord = sizeof(size_t);
+    static constexpr uint32_t nBytesPerWord = sizeof(uint32_t);
     static constexpr auto nCellsPerWord = nBytesPerWord * nCellsPerByte;
     static constexpr auto cellMask = (1 << nBitsPerCell)  - 1;
 
     char *start, *end;
-    size_t maxLevel = 0;
-    size_t *tree;
+    uint32_t maxLevel = 0;
+    uint32_t *tree;
 
-    enum class NodeState: uintptr_t {
+    enum class NodeState: uint32_t {
         Free = 0,
         Partial = 1,
         Used = 2
     };
 
-    static inline constexpr auto idx2wordIndex(uintptr_t idx) {
+    static inline constexpr auto idx2wordIndex(uint32_t idx) {
         return idx / nCellsPerWord;
     }
 
-    static inline constexpr auto idx2bitShift(uintptr_t idx) {
+    static inline constexpr auto idx2bitShift(uint32_t idx) {
         return (idx % nCellsPerWord) * nBitsPerCell;
     }
 
-    inline NodeState getState(size_t idx) const {
+    inline NodeState getState(uint32_t idx) const {
         auto byteIdx = idx2wordIndex(idx);
         auto bitShift = idx2bitShift(idx);
         return static_cast<NodeState>((tree[byteIdx] >> bitShift) & cellMask);
     }
 
-    inline void setState(size_t idx, NodeState state) {
+    inline void setState(uint32_t idx, NodeState state) {
         auto byteIdx = idx2wordIndex(idx);
         auto bitShift = idx2bitShift(idx);
         const auto cleared = tree[byteIdx] & ~(cellMask << bitShift);
-        tree[byteIdx] = cleared | ((uintptr_t)state) << (bitShift);
+        tree[byteIdx] = cleared | ((uint32_t)state) << (bitShift);
     }
 
-    inline size_t ptr2idx(void* ptr) {
+    inline uint32_t ptr2idx(void* ptr) {
         return (1 << maxLevel) + ((reinterpret_cast<char*>(ptr) - start) >> minBlockSizeLog);
     }
 
-    static inline auto baseIdx(size_t level) {
+    static inline auto baseIdx(uint32_t level) {
         return 1 << level;
     }
 
-    static inline auto level(size_t idx) {
+    static inline auto level(uint32_t idx) {
         return 31 - clz(idx);
     }
 
-    inline char* idx2ptr(size_t idx)
+    inline char* idx2ptr(uint32_t idx)
     {
         auto leaf = idx << (maxLevel - level(idx));
         auto leafBlockOffset = leaf - (1 << maxLevel);
         return start + (leafBlockOffset << minBlockSizeLog);
     }
 
-    static inline auto parent(size_t idx) {
+    static inline auto parent(uint32_t idx) {
         return idx >> 1;
     }
 
-    inline void indicateUsed(size_t idx, size_t limit = 0)
+    inline void indicateUsed(uint32_t idx, uint32_t limit = 0)
     {
         setState(idx, NodeState::Used);
 
@@ -163,7 +163,7 @@ class BuddyAllocator
         }
     }
 
-    inline auto checkParent(size_t idx)
+    inline auto checkParent(uint32_t idx)
     {
         while(idx)
         {
@@ -191,11 +191,11 @@ class BuddyAllocator
         return decltype(ptr2idx(nullptr))(0);
     }
 
-    static inline auto sibling(size_t idx) {
+    static inline auto sibling(uint32_t idx) {
         return idx ^ 1;
     }
 
-    inline size_t indicateUnused(size_t idx, size_t limit = 0)
+    inline uint32_t indicateUnused(uint32_t idx, uint32_t limit = 0)
     {
         do
         {
@@ -212,11 +212,11 @@ class BuddyAllocator
     }
 
     template<class T>
-    constexpr static inline T* align(T* ptr, size_t nBytes) {
+    constexpr static inline T* align(T* ptr, uintptr_t nBytes) {
         return reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(ptr) & ~(nBytes - 1));
     }
 
-    inline bool size2level(size_t size, size_t &level)
+    inline bool size2level(uint32_t size, uint32_t &level)
     {
         auto sBits = 32 - clz(size - 1);
 
@@ -233,7 +233,8 @@ public:
     inline bool init(void* start, void* end)
     {
         // Sanity check
-        if(start >= end || align(start, maxAlignBits) != start)
+    	auto aligned = align(start, 1 << maxAlignBits);
+        if(start >= end || aligned != start)
             return false;
 
         this->start = reinterpret_cast<char*>(start);
@@ -262,11 +263,11 @@ public:
         return true;
     }
 
-    inline void* allocate(size_t x)
+    inline void* allocate(uint32_t x)
     {
         if(x)
         {
-            size_t searchLevel;
+            uint32_t searchLevel;
 
             if(!size2level(x, searchLevel))
                 return nullptr;
@@ -306,9 +307,9 @@ public:
         }
     }
 
-    inline bool adjust(void* ptr, size_t x)
+    inline bool adjust(void* ptr, uint32_t x)
     {
-        size_t newLevel;
+        uint32_t newLevel;
 
         if(size2level(x, newLevel))
         {

@@ -327,9 +327,9 @@ protected:
  * h:p5:n -> h:n4:n;
  * } @enddot
  *
- * As these blocks cover the heapspace continuously, without gaps, it is know the size of the
- * block to get to the next one, also conversely knowing the size of the previous block is
- * enough to get there. This implementation achieves the storage of the immediate neighbors'
+ * As these blocks cover the heapspace continuously (ie. without gaps) it is sufficient to
+ * know the size of the block to get to the next one, also conversely knowing the size of
+ * the previous block is. This implementation achieves the storage of the immediate neighbors'
  * location by storing the sizes instead of pointers. This is beneficial because this way the
  * sizes of the header fields depend on the maximal allowed size of a block and not on the
  * size of an arbitrary memory address. This comes in handy especially for 32bit microcontrollers,
@@ -337,10 +337,10 @@ protected:
  * portion of the available space is utilized, nevertheless using pointers would require the
  * storage of the full four bytes of the address. Also the sizes are not expressed as bytes,
  * but instead shifted down by the alignment bits, to save those because otherwise they would
- * be wasted as fixed zeroes. This means that the as the alignment get higher so does the
+ * be wasted as fixed zeroes. This means that as the alignment get higher so does the
  * maximal block size.
  *
- * Also the heap needs match the size of the segments to the needs of the application. Every
+ * The heap needs to match the size of the segments to the needs of the application. Every
  * requested block has to be at least as big as the specified size, but the actually
  * allocated space can exceed the amount that was asked for. However the additional space
  * is basically wasted, because the application can only take the specified length granted,
@@ -354,13 +354,13 @@ protected:
  * If during any operation a free block is created next to another free block they are
  * instantly joined. Obviously, used blocks can lay next to each other, but if any block
  * gets freed up, it is always checked for the possibility of merging. So this implementation
- * guarantees that there can be no pair of adjacent free blocks, thus always counting
+ * guarantees that there can be no pairs of adjacent free blocks, thus always counting
  * continuous free blocks as such.
  *
  * @note 	This class is directly responsible for only the tasks of splitting and joining
  * 			the blocks. The free store, including the search algorithm for adequate free
  * 			blocks is implemented by the pluggable policy. All of the operations carried out
- * 			in this class preserve are of linear time complexity, thus preserving the real-time
+ * 			in this class are of linear time complexity, thus preserving the possible real-time
  * 			characteristics of the supplied policy.
  *
  * @warning This heap implementation is not guarded for **concurrent accesses** in itself. If it

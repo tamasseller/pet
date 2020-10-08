@@ -55,6 +55,14 @@ namespace pet {
 		}
 	}
 
+	void SemihostingWriter::write(long val) {
+		write((int)val);
+	}
+
+	void SemihostingWriter::write(unsigned long val) {
+		write((unsigned int)val);
+	}
+
 	void SemihostingWriter::write(int val) {
 		char temp[16];
 		pet::Str::itoa<10>(val, temp, sizeof(temp));

@@ -76,8 +76,8 @@ TEST_GROUP(Delegate)
     struct MovableTestTarget
     {
         bool live = true;
-        const uint16_t gen = 0;
-        const uint16_t id = 0;
+        const uint8_t gen = 0;
+        const uint8_t id = 0;
         MovableTestTarget() = default;
         MovableTestTarget(int id): id(id) {}
         MovableTestTarget(MovableTestTarget &&o): live(o.live), gen(o.gen + 1), id(o.id) { o.live = false; }

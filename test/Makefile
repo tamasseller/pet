@@ -46,8 +46,6 @@ SOURCES += TestUbiqFailable.cpp
 SOURCES += TestUbiqError.cpp
 SOURCES += TestUbiqTrace.cpp
 SOURCES += TestModules.cpp
-ifeq (USE64BIT,)
-SOURCES += TestHeapBuddy.cpp
 SOURCES += TestHeapAvlStress.cpp
 SOURCES += TestHeapBestFitStress.cpp
 SOURCES += TestHeapHost1.cpp
@@ -56,15 +54,14 @@ SOURCES += TestHeapHost3.cpp
 SOURCES += TestHeapHost4.cpp
 SOURCES += TestHeapHost5.cpp
 SOURCES += TestHeapHost6.cpp
-SOURCES += TestHeapTlsfStress.cpp
 SOURCES += TestHeapTlsf.cpp
-endif
+SOURCES += TestHeapTlsfStress.cpp
+SOURCES += TestHeapBuddy.cpp
 
-ifeq (_,)
-endif
 
 # Test support
 
+SOURCES += ../ubiquitous/PrintfWriter.cpp
 SOURCES += MockWriter.cpp
 SOURCES += MockAllocator.cpp
 SOURCES += DebugConfig.cpp
@@ -91,7 +88,7 @@ LIBS += gcov
 
 LD=$(CXX) 
 
-ifeq (USE64BIT,)
+ifeq (_,)
 CXXFLAGS += -m32
 LDFLAGS += -m32
 endif

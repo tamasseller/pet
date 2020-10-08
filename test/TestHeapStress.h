@@ -62,7 +62,7 @@ class HeapStress: pet::Trace<HeapStressTestTraceTag> {
 		if(h > l) 
 		{
 		    state = state * 1103515245 + 12345;
-			return 1 + (state >> 16) % (h-l);
+			return l + ((state >> 16) % (h - l + 1));
 		}
 		
 		return 0;
@@ -85,7 +85,7 @@ class HeapStress: pet::Trace<HeapStressTestTraceTag> {
 
 	void random_free(int amount){
 		while(!db.isEmpty() && (amount > 0)){
-			int n = random(0, db.getSize());
+			int n = random(0, db.getSize() - 1);
 			amount -= db[n].size;
 			heap.free(db[n].ptr);
 			CHECK(heap.dump(data));
@@ -95,7 +95,7 @@ class HeapStress: pet::Trace<HeapStressTestTraceTag> {
 
 	void random_shrink(int amount){
 		while(amount > 0){
-			int n = random(0, db.getSize());
+			int n = random(0, db.getSize() - 1);
 			int blockSize = random(minAlloc, db[n].size);
 			unsigned int oldSize = db[n].size;
 			db[n].size = heap.shrink(db[n].ptr, blockSize);
