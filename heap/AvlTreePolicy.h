@@ -47,6 +47,9 @@ protected:
 	/** @copydoc pet::TlsfPolicy::freeHeaderSize */
 	static constexpr unsigned int freeHeaderSize = sizeof(AvlTree::Node);
 
+	/** @copydoc pet::TlsfPolicy::init */
+	inline void init(Block block);
+
 	/** @copydoc pet::TlsfPolicy::add */
 	inline void add(Block block);
 
@@ -81,6 +84,13 @@ inline void AvlTreePolicy<SizeType, alignmentBits>::add(Block block)
 	}
 
 	insert(pos, new(block.ptr) AvlTree::Node);
+}
+
+template <class SizeType, unsigned int alignmentBits>
+inline void AvlTreePolicy<SizeType, alignmentBits>::init(Block block)
+{
+	root = nullptr;
+	add(block);
 }
 
 template <class SizeType, unsigned int alignmentBits>

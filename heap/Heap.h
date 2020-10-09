@@ -504,7 +504,7 @@ inline void Heap<Policy, SizeType, alignmentBits, useChecksum>::init(void* start
 	first.setNext(end);
 	first.setPrev(first);
 	first.updateChecksum();
-	Policy::add(first);
+	Policy::init(first);
 	info << "Heap created at: " << start << " - " << (void*)(((char*)start) + size) << "\n";
 }
 
