@@ -36,7 +36,7 @@ public:
 		clrex();        // TODO is this ok (for example: preempted between write and clrex)?
 	}
 
-	inline operator Value() {
+	inline operator Value() const {
 		return data;
 	}
 
