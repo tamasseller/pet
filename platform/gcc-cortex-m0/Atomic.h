@@ -30,31 +30,55 @@ namespace detail {
 
 extern volatile bool exclusiveMonitor;
 
+template<int Size> struct StoreExclusiveImpl;
+
+#define __STREX_IMPL_ASM(W)												       \
+	uintptr_t temp = 0; 												       \
+	bool ret;																   \
+	asm volatile(														       \
+		"	.thumb					  \n"									   \
+		"	.syntax unified			  \n"                                      \
+		"	cpsid i					  \n" /* Atomically:					*/ \
+		"	ldrb %[ret], [%[mon]]	  \n" /* 		1. load the monitor.    */ \
+		"	cmp %[ret], #0			  \n" /*  	    2. check if contended.  */ \
+		"	beq 1f					  \n" /*	 	3. skip next if it is.  */ \
+		"	str" W " %[in], [%[adr]] \n" /* 		4. store the new value. */ \
+		"1: strb %[tmp], [%[mon]]	  \n" /* 		5. reset monitor.       */ \
+		"	cpsie i\n"                                                         \
+			: [ret] "=&l" (ret)                                                \
+			: [mon] "l"   (&exclusiveMonitor),							       \
+			  [tmp] "l"   (temp),                                              \
+			  [adr] "l"   (addr),                                              \
+			  [in]  "l"   (in) : "memory"                                      \
+		);																	   \
+		return ret;
+
+template<> struct StoreExclusiveImpl<4> {
+	template<class Value> static inline bool work(volatile Value* addr, Value in) {
+		static_assert(sizeof(Value) == 4, "wrong atomic access width");
+		__STREX_IMPL_ASM("")
+	}
+};
+
+template<> struct StoreExclusiveImpl<2> {
+	template<class Value> static inline bool work(volatile Value* addr, Value in) {
+		static_assert(sizeof(Value) == 2, "wrong atomic access width");
+		__STREX_IMPL_ASM("h")
+	}
+};
+
+template<> struct StoreExclusiveImpl<1> {
+	template<class Value> static inline bool work(volatile Value* addr, Value in) {
+		static_assert(sizeof(Value) == 1, "wrong atomic access width");
+		__STREX_IMPL_ASM("b")
+	}
+};
+
+#undef __STREX_IMPL_ASM
+
 template<class Value>
-inline bool storeExclusive(volatile Value* addr, Value in)
-{
-	static_assert(sizeof(Value) == 4, "unimplemented atomic access width");
-	uintptr_t temp = 0;
-	bool ret;
-
-	asm volatile(
-		"	.thumb					\n"
-		"	.syntax unified			\n"
-		"	cpsid i					\n"	// Atomically:
-		"	ldrb %[ret], [%[mon]]	\n"	// 		1. load the monitor.
-		"	cmp %[ret], #0			\n" //  	2. check if contended.
-		"	beq 1f					\n" //	 	3. skip next if it is.
-		"	str %[in], [%[adr]]		\n" // 		4. store the new value.
-		"1: strb %[tmp], [%[mon]]	\n" // 		5. reset monitor.
-		"	cpsie i\n"
-			: [ret] "=&l" (ret)
-			: [mon] "l"   (&exclusiveMonitor),
-			  [tmp] "l"   (temp),
-			  [adr] "l"   (addr),
-			  [in]  "l"   (in) : "memory"
-		);
-
-	return ret;
+inline bool storeExclusive(volatile Value* addr, Value in) {
+	return StoreExclusiveImpl<(int)sizeof(Value)>::work(addr, in);
 }
 
 template<class Value>
@@ -77,8 +101,8 @@ inline void clearExclusive()
 template<class Data>
 struct Atomic: CortexCommon::AtomicCommon<
 	Data,
-	&detail::loadExclusive,
-	&detail::storeExclusive,
+	&detail::loadExclusive<Data>,
+	&detail::storeExclusive<Data>,
 	&detail::clearExclusive>
 {
 	inline Atomic(): Atomic::AtomicCommon(0) {}

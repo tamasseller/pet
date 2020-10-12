@@ -38,14 +38,19 @@
 #endif
 #endif
 
-#define	    really_inline 		__attribute__((always_inline)) inline
+#define	really_inline 	__attribute__((always_inline)) inline
+#define likely(x)       __builtin_expect((x),1)
+#define unlikely(x)     __builtin_expect((x),0)
+
 
 #elif defined(_MSC_VER)
 
 #define PET_COMPILER_IS_MSVC
 #define PET_TARGET_IS_PC
 
-#define	    really_inline 		__forceinline
+#define	really_inline 	__forceinline
+#define likely(x)       (x)
+#define unlikely(x)     (x)
 
 #endif 
 
