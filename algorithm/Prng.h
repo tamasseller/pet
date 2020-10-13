@@ -12,10 +12,10 @@
 
 namespace pet {
 
-class Prng
+template<class Child>
+class PrngBase
 {
     uint32_t state;
-    const uint32_t increment;
 
     static constexpr auto multiplier  = 1103515245u;
     static constexpr auto stateWidth  = 32;
@@ -24,21 +24,22 @@ class Prng
     static constexpr auto truncShift  = outputWidth - rotWidth;			// 12
     static constexpr auto mixShift    = (stateWidth - truncShift) / 2;	// 10
 
-    inline uint32_t ensureNonZero(uint32_t x)
+	inline uint32_t step()
+	{
+		const auto ret = state;
+		state = state * multiplier + static_cast<Child*>(this)->getIncrement();
+		return ret;
+	}
+
+protected:
+    static inline uint32_t ensureOdd(uint32_t x)
     {
 		const auto foldTop = (x ^ (x >> 1));
 		return (foldTop << 1) + 1;
 	}
-	
-	inline uint32_t step()
-	{
-		const auto ret = state;
-		state = state * multiplier + increment;
-		return ret;
-	}
 
 public:
-    inline Prng (uint32_t seed, uint32_t increment): state(ensureNonZero(seed)), increment(ensureNonZero(increment)) 
+    inline PrngBase(uint32_t seed): state(ensureOdd(seed))
     {
 		for(int i=0; i<3; i++)
 			step();
@@ -87,6 +88,24 @@ public:
     inline uint32_t rand32() {
         return ((uint32_t)rand16() << 16) | rand16();
     }
+};
+
+class Prng: PrngBase<Prng>
+{
+	friend Prng::PrngBase;
+
+	const uint32_t increment;
+
+	inline auto getIncrement() {
+		return increment;
+	}
+
+public:
+    inline Prng(uint32_t seed, uint32_t increment): PrngBase(seed), increment(ensureOdd(increment)) {}
+
+	using Prng::PrngBase::rand8;
+	using Prng::PrngBase::rand16;
+	using Prng::PrngBase::rand32;
 };
 
 }
