@@ -77,7 +77,7 @@ public:
         static_assert(TypePackInfo<T...>::template Position<R>::value != -1, "Can not initialize as non-contained type.");
         this->~Union();
         tag = TypePackInfo<T...>::template Position<R>::value;
-        new(data) R(pet::forward<Args>(args)...);
+        new(data, NewOperatorDisambiguator{}) R(pet::forward<Args>(args)...);
     }
 
     template<class R>
