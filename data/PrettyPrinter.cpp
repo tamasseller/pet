@@ -1,3 +1,4 @@
+extern "C"
 __attribute__((section(".debug_gdb_scripts"), used))
 const char __gdb_pretty_printer_data[] = R"foo(gdb.inlined-script
 import gdb.xmethod

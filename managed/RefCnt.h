@@ -93,27 +93,27 @@ class RefCnt
             new(this, NewOperatorDisambiguator()) PtrBase();
         }
 
-        inline bool operator ==(const PtrBase& o) const {
+        really_inline bool operator ==(const PtrBase& o) const {
             return target == o.target;
         }
 
-        inline bool operator ==(nullptr_t) const {
+        really_inline bool operator ==(nullptr_t) const {
             return !target;
         }
 
-        inline bool operator !=(const PtrBase& o) const {
+        really_inline bool operator !=(const PtrBase& o) const {
             return target != o.target;
         }
 
-        inline bool operator !=(nullptr_t) const {
+        really_inline bool operator !=(nullptr_t) const {
             return target;
         }
 
-        inline bool operator !() const {
+        really_inline bool operator !() const {
             return target == nullptr;
         }
 
-        inline operator bool() const {
+        really_inline operator bool() const {
             return target != nullptr;
         }
     };
@@ -145,15 +145,15 @@ public:
     	using PtrBase::operator!;
     	using PtrBase::operator bool;
 
-        inline T* operator ->() const {
+        really_inline T* operator ->() const {
             return static_cast<T*>(this->target);
         }
 
-        inline T* get() const {
+        really_inline T* get() const {
             return static_cast<T*>(this->target);
         }
 
-        inline T& operator *() const {
+        really_inline T& operator *() const {
             return *static_cast<T*>(this->target);
         }
     };
@@ -165,7 +165,7 @@ public:
 
     template<class T = Target, class... Args>
     static inline Ptr<T> make(Args&&... args) {
-        return Ptr<T>::init(new (Allocator::alloc(sizeof(T))) T(pet::forward<Args>(args)...));
+        return Ptr<T>::init(new (Allocator::alloc(sizeof(T)), NewOperatorDisambiguator()) T(pet::forward<Args>(args)...));
     }
 
     template<class T=Target>
