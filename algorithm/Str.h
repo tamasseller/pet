@@ -173,9 +173,12 @@ struct Str {
 
 		constexpr auto maxPlaces = pet::log<base>::template x<UINT_MAX>::value;
 		constexpr auto &table = pet::applyOverRange<pet::exp<base>::template x, 1, maxPlaces>::value;
+		constexpr auto * const end = table + sizeof(table)/sizeof(table[0]);
 
-		unsigned int n = 0;
-		while(x >= table[n] && n < sizeof(table)/sizeof(table[0])) n++;
+		auto* p = &table[0];
+		while(x >= *p && p < end) p++;
+
+		auto n = (unsigned int)(p - table);
 
 		if(!length || n >= length - 1)
 			return false; // too long

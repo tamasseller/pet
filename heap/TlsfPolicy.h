@@ -253,6 +253,7 @@ protected:
     	 * @param 	block The block to be added.
     	 */
     	inline void add(Block block);
+        inline void init(Block block) { add(block); }
 
     	/**
     	 * Remove a block from the free store.

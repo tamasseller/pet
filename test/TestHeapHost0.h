@@ -47,6 +47,11 @@ class MockPolicy: HeapBase<SizeType, alignmentBits> {
             this->freeBlocks.insert(this->freeBlocks.begin(), block);
         }
 
+        void init(typename Base::Block block)
+        {
+        	add(block);
+        }
+
         void remove(typename Base::Block block)
         {
             MOCK(heapPolicy)::CALL(remove).withParam(block.ptr);

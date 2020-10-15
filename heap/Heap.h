@@ -515,7 +515,7 @@ inline pet::FailPointer<void> Heap<Policy, SizeType, alignmentBits, useChecksum>
     unsigned int size = sizeParam;
 
 	if(size > maxBlockSize) {
-		fail << "Heap::alloc(): Too large block requested !\n";
+		warn << "Heap::alloc(): Too large block requested !\n";
         return 0;
     }
 

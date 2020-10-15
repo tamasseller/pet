@@ -51,6 +51,8 @@ protected:
 	/** @copydoc pet::TlsfPolicy::add(Block */
 	inline void add(Block block);
 
+    inline void init(Block block) { add(block); }
+
 	/** @copydoc pet::TlsfPolicy::remove */
 	inline void remove(Block block);
 
