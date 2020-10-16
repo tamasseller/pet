@@ -57,7 +57,7 @@ public:
 	template<class U>
 	inline operator U() {
 		return (U)(T*)(*this);
-	};
+	}
 };
 
 /**
@@ -94,7 +94,7 @@ public:
 	template<class U>
 	inline operator U() {
 		return (U)(T)(*this);
-	};
+	}
 
 	/** @copydoc pet::FailableBase::rethrow() */
 	FailValue rethrow() {

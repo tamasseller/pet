@@ -50,8 +50,8 @@ protected:
 
 	/** @copydoc pet::TlsfPolicy::add(Block */
 	inline void add(Block block);
+    inline void init(Block block);
 
-    inline void init(Block block) { add(block); }
 
 	/** @copydoc pet::TlsfPolicy::remove */
 	inline void remove(Block block);
@@ -79,6 +79,13 @@ template <class SizeType, unsigned int alignmentBits>
 inline void BestFitPolicy<SizeType, alignmentBits>::add(Block block)
 {
 	freeStore.add((FreeBlock *)block.ptr);
+}
+
+template <class SizeType, unsigned int alignmentBits>
+inline void BestFitPolicy<SizeType, alignmentBits>::init(Block block)
+{
+	freeStore.clear();
+	add(block);
 }
 
 template <class SizeType, unsigned int alignmentBits>

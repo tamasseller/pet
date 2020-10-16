@@ -70,11 +70,11 @@ namespace pet {										\
 
 #define CLIENT_TRACE_POLICY(X, Y) 					\
 class X;											\
-__TRACE_POLICY(X, Y, TracePolicy);					\
+__TRACE_POLICY(X, Y, TracePolicy)					\
 
 #define CLIENT_TRACE_POLICY_NS(NS, X, Y) 			\
 namespace NS {class X;}								\
-__TRACE_POLICY(NS::X, Y, TracePolicy);
+__TRACE_POLICY(NS::X, Y, TracePolicy)
 
 #define GLOBAL_TRACE_POLICY(Y) __TRACE_POLICY(Global, Y, DefaultTracePolicy)
 

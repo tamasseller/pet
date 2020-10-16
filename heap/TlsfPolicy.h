@@ -22,6 +22,7 @@
 
 #include "heap/Heap.h"
 #include "data/DoubleList.h"
+#include "meta/Resettable.h"
 
 class TlsfPolicyInternalsTest;
 
@@ -144,13 +145,18 @@ class TlsfPolicy: private HeapBase<SizeType, alignmentBits> {
          * Contains the lists for each block size category
          * and also a two layered bitmap cache.
          */
-    	class Index {
+    	class Index: Resettable<Index>
+    	{
            	unsigned short flMap = 0;
            	unsigned short slMap[16] = {0,};
            	FreeList blocks[256];
 
        		static inline unsigned int getLogMap(unsigned int size);
+
+       		friend class Index::Resettable;
     	public:
+       		using Index::Resettable::reset;
+
        		/**
        		 * Hash value.
        		 *
@@ -253,7 +259,7 @@ protected:
     	 * @param 	block The block to be added.
     	 */
     	inline void add(Block block);
-        inline void init(Block block) { add(block); }
+        inline void init(Block block);
 
     	/**
     	 * Remove a block from the free store.
@@ -310,6 +316,13 @@ inline void TlsfPolicy<SizeType, alignmentBits>::add(Block b)
 	typename Index::Entry insEntry = Index::getInsertionEntry(size);
 	index.getListFor(insEntry).add(block);
 	index.setBits(insEntry);
+}
+
+template <class SizeType, unsigned int alignmentBits>
+inline void TlsfPolicy<SizeType, alignmentBits>::init(Block block)
+{
+	index.reset();
+	add(block);
 }
 
 template <class SizeType, unsigned int alignmentBits>

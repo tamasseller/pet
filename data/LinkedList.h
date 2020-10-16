@@ -22,6 +22,8 @@
 
 #include "platform/Compiler.h"
 
+#include "meta/Utility.h"
+
 namespace pet {
 
 /**
@@ -69,7 +71,7 @@ public:
 		 *
 		 * @return The current element or NULL if over the end of the list.
 		 */
-		really_inline Ptr current() const;
+		really_inline const Ptr &current() const;
 
 		/**
 		 * Take a step.
@@ -97,7 +99,7 @@ public:
 		 * The iterator will stand at the next element after the operation.
 		 * Does nothing on an over-the-end iterator.
 		 */
-		really_inline void remove() const;
+		really_inline Ptr remove() const;
 
 		/**
 		 * Operators for STL style iterator usage.
@@ -269,7 +271,7 @@ template<class Ptr>
 really_inline LinkedPtrList<Ptr>::Iterator::Iterator(Ptr* prevsNext):prevsNext(prevsNext) {}
 
 template<class Ptr>
-really_inline Ptr LinkedPtrList<Ptr>::Iterator::current() const
+really_inline const Ptr &LinkedPtrList<Ptr>::Iterator::current() const
 {
 	return *this->prevsNext;
 }
@@ -306,15 +308,19 @@ inline typename LinkedPtrList<Ptr>::Iterator& LinkedPtrList<Ptr>::Iterator::oper
 template<class Ptr>
 really_inline void LinkedPtrList<Ptr>::Iterator::insert(Ptr elem) const
 {
-	elem->next = *this->prevsNext;
-	*this->prevsNext = elem;
+	elem->next = pet::move(*this->prevsNext);
+	*this->prevsNext = pet::move(elem);
 }
 
 template<class Ptr>
-really_inline void LinkedPtrList<Ptr>::Iterator::remove() const
+really_inline Ptr LinkedPtrList<Ptr>::Iterator::remove() const
 {
-	if(*this->prevsNext)
-		*this->prevsNext = (*this->prevsNext)->next;
+	auto ret(pet::move(*this->prevsNext));
+
+	if(ret)
+		*this->prevsNext = ret->next;
+
+	return ret;
 }
 
 template<class Element>
