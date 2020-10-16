@@ -22,6 +22,7 @@
 
 #include "meta/TypePackInfo.h"
 #include "meta/Utility.h"
+#include "meta/Resettable.h"
 
 namespace pet {
 
@@ -81,31 +82,31 @@ public:
     }
 
     template<class R>
-    R &accessAs() {
+    R *accessAs() {
         static_assert(TypePackInfo<T...>::template Position<R>::value != -1, "Can not get as non-contained type.");
         if(tag != TypePackInfo<T...>::template Position<R>::value)
-            return *static_cast<R*>(nullptr);
+            return nullptr;
 
-        return *reinterpret_cast<R*>(data);
+        return reinterpret_cast<R*>(data);
     }
 
     template<class R>
-    const R &accessAs() const {
+    const R *accessAs() const {
         static_assert(TypePackInfo<T...>::template Position<R>::value != -1, "Can not get as non-contained type.");
         if(tag != TypePackInfo<T...>::template Position<R>::value)
-            return *static_cast<const R*>(nullptr);
+            return nullptr;
 
-        return *reinterpret_cast<const R*>(data);
+        return reinterpret_cast<const R*>(data);
     }
 
     template<class R>
-    R &accessAsBase() {
-        return *reinterpret_cast<R*>((ApplyToPack<baseLink, BaseAccessors<R>::template Accessor, nopBaseLink, T...>::value)(data, tag));
+    R *accessAsBase() {
+        return reinterpret_cast<R*>((ApplyToPack<baseLink, BaseAccessors<R>::template Accessor, nopBaseLink, T...>::value)(data, tag));
     }
 
     template<class R>
-    const R &accessAsBase() const {
-        return *reinterpret_cast<const R*>((ApplyToPack<cbaseLink, BaseAccessors<R, const void*, cbaseLink>::template Accessor, cnopBaseLink, T...>::value)(data, tag));
+    const R *accessAsBase() const {
+        return reinterpret_cast<const R*>((ApplyToPack<cbaseLink, BaseAccessors<R, const void*, cbaseLink>::template Accessor, cnopBaseLink, T...>::value)(data, tag));
     }
 
     Union() = default;

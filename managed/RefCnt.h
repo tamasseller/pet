@@ -46,36 +46,41 @@ class RefCnt
 			}
     	}
 
-    	inline void release()
+    	inline void release(Target* trg)
     	{
-    		if(target && 1 == target->counter([](auto o, auto &n) { n = o - 1; return true;}))
-    			delete target;
+    		if(trg && 1 == trg->counter([](auto o, auto &n) { n = o - 1; return true;}))
+    			delete trg;
     	}
 
-		inline PtrBase() = default;
+    	really_inline void release() {
+    		release(target);
+    	}
 
-        inline PtrBase& operator =(nullptr_t) {
+    	really_inline PtrBase() = default;
+
+		really_inline PtrBase& operator =(nullptr_t) {
             *this = PtrBase();
             return *this;
         }
 
-        inline PtrBase(const PtrBase &other) {
+		really_inline PtrBase(const PtrBase &other) {
             acquire(other.target);
         }
 
-        inline PtrBase& operator =(const PtrBase &other)
+        really_inline PtrBase& operator =(const PtrBase &other)
         {
-            release();
+        	auto oldTarget = target;
             acquire(other.target);
+            release(oldTarget);
             return *this;
         }
 
-        inline PtrBase(PtrBase &&other): target(other.target) {
+        really_inline PtrBase(PtrBase &&other): target(other.target) {
         	new(&other, NewOperatorDisambiguator()) PtrBase();
         }
 
         template<class U>
-        inline PtrBase& operator =(PtrBase &&other)
+        really_inline PtrBase& operator =(PtrBase &&other)
         {
             release();
             target = other.target;
@@ -83,11 +88,11 @@ class RefCnt
             return *this;
         }
 
-        inline ~PtrBase() {
+        really_inline ~PtrBase() {
             release();
         }
 
-        inline void reset()
+        really_inline void reset()
         {
             release();
             new(this, NewOperatorDisambiguator()) PtrBase();
@@ -132,12 +137,11 @@ public:
     	}
 
     public:
-        inline Ptr() = default;
-        inline Ptr(nullptr_t): PtrBase() {}
-        inline Ptr(const PtrBase &other): PtrBase(other) {}
-        inline Ptr(PtrBase &&other): PtrBase(pet::move(other)) {}
+    	really_inline Ptr() = default;
+    	really_inline Ptr(nullptr_t): PtrBase() {}
+    	really_inline Ptr(const PtrBase &other): PtrBase(other) {}
+    	really_inline Ptr(PtrBase &&other): PtrBase(pet::move(other)) {}
 
-    	using PtrBase::PtrBase;
     	using PtrBase::operator=;
     	using PtrBase::reset;
     	using PtrBase::operator==;
@@ -164,12 +168,12 @@ public:
     }
 
     template<class T = Target, class... Args>
-    static inline Ptr<T> make(Args&&... args) {
+    really_inline static Ptr<T> make(Args&&... args) {
         return Ptr<T>::init(new (Allocator::alloc(sizeof(T)), NewOperatorDisambiguator()) T(pet::forward<Args>(args)...));
     }
 
     template<class T=Target>
-    inline Ptr<T> self() {
+    really_inline Ptr<T> self() {
         return Ptr<T>::init(static_cast<Target*>(this));
     }
 };

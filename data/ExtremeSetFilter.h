@@ -83,7 +83,7 @@ public:
 		}
 
 		size = s;
-		for(auto i = 0; i < size / 2; i++)
+		for(auto i = 0u; i < size / 2; i++)
 	        swapElement(i, size - i - 1);
 	}
 

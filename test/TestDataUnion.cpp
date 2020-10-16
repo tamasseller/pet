@@ -53,17 +53,17 @@ TEST_GROUP(Union) {};
 TEST(Union, Simple) {
     Union<int, const short, char> u('c');
 
-    CHECK(u.accessAs<char>() == 'c');
-    CHECK(&u.accessAs<const short>() == nullptr);
+    CHECK(*u.accessAs<char>() == 'c');
+    CHECK(u.accessAs<const short>() == nullptr);
 
     u.initAs<int>(1);
-    CHECK(u.accessAs<int>() == 1);
-    CHECK(&u.accessAs<char>() == nullptr);
+    CHECK(*u.accessAs<int>() == 1);
+    CHECK(u.accessAs<char>() == nullptr);
 
     u.initAs<const short>(2);
-    short x = u.accessAs<const short>();
-    CHECK(x == 2);
-    CHECK(&u.accessAs<int>() == nullptr);
+    const short *x = u.accessAs<const short>();
+    CHECK(*x == 2);
+    CHECK(u.accessAs<int>() == nullptr);
 }
 
 TEST(Union, UnionAlignment) {
@@ -80,8 +80,8 @@ TEST(Union, UnionAlignment) {
 TEST(Union, ConstUnion) {
     const Union<int, char> u(123);
 
-    CHECK(u.accessAs<int>() == 123);
-    CHECK(&u.accessAs<char>() == nullptr);
+    CHECK(*u.accessAs<int>() == 123);
+    CHECK(u.accessAs<char>() == nullptr);
 }
 
 
@@ -146,27 +146,27 @@ TEST(Union, BaseAccess)
     Union<C1, C2> u;
 
     u.initAs<C1>();
-    u.accessAs<C1>().x = 1;
-    CHECK(u.accessAsBase<Base1>().x == 1);
-    u.accessAsBase<Base1>().x = 2;
-    CHECK(u.accessAs<C1>().x = 2);
+    u.accessAs<C1>()->x = 1;
+    CHECK(u.accessAsBase<Base1>()->x == 1);
+    u.accessAsBase<Base1>()->x = 2;
+    CHECK(u.accessAs<C1>()->x == 2);
 
     u.initAs<C2>();
 
-    u.accessAs<C2>().x = 1;
-    u.accessAs<C2>().y = 2;
-    CHECK(u.accessAsBase<Base1>().x == 1);
+    u.accessAs<C2>()->x = 1;
+    u.accessAs<C2>()->y = 2;
+    CHECK(u.accessAsBase<Base1>()->x == 1);
 
     // Should produce error.
     // CHECK(u.accessAsBase<Base2>().y == 2);
 
-    u.accessAsBase<Base1>().x = 3;
+    u.accessAsBase<Base1>()->x = 3;
 
     // Should produce error.
     //u.accessAsBase<Base2>().y = 4;
 
-    CHECK(u.accessAs<C2>().x == 3);
-    CHECK(u.accessAs<C2>().y == 2);
+    CHECK(u.accessAs<C2>()->x == 3);
+    CHECK(u.accessAs<C2>()->y == 2);
 }
 
 TEST(Union, ConstBaseAccess)
@@ -178,8 +178,8 @@ TEST(Union, ConstBaseAccess)
 
     const Union<C1, C2> u(C2(1, 2));
 
-    CHECK(u.accessAs<C2>().x == 1);
-    CHECK(u.accessAs<C2>().y == 2);
-    CHECK(u.accessAsBase<Base1>().x == 1);
+    CHECK(u.accessAs<C2>()->x == 1);
+    CHECK(u.accessAs<C2>()->y == 2);
+    CHECK(u.accessAsBase<Base1>()->x == 1);
 }
 

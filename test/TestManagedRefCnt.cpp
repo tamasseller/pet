@@ -86,7 +86,7 @@ TEST(RefCnt, Sanity)
         MOCK(Target)::EXPECT(Dtor);
     }
 
-    CHECK(Allocator::count == 0);
+    CHECK(Allocator::allFreed());
 }
 
 TEST(RefCnt, CopyEq)
@@ -113,7 +113,7 @@ TEST(RefCnt, CopyEq)
         MOCK(Target)::EXPECT(Dtor);
     }
 
-    CHECK(Allocator::count == 0);
+    CHECK(Allocator::allFreed());
 }
 
 TEST(RefCnt, MoveEq)
@@ -137,7 +137,7 @@ TEST(RefCnt, MoveEq)
         MOCK(Target)::EXPECT(Dtor);
     }
 
-    CHECK(Allocator::count == 0);
+    CHECK(Allocator::allFreed());
 }
 
 TEST(RefCnt, CopyCtor)
@@ -162,7 +162,7 @@ TEST(RefCnt, CopyCtor)
         MOCK(Target)::EXPECT(Dtor);
     }
 
-    CHECK(Allocator::count == 0);
+    CHECK(Allocator::allFreed());
 }
 
 TEST(RefCnt, CopyEmpty)
@@ -176,7 +176,7 @@ TEST(RefCnt, MoveCtor)
     struct {
         inline void f(Target::Ptr<Target> &&q)
         {
-            Target::Ptr<Target> r(pet::move(q));
+            Target::Ptr<Target> r = pet::move(q);
 
             q->f();
             CHECK(Allocator::count == 1);
@@ -185,14 +185,14 @@ TEST(RefCnt, MoveCtor)
     } s;
 
     MOCK(Target)::EXPECT(Ctor).withParam(1).withParam('a');
-    auto ptr = Target::make(1, 'a');
+    Target::Ptr<Target> ptr = Target::make(1, 'a');
 
     CHECK(Allocator::count == 1);
 
     MOCK(Target)::EXPECT(f);
     s.f(pet::move(ptr));
 
-    CHECK(Allocator::count == 0);
+    CHECK(Allocator::allFreed());
 }
 
 TEST(RefCnt, Access)
