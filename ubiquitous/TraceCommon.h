@@ -39,6 +39,49 @@ enum class Level: int {
 
 /** @cond */
 
+struct LineEnding {
+	operator const char*() const {
+		return "\n";
+	}
+};
+
+static constexpr inline auto endl = LineEnding();
+
+struct CollectionStart {
+	operator const char*() const {
+		return "\t[";
+	}
+};
+
+static constexpr inline auto coll = CollectionStart();
+
+struct CollectionEnd {
+	operator const char*() const {
+		return "]";
+	}
+};
+
+static constexpr inline auto endc = CollectionEnd();
+
+struct ElementSeparator {
+	operator const char*() const {
+		return ",\t";
+	}
+};
+
+static constexpr inline auto sep = ElementSeparator();
+
+struct KeyValueSeparator {
+	operator const char*() const {
+		return ": ";
+	}
+};
+
+static constexpr inline auto val = KeyValueSeparator();
+
+
+
+
 class Global;
 
 template<class>

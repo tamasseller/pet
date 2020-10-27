@@ -111,7 +111,7 @@ struct Trace {
 			if(!cond) {
 				TraceWriter<Global>::write("Assertation failed: ");
 				TraceWriter<Global>::write(msg);
-				TraceWriter<Global>::write("\n");
+				TraceWriter<Global>::write(endl);
 			}
 		}
 	}
