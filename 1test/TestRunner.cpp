@@ -33,6 +33,7 @@ LinkedPtrList<TestPlugin*> TestRunner::plugins;
 TestInterface* TestRunner::currentTest;
 TestOutput* TestRunner::output;
 bool TestRunner::isSynthetic;
+bool TestRunner::failing;
 
 int TestRunner::runAllTests(TestOutput* output)
 {
@@ -41,22 +42,26 @@ int TestRunner::runAllTests(TestOutput* output)
 
 	for(auto it = Registry<TestInterface>::iterator(); it.current(); it.step()) {
 	    isSynthetic = false;
+	    failing = false;
 	    FailureInjector::reset();
 	    while(true) {
 	        currentTest = it.current();
 
 	        if(setjmp(jmpBuff))
-	            failed++;
-	        else {
+	        {
+	        	failed++;
+	        	failing = false;
+	        }
+	        else
+	        {
 	        	for(auto pluginIt = plugins.iterator(); pluginIt.current(); pluginIt.step())
 	        		pluginIt.current()->beforeTest();
 
 	        	currentTest->runTest();
-
 	        }
+
         	for(auto pluginIt = plugins.iterator(); pluginIt.current(); pluginIt.step())
         		pluginIt.current()->afterTest();
-
 
             output->reportProgress();
 
@@ -91,6 +96,7 @@ bool TestRunner::installPlugin(TestPlugin* plugin) {
 
 void TestRunner::failTestAlways(const char* sourceInfo, const char* text)
 {
+	failing = true;
     output->reportTestFailure(isSynthetic, currentTest->getName(), currentTest->getSourceInfo(), sourceInfo, text);
     longjmp(jmpBuff,1);
 }

@@ -35,6 +35,7 @@ class TestRunner {
 	static TestInterface* currentTest;
 	static TestOutput* output;
 	static bool isSynthetic;
+	static bool failing;
 	static LinkedPtrList<TestPlugin*> plugins;
 public:
 	static bool installPlugin(TestPlugin*);
@@ -42,6 +43,7 @@ public:
 	static int runAllTests(TestOutput* output = &TraceOutput::instance);
 	static inline TestInterface* getCurrentTest();
 
+	static inline bool isFailing() { return failing; }
     static void failTest(const char* sourceInfo, const char* text);
     static void failTestAlways(const char* sourceInfo, const char* text);
     static void checkExpectation(bool condition, const char* sourceInfo, const char* text);
