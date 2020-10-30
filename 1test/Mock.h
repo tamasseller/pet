@@ -100,14 +100,15 @@ class ExpectPool {
         inline static bool call(uintptr_t value);
 
         /**
-         * Triggers a test failure if the buffer is not empty.
-         */
-        inline static void check();
-
-        /**
          * Resets the buffer.
          */
         inline static void clear();
+
+public:
+        /**
+         * Triggers a test failure if the buffer is not empty.
+         */
+        inline static void check();
 };
 
 /**
