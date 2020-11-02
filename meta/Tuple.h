@@ -39,73 +39,74 @@ template<class T, class... Ts> struct TypeAt<0, T, Ts...> {
 template<class idx, class... T> class TupleImpl;
 
 template<int... idx, class... T>
-class TupleImpl<Sequence<idx...>, T...>: TupleWrapper<idx, T>... {
-        template<int n>
-        using Member = typename TypeAt<n, TupleWrapper<idx, T>...>::type;
+class TupleImpl<Sequence<idx...>, T...>: TupleWrapper<idx, T>...
+{
+	template<int n>
+	using Member = typename TypeAt<n, TupleWrapper<idx, T>...>::type;
 
-        template<class> friend struct TupleExtractor;
+	template<class> friend struct TupleExtractor;
 
-        typedef TupleImpl<Sequence<idx...>, removeReference<T>...> NoRefPair;
-    public:
-        template<class... Args>
-        inline TupleImpl(nullptr_t, Args&&... args): TupleWrapper<idx, T>(pet::forward<Args>(args))... {}
+	typedef TupleImpl<Sequence<idx...>, removeReference<T>...> NoRefPair;
+public:
+	template<class... Args>
+	inline TupleImpl(nullptr_t, Args&&... args): TupleWrapper<idx, T>(pet::forward<Args>(args))... {}
 
-        inline TupleImpl() = default;
-        inline TupleImpl(TupleImpl&&) = default;
-        inline TupleImpl(const TupleImpl&) = default;
+	inline TupleImpl() = default;
+	inline TupleImpl(TupleImpl&&) = default;
+	inline TupleImpl(const TupleImpl&) = default;
 
-        template<int n>
-        inline decltype(Member<n>::value) &get() {
-            return static_cast<Member<n>*>(this)->value;
-        }
+	template<int n>
+	inline decltype(Member<n>::value) &get() {
+		return static_cast<Member<n>*>(this)->value;
+	}
 
-        template<int n>
-        inline const decltype(Member<n>::value) &get() const {
-            return static_cast<const Member<n>*>(this)->value;
-        }
+	template<int n>
+	inline const decltype(Member<n>::value) &get() const {
+		return static_cast<const Member<n>*>(this)->value;
+	}
 
-        template<class Element>
-        inline void extract(Element* elements) {
-            int unused[] = {(elements[idx] = get<idx>(), 0)...};
-            (void) unused;
-        }
+	template<class Element>
+	inline void extract(Element* elements) {
+		int unused[] = {(elements[idx] = get<idx>(), 0)...};
+		(void) unused;
+	}
 
-        inline TupleImpl &operator =(const TupleImpl& other) {
-            int unused[] = {(get<idx>() = other.get<idx>(), 0)...};
-            (void) unused;
-            return *this;
-        }
+	inline TupleImpl &operator =(const TupleImpl& other) {
+		int unused[] = {(get<idx>() = other.get<idx>(), 0)...};
+		(void) unused;
+		return *this;
+	}
 
-        inline TupleImpl &operator =(TupleImpl&& other) {
-            int unused[] = {(get<idx>() = pet::move(other.get<idx>()), 0)...};
-            (void) unused;
-            return *this;
-        }
+	inline TupleImpl &operator =(TupleImpl&& other) {
+		int unused[] = {(get<idx>() = pet::move(other.get<idx>()), 0)...};
+		(void) unused;
+		return *this;
+	}
 
-        template<class = enableIf<!sameTypes<TupleImpl, NoRefPair>::value>>
-        inline TupleImpl &operator =(const NoRefPair& other) {
-            int unused[] = {(get<idx>() = other.template get<idx>(), 0)...};
-            (void) unused;
-            return *this;
-        }
+	template<class = enableIf<!sameTypes<TupleImpl, NoRefPair>::value>>
+	inline TupleImpl &operator =(const NoRefPair& other) {
+		int unused[] = {(get<idx>() = other.template get<idx>(), 0)...};
+		(void) unused;
+		return *this;
+	}
 
-        template<class C>
-        inline decltype(auto) moveApply(C&& c) &&
-        {
-            return c(pet::move(get<idx>())...);
-        }
+	template<class C>
+	inline decltype(auto) moveApply(C&& c) &&
+	{
+		return c(pet::move(get<idx>())...);
+	}
 
-        template<class C>
-        inline decltype(auto) copyApply(C&& c)
-        {
-            return c(pet::forward<T>(get<idx>())...);
-        }
+	template<class C>
+	inline decltype(auto) copyApply(C&& c)
+	{
+		return c(pet::forward<T>(get<idx>())...);
+	}
 
-        template<class... Args>
-        static inline auto create(Args&&... args)
-        {
-            return TupleImpl(nullptr, pet::forward<Args>(args)...);
-        }
+	template<class... Args>
+	static inline auto create(Args&&... args)
+	{
+		return TupleImpl(nullptr, pet::forward<Args>(args)...);
+	}
 };
 
 }

@@ -37,14 +37,14 @@ class MutableStorage {
             return r;
         }
 
-        template<class... C> Hax(C... c): data(c...) {}
+        template<class... C> Hax(C... c): data(forward<C>(c)...) {}
     };
 
 public:
     template<class Type, class... C>
     inline Type* construct(C... c) {
     	static_assert(TypePackInfo<HeldTypes...>::template Position<Type>::value != -1, "Unfamiliar type requested");
-    	auto obj = new(data) Hax<Type>(c...);
+    	auto obj = new(data) Hax<Type>(forward<C>(c)...);
     	return &obj->data;
     }
 
