@@ -24,16 +24,19 @@
 
 #if defined(PET_COMPILER_IS_MSVC) && defined(PET_TARGET_IS_PC)
 
-
 #include "msvc-x86-64/Atomic.h"
 
 #elif defined(PET_COMPILER_IS_GCC) && defined(PET_TARGET_IS_PC)
 
 #include "gcc-x86-64/Atomic.h"
 
-#elif defined(PET_COMPILER_IS_GCC) && (defined(PET_TARGET_IS_CM0) ||  defined(PET_TARGET_IS_CM3) || defined(PET_TARGET_IS_CM4))
+#elif defined(PET_COMPILER_IS_GCC) && (defined(PET_TARGET_IS_CM0))
 
 #include "gcc-cortex-m0/Atomic.h"
+
+#elif defined(PET_COMPILER_IS_GCC) && defined(PET_TARGET_IS_CM3) || defined(PET_TARGET_IS_CM4)
+
+#include "gcc-cortex-m3m4/Atomic.h"
 
 #endif
 
