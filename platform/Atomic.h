@@ -32,11 +32,11 @@
 
 #elif defined(PET_COMPILER_IS_GCC) && (defined(PET_TARGET_IS_CM0))
 
-#include "gcc-cortex-m0/Atomic.h"
+#include "gcc-armv6m/Atomic.h"
 
 #elif defined(PET_COMPILER_IS_GCC) && defined(PET_TARGET_IS_CM3) || defined(PET_TARGET_IS_CM4)
 
-#include "gcc-cortex-m3m4/Atomic.h"
+#include "gcc-armv7m/Atomic.h"
 
 #endif
 

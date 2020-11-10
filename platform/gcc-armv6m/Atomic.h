@@ -20,7 +20,7 @@
 #ifndef ATOMIC_IMPL_H_
 #define ATOMIC_IMPL_H_
 
-#include "../gcc-cortex-common/AtomicCommon.h"
+#include "../gcc-arm-common/AtomicCommon.h"
 
 #include <stdint.h>
 
@@ -30,7 +30,7 @@ namespace detail {
 
 extern volatile bool exclusiveMonitor;
 
-template<int Size> struct StoreExclusiveImpl;
+template<int Size> struct ExclusiveAccessImpl;
 
 #define __STREX_IMPL_ASM(W)												       \
 	uintptr_t temp = 0; 												       \
@@ -53,21 +53,21 @@ template<int Size> struct StoreExclusiveImpl;
 		);																	   \
 		return ret;
 
-template<> struct StoreExclusiveImpl<4> {
+template<> struct ExclusiveAccessImpl<4> {
 	template<class Value> static inline bool work(volatile Value* addr, Value in) {
 		static_assert(sizeof(Value) == 4, "wrong atomic access width");
 		__STREX_IMPL_ASM("")
 	}
 };
 
-template<> struct StoreExclusiveImpl<2> {
+template<> struct ExclusiveAccessImpl<2> {
 	template<class Value> static inline bool work(volatile Value* addr, Value in) {
 		static_assert(sizeof(Value) == 2, "wrong atomic access width");
 		__STREX_IMPL_ASM("h")
 	}
 };
 
-template<> struct StoreExclusiveImpl<1> {
+template<> struct ExclusiveAccessImpl<1> {
 	template<class Value> static inline bool work(volatile Value* addr, Value in) {
 		static_assert(sizeof(Value) == 1, "wrong atomic access width");
 		__STREX_IMPL_ASM("b")
@@ -78,7 +78,7 @@ template<> struct StoreExclusiveImpl<1> {
 
 template<class Value>
 inline bool storeExclusive(volatile Value* addr, Value in) {
-	return StoreExclusiveImpl<(int)sizeof(Value)>::work(addr, in);
+	return ExclusiveAccessImpl<(int)sizeof(Value)>::work(addr, in);
 }
 
 template<class Value>
