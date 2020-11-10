@@ -162,7 +162,7 @@ public:
 	/**
 	 * Remove all elements.
 	 */
-	inline bool isEmpty() const;
+	inline bool isEmpty() const volatile ;
 
 	/**
 	 * Get an all through iterator.
@@ -239,7 +239,7 @@ inline void LinkedPtrList<Ptr>::clear() {
 }
 
 template<class Ptr>
-inline bool LinkedPtrList<Ptr>::isEmpty() const {
+inline bool LinkedPtrList<Ptr>::isEmpty() const volatile {
 	return first == nullptr;
 }
 

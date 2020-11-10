@@ -107,13 +107,13 @@ template<> struct ExclusiveAccessImpl<1>
 template<class Value>
 inline bool storeExclusive(volatile Value* addr, Value in)
 {
-	return ExclusiveAccessImpl<(int)sizeof(Value)>::store<Value>(addr, in);
+	return ExclusiveAccessImpl<(int)sizeof(Value)>::template store<Value>(addr, in);
 }
 
 template<class Value>
 inline Value loadExclusive(volatile Value* addr)
 {
-	return ExclusiveAccessImpl<(int)sizeof(Value)>::load<Value>(addr);
+	return ExclusiveAccessImpl<(int)sizeof(Value)>::template load<Value>(addr);
 }
 
 inline void clearExclusive()
