@@ -1,0 +1,1 @@
+for i in $(find . -name '*.cpp' -o -name '*.h'); do grep 'All rights reserved' $i >/dev/null || echo $i; done
