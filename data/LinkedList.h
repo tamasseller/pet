@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * Copyright (c) 2016, 2017 Seller Tamás. All rights reserved.
+ * Copyright (c) 2016, 2017 Tamás Seller. All rights reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -162,7 +162,7 @@ public:
 	/**
 	 * Remove all elements.
 	 */
-	inline bool isEmpty() const;
+	inline bool isEmpty() const volatile ;
 
 	/**
 	 * Get an all through iterator.
@@ -239,7 +239,7 @@ inline void LinkedPtrList<Ptr>::clear() {
 }
 
 template<class Ptr>
-inline bool LinkedPtrList<Ptr>::isEmpty() const {
+inline bool LinkedPtrList<Ptr>::isEmpty() const volatile {
 	return first == nullptr;
 }
 
