@@ -27,24 +27,24 @@
 #include "Macro.h"
 
 #if defined (__GNUC__) && !defined(__ECLIPSE__)
-#define TEST(...)                   VAR_ARG_MACRO(TEST, ##__VA_ARGS__)
-#define BEGIN_TEST_CASE(...)        VAR_ARG_MACRO(BEGIN_SPLIT, ##__VA_ARGS__)
-#define IGNORE_TEST(...)            VAR_ARG_MACRO(IGNORE_TEST, ##__VA_ARGS__)
+#define TEST(...)                       VAR_ARG_MACRO(TEST, ##__VA_ARGS__)
+#define BEGIN_TEST_CASE(...)            VAR_ARG_MACRO(BEGIN_SPLIT, ##__VA_ARGS__)
+#define IGNORE_TEST(...)                VAR_ARG_MACRO(IGNORE_TEST, ##__VA_ARGS__)
 #else
-#define TEST(group, name)           TEST2(group, name)
-#define BEGIN_TEST(group, name)     TEST_TEMPLATE2(group, name)
-#define IGNORE_TEST(group, name)    IGNORE_TEST2(group, name)
+#define TEST(group, name)               TEST2(group, name)
+#define BEGIN_TEST_CASE(group, name)    BEGIN_SPLIT2(group, name)
+#define IGNORE_TEST(group, name)        IGNORE_TEST2(group, name)
 #endif
 
-#define FAIL(text)                  pet::TestRunner::failTest(INTERNAL_AT(), text)
-#define FAIL_ALWAYS(text)           pet::TestRunner::failTestAlways(INTERNAL_AT(), text)
+#define FAIL(text)                      pet::TestRunner::failTest(INTERNAL_AT(), text)
+#define FAIL_ALWAYS(text)               pet::TestRunner::failTestAlways(INTERNAL_AT(), text)
 
-#define CHECK_FAIL_TEXT(...)        ("Expectation: '" INTERNAL_STRINGIFY(__VA_ARGS__) "' failed")
-#define CHECK(...)                  pet::TestRunner::checkExpectation((__VA_ARGS__), INTERNAL_AT(), CHECK_FAIL_TEXT(__VA_ARGS__))
-#define CHECK_ALWAYS(...)           pet::TestRunner::checkExpectationAlways((__VA_ARGS__), INTERNAL_AT(), CHECK_FAIL_TEXT(__VA_ARGS__))
+#define CHECK_FAIL_TEXT(...)            ("Expectation: '" INTERNAL_STRINGIFY(__VA_ARGS__) "' failed")
+#define CHECK(...)                      pet::TestRunner::checkExpectation((__VA_ARGS__), INTERNAL_AT(), CHECK_FAIL_TEXT(__VA_ARGS__))
+#define CHECK_ALWAYS(...)               pet::TestRunner::checkExpectationAlways((__VA_ARGS__), INTERNAL_AT(), CHECK_FAIL_TEXT(__VA_ARGS__))
 
-#define TEST_SETUP()                inline void testSetup()
-#define TEST_TEARDOWN()             inline void testTeardown()
+#define TEST_SETUP()                    inline void testSetup()
+#define TEST_TEARDOWN()                 inline void testTeardown()
 
 #define TEST_GROUP(name)                                                                \
 struct INTERNAL_TEST_GROUP_NAME(name): public pet::TestGroupBase
