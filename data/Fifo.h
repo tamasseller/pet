@@ -336,7 +336,8 @@ public:
 	 */
 	inline uint16_t nextWritable(DataType* &buff)
 	{
-		uint16_t idx, ret = this->nextWritableIdx(idx);
+		uint16_t idx = 0;
+		uint16_t ret = this->nextWritableIdx(idx);
 		buff = static_cast<Child*>(this)->getBuffer() + idx;
 		return ret;
 	}
