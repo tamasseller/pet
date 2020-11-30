@@ -216,11 +216,13 @@ class BuddyAllocator
         return reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(ptr) & ~(nBytes - 1));
     }
 
-    inline bool size2level(uint32_t size, uint32_t &level)
+    inline bool size2level(uint32_t &size, uint32_t &level)
     {
         auto sBits = 32 - clz(size - 1);
 
         auto invLevel = (sBits <= minBlockSizeLog) ? 0 : sBits - minBlockSizeLog;
+
+        size = 1 << (invLevel + minBlockSizeLog);
 
         if(invLevel > maxLevel)
             return false;
@@ -229,8 +231,7 @@ class BuddyAllocator
         return true;
     }
 
-public:
-    inline bool init(void* start, void* end)
+    inline bool initStartAndMaxLevel(void* start, void* end, uint32_t &nNodeWords)
     {
         // Sanity check
     	auto aligned = align(start, 1 << maxAlignBits);
@@ -247,15 +248,38 @@ public:
         if(sBits <= minBlockSizeLog)
             return false;
 
-        maxLevel = sBits - minBlockSizeLog;
+        this->maxLevel = sBits - minBlockSizeLog;
         auto nNodeCount = 1 << (maxLevel + 1);
-        auto nNodeWords = (nNodeCount + nCellsPerWord - 1) / nCellsPerWord;
+        nNodeWords = (nNodeCount + nCellsPerWord - 1) / nCellsPerWord;
+        return true;
+    }
 
-        tree = reinterpret_cast<decltype(tree)>(align(e - nNodeWords * nBytesPerWord, nBytesPerWord));
+public:
+    static inline int minimalTreeSize(size_t size)
+    {
+    	const auto sBits = 31 - clz(size);
+
+        if(sBits <= minBlockSizeLog)
+            return -1;
+
+        const auto maxLevel = sBits - minBlockSizeLog;
+        const auto nNodeCount = 1 << (maxLevel + 1);
+        return (nNodeCount + nCellsPerWord - 1) / nCellsPerWord * nBytesPerWord;
+    }
+
+    inline bool init(void* start, void* end)
+    {
+    	uint32_t nNodeWords;
+
+    	if(!initStartAndMaxLevel(start, end, nNodeWords))
+    		return false;
+
+    	auto *e = reinterpret_cast<char*>(end);
+    	this->tree = reinterpret_cast<decltype(tree)>(align(e - nNodeWords * nBytesPerWord, nBytesPerWord));
         this->end = reinterpret_cast<decltype(this->end)>(align(tree, minBlockSize));
 
         for(int i = 0; i < nNodeWords; i++)
-            tree[i] = 0;
+        	this->tree[i] = 0;
 
         for(auto p = static_cast<char*>(this->end); p < end; p += minBlockSize)
             indicateUsed(ptr2idx(p));
@@ -263,13 +287,33 @@ public:
         return true;
     }
 
-    inline void* allocate(uint32_t x)
+    inline bool init(void* start, void* end, void* treeStart, size_t treeSize)
     {
-        if(x)
+    	uint32_t nNodeWords;
+
+		if(!initStartAndMaxLevel(start, end, nNodeWords))
+			return false;
+
+		if(treeSize < nNodeWords * nBytesPerWord)
+			return false;
+
+		this->tree = reinterpret_cast<decltype(tree)>(treeStart);
+        this->end = reinterpret_cast<decltype(this->end)>(align(end, minBlockSize));
+
+        for(int i = 0; i < nNodeWords; i++)
+            this->tree[i] = 0;
+
+        return true;
+    }
+
+    inline void* allocate(uint32_t requested, uint32_t &actual)
+    {
+        if(requested)
         {
             uint32_t searchLevel;
 
-            if(!size2level(x, searchLevel))
+            actual = requested;
+            if(!size2level(actual, searchLevel))
                 return nullptr;
 
             auto searchStart = baseIdx(searchLevel);
@@ -295,6 +339,12 @@ public:
         return nullptr;
     }
 
+    inline void* allocate(uint32_t requested)
+    {
+    	uint32_t _;
+    	return allocate(requested, _);
+    }
+
     inline void free(void* ptr)
     {
         if(auto idx = findActual(ptr))
@@ -307,11 +357,12 @@ public:
         }
     }
 
-    inline bool adjust(void* ptr, uint32_t x)
+    inline bool adjust(void* ptr, uint32_t requested, uint32_t &actual)
     {
         uint32_t newLevel;
 
-        if(size2level(x, newLevel))
+        actual = requested;
+        if(size2level(requested, newLevel))
         {
             if(auto idx = findActual(ptr))
             {
@@ -349,6 +400,12 @@ public:
         }
 
         return false;
+    }
+
+    inline bool adjust(void* ptr, uint32_t requested)
+    {
+        uint32_t _;
+        return adjust(ptr, requested, _);
     }
 };
 

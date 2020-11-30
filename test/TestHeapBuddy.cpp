@@ -19,9 +19,11 @@
 
 #include "heap/Buddy.h"
 
+#include "algorithm/Math.h"
+
 #include "1test/Test.h"
 
-TEST_GROUP(Buddy)
+TEST_GROUP(BuddyInline)
 {
     static constexpr auto size = 16;
     uint32_t mem[size];
@@ -30,9 +32,9 @@ TEST_GROUP(Buddy)
 
     bool isUnique(void** ptrs, size_t n)
     {
-        for(int i = 1; i <= n; i++)
+        for(int i = 1; i < n; i++)
         {
-            for(int j = 0; j<j; j++)
+            for(int j = 0; j < i; j++)
             {
                 if(ptrs[i] == ptrs[j])
                     return false;
@@ -40,11 +42,6 @@ TEST_GROUP(Buddy)
         }
 
         return true;
-    }
-
-    template<size_t N>
-    bool isUnique(void* (&ptrs)[N]) {
-        return isUnique(ptrs, N);
     }
 
     void steppingShuffle(int size)
@@ -69,25 +66,72 @@ TEST_GROUP(Buddy)
                 CHECK(ptrs[i]);
             }
 
-            CHECK(isUnique(ptrs));
+            CHECK(isUnique(ptrs, p - ptrs));
         }
+    }
+
+    void runRandomStress(uint32_t sizeMult = 1)
+    {
+    	void* ptrs[1024];
+    	int idx = 0;
+    	int a = 1, b = 1;
+
+    	for(int round = 0; round < 1000; round++)
+    	{
+    	    while(true)
+    	    {
+    	        auto size = a;
+    	        size = (a + b) % 31;
+    	        b = a;
+    	        a = size;
+    	        size *= sizeMult;
+
+    	        CHECK(idx < sizeof(ptrs)/sizeof(*ptrs));
+
+    	        uint32_t actual;
+    	        if(auto x = uut.allocate(size, actual))
+    	        {
+    	        	CHECK(size <= actual && actual < pet::max(2 * size, 4 + 1));
+    	        	ptrs[idx++] = x;
+    	        }
+    	        else
+    	        {
+    	        	break;
+    	        }
+    	    }
+
+            for(int i = 1; i < idx; i++)
+                for(int j = 0; j < i; j++)
+                    CHECK(ptrs[i] != ptrs[j]);
+
+    	    const auto nFree = idx / 2;
+    	    for(int i = 0; i < nFree; i++)
+    	        uut.free(ptrs[--idx]);
+    	}
     }
 };
 
-TEST(Buddy, Abuse)
+TEST(BuddyInline, Abuse)
 {
-    CHECK(!uut.init(mem, mem));
+    CHECK(decltype(uut)::minimalTreeSize(1) == -1);
+
+	CHECK(!uut.init(mem, mem));
     CHECK(!uut.init(mem, mem - size));
 
+    CHECK(!uut.init(mem, mem + 1, nullptr, 0));
+    CHECK(!uut.init(mem, mem + size, nullptr, 0));
     CHECK(uut.init(mem, mem + size));
     uut.free(nullptr);
 
     CHECK(!uut.allocate(10000000));
 
-    CHECK(uut.allocate(1));
+    auto x = uut.allocate(1);
+    CHECK(x);
+    CHECK(!uut.adjust(x, 100000000));
+    CHECK(uut.adjust(x, 1));
 }
 
-TEST(Buddy, Sanity)
+TEST(BuddyInline, Sanity)
 {
     CHECK(uut.init(mem, mem + size));
 
@@ -97,20 +141,19 @@ TEST(Buddy, Sanity)
     uut.free(x);
 }
 
-TEST(Buddy, AllSmallsSteppingShuffle)
+TEST(BuddyInline, AllSmallsSteppingShuffle)
 {
     CHECK(uut.init(mem, mem + size));
     steppingShuffle(1);
 }
 
-TEST(Buddy, AllBiggerSteppingShuffle)
+TEST(BuddyInline, AllBiggerSteppingShuffle)
 {
     CHECK(uut.init(mem, mem + size));
     steppingShuffle(8);
 }
 
-
-TEST(Buddy, PassBigger)
+TEST(BuddyInline, PassBigger)
 {
     for(int small = 4; small < 8; small <<= 1)
     {
@@ -125,40 +168,52 @@ TEST(Buddy, PassBigger)
     }
 }
 
-TEST(Buddy, RandomStress)
+TEST(BuddyInline, RandomStress)
 {
-    void* ptrs[1024];
-    int idx = 0;
-    int a = 1, b = 1;
-
-    CHECK(uut.init(mem, mem + size));
-
-    for(int round = 0; round < 1000; round++)
-    {
-        while(true)
-        {
-            auto size = a;
-            size = (a + b) % 31;
-            b = a;
-            a = size;
-
-            CHECK(idx < sizeof(ptrs)/sizeof(*ptrs));
-
-            if(auto x = uut.allocate(size))
-                ptrs[idx++] = x;
-            else
-                break;
-        }
-
-        CHECK(isUnique(ptrs, idx));
-
-        const auto nFree = idx / 2;
-        for(int i = 0; i < nFree; i++)
-            uut.free(ptrs[--idx]);
-    }
+	CHECK(uut.init(mem, mem + size));
+	runRandomStress();
 }
 
-TEST(Buddy, Grow)
+TEST(BuddyInline, RandomStressOffline)
+{
+	char offlineTree[16];
+	CHECK(uut.init(mem, mem + size, offlineTree, sizeof(offlineTree)));
+	runRandomStress();
+}
+
+TEST(BuddyInline, AllocateAllOffline)
+{
+	char offlineTree[16];
+
+	auto minTree = decltype(uut)::minimalTreeSize(sizeof(mem));
+	CHECK(sizeof(offlineTree) > minTree);
+	CHECK(!uut.init(mem, mem + size, offlineTree, minTree - 1));
+	CHECK(uut.init(mem, mem + size, offlineTree, minTree));
+
+	auto x = uut.allocate(sizeof(mem));
+	CHECK(x);
+	CHECK(!uut.allocate(1));
+	uut.free(x);
+	CHECK(uut.allocate(size));
+}
+
+TEST(BuddyInline, RandomStressOfflineBigData)
+{
+	char bigData[16 * 1024];
+	char offlineTree[2050];
+
+	auto minTree = decltype(uut)::minimalTreeSize(sizeof(bigData));
+	CHECK(sizeof(offlineTree) > minTree);
+	CHECK(!uut.init(bigData, bigData + sizeof(bigData), offlineTree, minTree - 1));
+	CHECK(uut.init(bigData, bigData + sizeof(bigData), offlineTree, minTree));
+
+	for(int i = minTree; i < sizeof(offlineTree); i++)
+		offlineTree[i] ^= 0xaa;
+
+	runRandomStress();
+}
+
+TEST(BuddyInline, Grow)
 {
     CHECK(uut.init(mem, mem + size));
     auto x = uut.allocate(4);
@@ -183,7 +238,7 @@ TEST(Buddy, Grow)
     CHECK(!uut.allocate(1));
 }
 
-TEST(Buddy, Shrink)
+TEST(BuddyInline, Shrink)
 {
     CHECK(uut.init(mem, mem + size));
     auto x = uut.allocate(32);
@@ -211,7 +266,7 @@ TEST(Buddy, Shrink)
     CHECK(!uut.allocate(1));
 }
 
-TEST(Buddy, GrowAndShrink)
+TEST(BuddyInline, GrowAndShrink)
 {
     CHECK(uut.init(mem, mem + size));
     auto x = uut.allocate(16);
