@@ -345,15 +345,16 @@ public:
     	return allocate(requested, _);
     }
 
-    inline void free(void* ptr)
+    inline bool free(void* ptr)
     {
         if(auto idx = findActual(ptr))
         {
             indicateUnused(idx);
+            return true;
         }
         else
         {
-            // TODO report error
+            return false;
         }
     }
 
