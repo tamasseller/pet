@@ -23,6 +23,8 @@
 #include "meta/Utility.h"
 #include "meta/Resettable.h"
 
+#include <stdint.h>
+
 namespace pet
 {
 
