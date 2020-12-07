@@ -2,11 +2,14 @@ OUTPUT = pet-test
 
 # Test code
 
+
+
 SOURCES += TestAlgoCharLookup.cpp
 SOURCES += TestAlgoCharTraits.cpp
 SOURCES += TestAlgoStr.cpp
 SOURCES += TestAlgoMinMaxHeap.cpp
 SOURCES += TestAlgoIntegerDivision.cpp
+SOURCES += TestAlgoUnalignedAccess.cpp
 SOURCES += TestDataExtremeSetFilter.cpp
 SOURCES += TestDataFifo.cpp
 SOURCES += TestDataUnion.cpp
