@@ -106,7 +106,7 @@ struct Trace {
 	 * If not specified explicitly the level defaults to Level::Failure.
 	 */
 	template<Level level=Level::Failure>
-	static inline void assert(bool cond, const char* msg = "unspecified") {
+	static inline void assertThat(bool cond, const char* msg = "unspecified") {
 		if(level >= TracePolicy<Tag>::level) {
 			if(!cond) {
 				TraceWriter<Global>::write("Assertation failed: ");
