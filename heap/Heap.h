@@ -531,7 +531,7 @@ inline pet::FailPointer<void> Heap<Policy, SizeType, alignmentBits, useChecksum>
     	return 0;
     }
 
-	assert(ret.checkChecksum(), "Heap corruption");
+	assertThat(ret.checkChecksum(), "Heap corruption");
 
 	if(canSplit(ret, size)) {
 	    Block leftover(ret.split(size));
@@ -545,17 +545,17 @@ inline pet::FailPointer<void> Heap<Policy, SizeType, alignmentBits, useChecksum>
 	ret.setFree(false);
 	ret.updateChecksum();
 
-    assert(ret.getSize() >= size, "Heap corruption");
+    assertThat(ret.getSize() >= size, "Heap corruption");
     return ret.ptr;
 }
 
 template<class Policy, class SizeType, unsigned int alignmentBits, bool useChecksum>
 inline void Heap<Policy, SizeType, alignmentBits, useChecksum>::free(void* r) {
-	assert(r, "Heap::free(): Invalid argument\n");
+	assertThat(r, "Heap::free(): Invalid argument\n");
 
     Block block(r);
-	assert(block.checkChecksum(), "Heap corruption");
-	assert(!block.isFree(), "Heap corruption (probably double free)");
+	assertThat(block.checkChecksum(), "Heap corruption");
+	assertThat(!block.isFree(), "Heap corruption (probably double free)");
 
 	info << "Heap::free(" <<  r << "): " << decode(block.getSize()) << " freed\n";
 
@@ -564,13 +564,13 @@ inline void Heap<Policy, SizeType, alignmentBits, useChecksum>::free(void* r) {
 
     if(prevFree) {
         Block prev(block.getPrev());
-        assert(prev.checkChecksum(), "Heap corruption");
+        assertThat(prev.checkChecksum(), "Heap corruption");
         unsigned int oldSize = prev.getSize();
 
         if(nextFree) {
         	Block next(block.getNext());
 
-        	assert(next.checkChecksum(), "Heap corruption");
+        	assertThat(next.checkChecksum(), "Heap corruption");
 
             Policy::remove(next);
 
@@ -578,7 +578,7 @@ inline void Heap<Policy, SizeType, alignmentBits, useChecksum>::free(void* r) {
         	prev.updateNext(end);
         } else {
         	if(block.hasNext(end))
-        		assert(block.getNext().checkChecksum(), "Heap corruption");
+        		assertThat(block.getNext().checkChecksum(), "Heap corruption");
 
         	prev.merge(block);
         	prev.updateNext(end);
@@ -590,7 +590,7 @@ inline void Heap<Policy, SizeType, alignmentBits, useChecksum>::free(void* r) {
 
         if(nextFree) {
         	Block next(block.getNext());
-        	assert(next.checkChecksum(), "Heap corruption");
+        	assertThat(next.checkChecksum(), "Heap corruption");
             Policy::remove(next);
 
         	block.merge(next);
@@ -605,11 +605,11 @@ inline void Heap<Policy, SizeType, alignmentBits, useChecksum>::free(void* r) {
 template<class Policy, class SizeType, unsigned int alignmentBits, bool useChecksum>
 inline unsigned int Heap<Policy, SizeType, alignmentBits, useChecksum>::shrink(void* ptr, unsigned int shrunkSizeParam)
 {
-	assert(ptr, "Heap::shrink(): Null argument\n");
+	assertThat(ptr, "Heap::shrink(): Null argument\n");
 	info << "Heap::shrink(" <<  ptr << "): ";
 
     Block block(ptr);
-    assert(block.checkChecksum(), "Heap corruption");
+    assertThat(block.checkChecksum(), "Heap corruption");
 
 	unsigned int oldSize = decode(block.getSize());
 
@@ -632,7 +632,7 @@ inline unsigned int Heap<Policy, SizeType, alignmentBits, useChecksum>::shrink(v
 
 	    if(leftover.hasNext(end)) {
         	Block next(leftover.getNext());
-        	assert(next.checkChecksum(), "Heap corruption");
+        	assertThat(next.checkChecksum(), "Heap corruption");
 
 	    	if(next.isFree()) {
 				Policy::remove(next);

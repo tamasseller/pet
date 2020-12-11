@@ -432,8 +432,8 @@ bool TlsfPolicy<SizeType, alignmentBits>::Index::Entry::operator !=(const Entry&
 template <class SizeType, unsigned int alignmentBits>
 inline typename TlsfPolicy<SizeType, alignmentBits>::FreeList&
 TlsfPolicy<SizeType, alignmentBits>::Index::getListFor(const Entry &index){
-	AllHeapsTrace::assert(index.sl < 16);
-	AllHeapsTrace::assert(index.fl < 16);
+	AllHeapsTrace::assertThat(index.sl < 16);
+	AllHeapsTrace::assertThat(index.fl < 16);
 	return blocks[index.sl + index.fl*16];
 }
 

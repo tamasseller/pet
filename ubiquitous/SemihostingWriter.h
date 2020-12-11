@@ -38,7 +38,7 @@ namespace pet {
  */
 
 class SemihostingWriter {
-	static constexpr auto bufferSize = 1024u;
+	static constexpr auto bufferSize = 4 * 1024u;
 	static constexpr bool flushOnNewline = false;
 	static char buffer[bufferSize];
 

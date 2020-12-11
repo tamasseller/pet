@@ -37,11 +37,11 @@ struct TestBase {
 	}
 
 	void testAssert() {
-		Client::assert(true);
-		Client::assert(false);
-		Client::assert(true, "foo");
-		Client::assert(false, "bar");
-		Client::template assert<pet::Level::Warning>(false, "foobar");
+		Client::assertThat(true);
+		Client::assertThat(false);
+		Client::assertThat(true, "foo");
+		Client::assertThat(false, "bar");
+		Client::template assertThat<pet::Level::Warning>(false, "foobar");
 	}
 };
 

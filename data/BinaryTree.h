@@ -286,7 +286,7 @@ inline void BinaryTree::Iterator::step()
 			if(currentNode->small == prev)
 				break;
 
-            BinaryTreeTrace::assert(currentNode->big == prev);
+            BinaryTreeTrace::assertThat(currentNode->big == prev);
         }
     }
 }
