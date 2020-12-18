@@ -73,5 +73,4 @@ struct FailableAllocator: public Allocator {
 	}
 };
 
-
 #endif /* MOCKALLOCATOR_H_ */

@@ -42,7 +42,9 @@ class RefCnt
     	{
 			if((target = newTarget) != nullptr)
 			{
-			   target->counter([](auto o, auto &n) { n = o + 1; return true;});
+				Allocator::traceReferenceAcquistion(this, newTarget);
+
+	    		target->counter([](auto o, auto &n) { n = o + 1; return true;});
 			}
     	}
 
@@ -52,14 +54,15 @@ class RefCnt
     			delete trg;
     	}
 
-    	really_inline void release() {
-    		release(target);
-    	}
-
     	really_inline PtrBase() = default;
 
-		really_inline PtrBase& operator =(nullptr_t) {
-            *this = PtrBase();
+		really_inline PtrBase& operator =(nullptr_t)
+		{
+        	if(target)
+        		Allocator::traceReferenceRelease(this, target);
+
+            release(target);
+			target = nullptr;
             return *this;
         }
 
@@ -69,33 +72,57 @@ class RefCnt
 
         really_inline PtrBase& operator =(const PtrBase &other)
         {
+        	if(target)
+        		Allocator::traceReferenceRelease(this, target);
+
         	auto oldTarget = target;
             acquire(other.target);
+
             release(oldTarget);
             return *this;
         }
 
-        really_inline PtrBase(PtrBase &&other): target(other.target) {
-        	new(&other, NewOperatorDisambiguator()) PtrBase();
+        really_inline PtrBase(PtrBase &&other): target(other.target)
+        {
+        	if(target)
+        	{
+        		Allocator::traceReferenceRelease(&other, target);
+        		Allocator::traceReferenceAcquistion(this, target);
+        	}
+
+        	other.target = nullptr;
         }
 
         template<class U>
         really_inline PtrBase& operator =(PtrBase &&other)
         {
-            release();
-            target = other.target;
-            new(&other, NewOperatorDisambiguator()) Ptr<U>();
+        	if(target)
+        		Allocator::traceReferenceRelease(this, target);
+
+        	auto oldTarget = target;
+        	target = other.target;
+            release(oldTarget);
+
+        	if(target)
+        	{
+        		Allocator::traceReferenceRelease(&other, target);
+        		Allocator::traceReferenceAcquistion(this, target);
+        	}
+
+        	other.target = nullptr;
             return *this;
         }
 
-        really_inline ~PtrBase() {
-            release();
+        really_inline ~PtrBase()
+        {
+        	if(target)
+        		Allocator::traceReferenceRelease(this, target);
+
+            release(target);
         }
 
-        really_inline void reset()
-        {
-            release();
-            new(this, NewOperatorDisambiguator()) PtrBase();
+        really_inline void reset() {
+            *this = nullptr;
         }
 
         really_inline bool operator ==(const PtrBase& o) const {

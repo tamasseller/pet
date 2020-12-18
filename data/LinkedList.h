@@ -204,7 +204,7 @@ inline bool LinkedPtrList<Ptr>::add(Ptr elem)
 		if(it.current() == elem)
 			return false;
 
-	iterator().insert(elem);
+	iterator().insert(pet::move(elem));
 	return true;
 }
 
@@ -216,7 +216,7 @@ inline bool LinkedPtrList<Ptr>::addBack(Ptr elem)
 		if(it.current() == elem)
 			return false;
 
-	it.insert(elem);
+	it.insert(pet::move(elem));
 	return true;
 }
 
