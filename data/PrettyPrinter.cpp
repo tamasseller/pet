@@ -32,10 +32,12 @@ class listIterator:
         return self
 
     def __next__(self):
-        if self.ptr == 0:
+
+        if self.ptr == gdb.Value(0).cast(it.type):
             raise StopIteration
-        count, val = self.count, self.ptr.dereference()
-        self.count, self.ptr = count + 1, val["next"]
+
+        count, val = self.count, gdb.Value(gdb.parse_and_eval("(*(('"+self.ptr.type.name+"'*)("+str(self.ptr.address)+")))->next")).cast(self.ptr.type)
+        self.count, self.ptr = count + 1, val
         return ('[%d]' % count, val)
 
 class linkedListPrinter:
@@ -51,9 +53,11 @@ class linkedListPrinter:
     def to_string (self):
         n = 0
         it = self.val["first"]
-        while it != 0:
+
+        while it != gdb.Value(0).cast(it.type):
             n = n + 1
-            it = it["next"]
+            it = gdb.Value(gdb.parse_and_eval("(*(('"+it.type.name+"'*)("+str(it.address)+")))->next")).cast(it.type)
+
         return "list with " + str(n) + " elements"
 
 class unionPrinter:
@@ -84,11 +88,26 @@ class smartPtrPrinter:
         if target == 0:
             return "null"
         
-        return "target=" + str(target) + " [reference count:" + str(target.dereference()["counter"]["data"]) + "]"
+        return "(" + self.val.type.template_argument(0).name + "*) " + str(target) + " [reference count:" + str(target.dereference()["counter"]["data"]) + "]"
+
+class listIteratorPrinter:
+    def __init__(self, val):
+        self.val = val
+	
+    def display_hint(self):
+        return None
+
+    def to_string (self):
+        pnx=self.val["prevsNext"]
+        if pnx == 0:
+            return "<after-the-end>"
+        
+        return str(pnx.dereference())
 
 pp = gdb.printing.RegexpCollectionPrettyPrinter("pet")
-pp.add_printer('LinkedList', '^pet::LinkedPtrList.*$', linkedListPrinter)
-pp.add_printer('DoubleList', '^pet::DoubleList.*$', linkedListPrinter)
+pp.add_printer('LinkedList', '^pet::LinkedPtrList<.*>$', linkedListPrinter)
+pp.add_printer('LinkedListIterator', '^pet::LinkedPtrList<.*>::Iterator$', listIteratorPrinter)
+pp.add_printer('DoubleList', '^pet::DoubleList<.*>$', linkedListPrinter)
 pp.add_printer('Union', '^pet::Union.*$', unionPrinter)
 pp.add_printer('RefCnt', '^pet::RefCnt.*::Ptr.*$', smartPtrPrinter)
 gdb.printing.register_pretty_printer(gdb.current_objfile(), pp)
@@ -119,6 +138,30 @@ class linkedListIndexerMatcher(gdb.xmethod.XMethodMatcher):
         if re.match('pet::DoubleList<[ \t\n]*[_a-zA-Z][ :_a-zA-Z0-9]*>', class_type.tag) and method_name == 'operator[]':
             return linkedListIndexerWorker(class_type)
 
-gdb.xmethod.register_xmethod_matcher(None, linkedListIndexerMatcher())
+gdb.xmethod.register_xmethod_matcher(None, linkedListIndexerMatcher(), True)
+
+class refCntPtrDereferenceWorker(gdb.xmethod.XMethodWorker):
+    def __init__(self, class_type):
+        self.class_type = class_type
+        self.target_type = class_type.template_argument(0)
+
+    def get_arg_types(self):
+        return []
+
+    def get_result_type(self):
+        return self.target_type.reference()
+
+    def __call__(self, obj):
+        return obj["target"].cast(self.target_type.pointer()).dereference()
+
+class refCntPtrDereferenceMatcher(gdb.xmethod.XMethodMatcher):
+    def __init__(self):
+        gdb.xmethod.XMethodMatcher.__init__(self, 'refCntPtrDereferenceMatcher')
+ 
+    def match(self, class_type, method_name):
+        if re.match('^pet::RefCnt<.*>::Ptr<.*>$', class_type.tag) and method_name in ['operator->', 'operator*']:
+            return refCntPtrDereferenceWorker(class_type)
+
+gdb.xmethod.register_xmethod_matcher(None, refCntPtrDereferenceMatcher(), True)
 
 )foo";
