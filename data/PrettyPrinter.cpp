@@ -148,10 +148,10 @@ class refCntPtrDereferenceWorker(gdb.xmethod.XMethodWorker):
     def get_arg_types(self):
         return []
 
-    def get_result_type(self):
+    def get_result_type(self, *args):
         return self.target_type.reference()
 
-    def __call__(self, obj):
+    def __call__(self, obj, *args):
         return obj["target"].cast(self.target_type.pointer()).dereference()
 
 class refCntPtrDereferenceMatcher(gdb.xmethod.XMethodMatcher):
