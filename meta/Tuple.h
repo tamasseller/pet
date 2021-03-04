@@ -80,25 +80,25 @@ public:
 
 	template<class Element>
 	inline void extract(Element* elements) {
-		int unused[] = {(elements[idx] = get<idx>(), 0)...};
+		int unused[] = {0, (elements[idx] = get<idx>(), 0)...};
 		(void) unused;
 	}
 
 	inline TupleImpl &operator =(const TupleImpl& other) {
-		int unused[] = {(get<idx>() = other.get<idx>(), 0)...};
+		int unused[] = {0, (get<idx>() = other.get<idx>(), 0)...};
 		(void) unused;
 		return *this;
 	}
 
 	inline TupleImpl &operator =(TupleImpl&& other) {
-		int unused[] = {(get<idx>() = pet::move(other.get<idx>()), 0)...};
+		int unused[] = {0, (get<idx>() = pet::move(other.get<idx>()), 0)...};
 		(void) unused;
 		return *this;
 	}
 
 	template<class = enableIf<!sameTypes<TupleImpl, NoRefPair>::value>>
 	inline TupleImpl &operator =(const NoRefPair& other) {
-		int unused[] = {(get<idx>() = other.template get<idx>(), 0)...};
+		int unused[] = {0, (get<idx>() = other.template get<idx>(), 0)...};
 		(void) unused;
 		return *this;
 	}

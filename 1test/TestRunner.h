@@ -37,6 +37,13 @@ class TestRunner {
 	static bool isSynthetic;
 	static bool failing;
 	static LinkedPtrList<TestPlugin*> plugins;
+
+	struct Result {
+		int synthetic = 0, failed = 0;
+	};
+
+	static Result runTest(TestInterface*);
+
 public:
 	static bool installPlugin(TestPlugin*);
 
@@ -48,6 +55,8 @@ public:
     static void failTestAlways(const char* sourceInfo, const char* text);
     static void checkExpectation(bool condition, const char* sourceInfo, const char* text);
     static void checkExpectationAlways(bool condition, const char* sourceInfo, const char* text);
+
+	class Experimental;
 };
 
 ////////////////////////////////////////////////////////////////

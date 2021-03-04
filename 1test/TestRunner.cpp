@@ -35,70 +35,82 @@ TestOutput* TestRunner::output;
 bool TestRunner::isSynthetic;
 bool TestRunner::failing;
 
+TestRunner::Result TestRunner::runTest(TestInterface* test)
+{
+	Result ret;
+
+	isSynthetic = false;
+	failing = false;
+	FailureInjector::reset();
+	
+	while(true) 
+	{
+		currentTest = test;
+
+		if(setjmp(jmpBuff))
+		{
+			ret.failed++;
+			failing = false;
+		}
+		else
+		{
+			for(auto pluginIt = plugins.iterator(); pluginIt.current(); pluginIt.step())
+				pluginIt.current()->beforeTest();
+
+			currentTest->runTest();
+		}
+
+		for(auto pluginIt = plugins.iterator(); pluginIt.current(); pluginIt.step())
+			pluginIt.current()->afterTest();
+
+		output->reportProgress();
+
+		if (!isSynthetic)
+			FailureInjector::firstRunDone();
+
+		if(!FailureInjector::hasMore())
+			break;
+
+		currentTest->reset();
+
+		FailureInjector::step();
+
+		ret.synthetic++;
+		isSynthetic = true;
+	}
+
+	return ret;
+}
+
 int TestRunner::runAllTests(TestOutput* output)
 {
 	TestRunner::output = output;
 	volatile unsigned int run = 0, failed = 0, synthetic = 0;
 
-	for(auto it = Registry<TestInterface>::iterator(); it.current(); it.step()) {
-	    isSynthetic = false;
-	    failing = false;
-	    FailureInjector::reset();
-	    while(true) {
-	        currentTest = it.current();
-
-	        if(setjmp(jmpBuff))
-	        {
-	        	failed++;
-	        	failing = false;
-	        }
-	        else
-	        {
-	        	for(auto pluginIt = plugins.iterator(); pluginIt.current(); pluginIt.step())
-	        		pluginIt.current()->beforeTest();
-
-	        	currentTest->runTest();
-	        }
-
-        	for(auto pluginIt = plugins.iterator(); pluginIt.current(); pluginIt.step())
-        		pluginIt.current()->afterTest();
-
-            output->reportProgress();
-
-			if (!isSynthetic)
-				FailureInjector::firstRunDone();
-
-	        if(!FailureInjector::hasMore())
-	            break;
-
-	        currentTest->reset();
-
-	        FailureInjector::step();
-
-	        synthetic++;
-	        isSynthetic = true;
-	    }
-
-        run++;
+	for(auto it = Registry<TestInterface>::iterator(); it.current(); it.step())
+	{
+		auto ret = runTest(it.current());
+		failed += ret.failed;
+		synthetic += ret.synthetic;
+		run++;
 	}
 
-	currentTest = 0;
-	TestRunner::output = 0;
+	currentTest = nullptr;
+	TestRunner::output = nullptr;
 
     output->reportFinal(run, failed, synthetic);
     return failed ? -1 : 0;
 }
 
-bool TestRunner::installPlugin(TestPlugin* plugin) {
+bool TestRunner::installPlugin(TestPlugin* plugin)  {
 	return plugins.add(plugin);
 }
-
 
 void TestRunner::failTestAlways(const char* sourceInfo, const char* text)
 {
 	failing = true;
     output->reportTestFailure(isSynthetic, currentTest->getName(), currentTest->getSourceInfo(), sourceInfo, text);
-    longjmp(jmpBuff,1);
+    longjmp(jmpBuff, 1);
 }
 
 void TestRunner::failTest(const char* sourceInfo, const char* text)
