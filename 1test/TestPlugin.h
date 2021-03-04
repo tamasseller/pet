@@ -32,7 +32,7 @@ class TestPlugin
 
 	friend TestRunner;
 	virtual void beforeTest() = 0;
-	virtual void afterTest() = 0;
+	virtual void afterTest(bool failed) = 0;
 public:
 
 	inline virtual ~TestPlugin() {}

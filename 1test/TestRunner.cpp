@@ -47,10 +47,12 @@ TestRunner::Result TestRunner::runTest(TestInterface* test)
 	{
 		currentTest = test;
 
+		bool failed = false;
 		if(setjmp(jmpBuff))
 		{
 			ret.failed++;
 			failing = false;
+			failed = true;
 		}
 		else
 		{
@@ -61,7 +63,7 @@ TestRunner::Result TestRunner::runTest(TestInterface* test)
 		}
 
 		for(auto pluginIt = plugins.iterator(); pluginIt.current(); pluginIt.step())
-			pluginIt.current()->afterTest();
+			pluginIt.current()->afterTest(failed);
 
 		output->reportProgress();
 
@@ -100,6 +102,16 @@ int TestRunner::runAllTests(TestOutput* output)
 
     output->reportFinal(run, failed, synthetic);
     return failed ? -1 : 0;
+}
+
+int TestRunner::getTestCount()
+{
+	int ret = 0;
+
+	for(auto it = Registry<TestInterface>::iterator(); it.current(); it.step())
+		ret++;
+
+	return ret;
 }
 
 bool TestRunner::installPlugin(TestPlugin* plugin)  {

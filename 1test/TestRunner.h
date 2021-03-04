@@ -47,6 +47,7 @@ class TestRunner {
 public:
 	static bool installPlugin(TestPlugin*);
 
+	static int getTestCount();
 	static int runAllTests(TestOutput* output = &TraceOutput::instance);
 	static inline TestInterface* getCurrentTest();
 
