@@ -20,13 +20,8 @@
 #ifndef DEBUGCONFIG_H_
 #define DEBUGCONFIG_H_
 
-
-/*#include "Addr2lineBacktrace.h"*/
-
 #include "1test/Test.h"
 #include "1test/Mock.h"
-
-#include "MockWriter.h"
 
 #include <string>
 
@@ -37,14 +32,7 @@ extern bool writerMocked;
 extern bool writerRecords;
 extern std::string recorded;
 
-UNCHECKED_ERROR_REPORT() {
-	if(assertMocked) {
-		MOCK()::CALL(uncheckedErrorReport);
-	} else {
-		//Addr2lineBacktrace().print();
-	    FAIL("Unchecked Error");
-	}
-}
+#include "MockWriter.h"
 
 TRACE_WRITER(MockWriter);
 GLOBAL_TRACE_POLICY(Failure);
@@ -52,5 +40,17 @@ CLIENT_TRACE_POLICY(B, All);
 CLIENT_TRACE_POLICY_NS(ns, C, Warning);
 
 CLIENT_TRACE_POLICY(TestTraceTag, All);
+
+UNCHECKED_ERROR_REPORT() 
+{
+	if(assertMocked) 
+	{
+		MOCK()::CALL(uncheckedErrorReport);
+	}
+	else 
+	{
+	    FAIL("Unchecked Error");
+	}
+}
 
 #endif /* DEBUGCONFIG_H_ */

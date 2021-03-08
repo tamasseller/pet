@@ -2,8 +2,6 @@ OUTPUT = pet-test
 
 # Test code
 
-
-
 SOURCES += TestAlgoCharLookup.cpp
 SOURCES += TestAlgoCharTraits.cpp
 SOURCES += TestAlgoStr.cpp
@@ -46,7 +44,6 @@ SOURCES += TestPoolStaticStack.cpp
 SOURCES += TestUbiqDelegate.cpp
 SOURCES += TestUbiqFailable.cpp
 SOURCES += TestUbiqError.cpp
-#SOURCES += TestUbiqTrace.cpp
 SOURCES += TestModules.cpp
 SOURCES += TestHeapAvlStress.cpp
 SOURCES += TestHeapBestFitStress.cpp
@@ -60,7 +57,7 @@ SOURCES += TestHeapTlsf.cpp
 SOURCES += TestHeapTlsfStress.cpp
 SOURCES += TestHeapBuddy.cpp
 SOURCES += TestManagedRefCnt.cpp
-
+SOURCES += TestUbiqTrace.cpp
 
 # Test support
 

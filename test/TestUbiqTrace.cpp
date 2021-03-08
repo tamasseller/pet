@@ -28,15 +28,18 @@ const char *warnMsg = "Warning\n";
 const char *infoMsg = "Information";
 
 template<class Client>
-struct TestBase {
-	void testWrite() {
+struct TestBase 
+{
+	void testWrite() 
+	{
 		Client::crit << critMsg;
 		Client::fail << failMsg;
 		Client::warn << warnMsg;
 		Client::info << infoMsg;
 	}
 
-	void testAssert() {
+	void testAssert() 
+	{
 		Client::assertThat(true);
 		Client::assertThat(false);
 		Client::assertThat(true, "foo");
@@ -47,11 +50,13 @@ struct TestBase {
 
 struct A: pet::Trace<A>, TestBase<A> {};
 struct B: pet::Trace<B>, TestBase<B> {};
+
 namespace ns {
-struct C: pet::Trace<C>, TestBase<C> {};
+	struct C: pet::Trace<C>, TestBase<C> {};
 }
 
-TEST_GROUP(TraceTest) {
+TEST_GROUP(TraceTest)
+{
 	A a;
 	B b;
 	ns::C c;
@@ -65,13 +70,15 @@ TEST_GROUP(TraceTest) {
 	}
 };
 
-TEST(TraceTest, GeneralFilter) {
+TEST(TraceTest, GeneralFilter)
+{
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam(critMsg);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam(failMsg);
 	a.testWrite();
 }
 
-TEST(TraceTest, ClassFilter) {
+TEST(TraceTest, ClassFilter)
+{
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam(critMsg);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam(failMsg);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam(warnMsg);
@@ -79,50 +86,55 @@ TEST(TraceTest, ClassFilter) {
 	b.testWrite();
 }
 
-TEST(TraceTest, NamespacedClassFilter) {
+TEST(TraceTest, NamespacedClassFilter) 
+{
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam(critMsg);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam(failMsg);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam(warnMsg);
 	c.testWrite();
 }
 
-TEST(TraceTest, GeneralFilterAssert) {
+TEST(TraceTest, GeneralFilterAssert)
+{
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("Assertation failed: ");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("unspecified");
-	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("\n");
+	MOCK(MockWriter)::EXPECT("write<const char*>").withParam((const char*)pet::endl);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("Assertation failed: ");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("bar");
-	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("\n");
+	MOCK(MockWriter)::EXPECT("write<const char*>").withParam((const char*)pet::endl);
 	a.testAssert();
 }
 
-TEST(TraceTest, ClassFilterAssert) {
+TEST(TraceTest, ClassFilterAssert)
+{
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("Assertation failed: ");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("unspecified");
-	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("\n");
+	MOCK(MockWriter)::EXPECT("write<const char*>").withParam((const char*)pet::endl);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("Assertation failed: ");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("bar");
-	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("\n");
+	MOCK(MockWriter)::EXPECT("write<const char*>").withParam((const char*)pet::endl);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("Assertation failed: ");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("foobar");
-	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("\n");
+	MOCK(MockWriter)::EXPECT("write<const char*>").withParam((const char*)pet::endl);
 	b.testAssert();
 }
 
-TEST(TraceTest, NamespacedClassFilterAssert) {
+TEST(TraceTest, NamespacedClassFilterAssert)
+{
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("Assertation failed: ");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("unspecified");
-	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("\n");
+	MOCK(MockWriter)::EXPECT("write<const char*>").withParam((const char*)pet::endl);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("Assertation failed: ");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("bar");
-	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("\n");
+	MOCK(MockWriter)::EXPECT("write<const char*>").withParam((const char*)pet::endl);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("Assertation failed: ");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("foobar");
-	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("\n");
+	MOCK(MockWriter)::EXPECT("write<const char*>").withParam((const char*)pet::endl);
 	c.testAssert();
 }
 
-TEST(TraceTest, Callthrough) {
+TEST(TraceTest, Callthrough)
+{
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam(critMsg);
 	A::crit << critMsg;
 	MOCK(MockWriter)::EXPECT("write<void*>").withParam((void*)critMsg);

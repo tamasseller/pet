@@ -58,6 +58,9 @@ struct Allocator {
 	    count = 0;
 		return ret;
 	}
+
+	static inline void traceReferenceAcquistion(...) {}
+	static inline void traceReferenceRelease(...) {}
 };
 
 struct FailableAllocator: public Allocator {
