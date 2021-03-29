@@ -39,7 +39,7 @@ public:
 	}
 
 	template<class Op, class... Args>
-	inline Value operator()(Op&& op, Args... args)
+	really_inline Value operator()(Op&& op, Args... args)
 	{
 		Value old, result;
 
