@@ -32,14 +32,14 @@ static jmp_buf jmpBuff;
 LinkedPtrList<TestPlugin*> TestRunner::plugins;
 TestInterface* TestRunner::currentTest;
 TestOutput* TestRunner::output;
-bool TestRunner::isSynthetic;
+bool TestRunner::synthetic;
 bool TestRunner::failing;
 
 TestRunner::Result TestRunner::runTest(TestInterface* test)
 {
 	Result ret;
 
-	isSynthetic = false;
+	synthetic = false;
 	failing = false;
 	FailureInjector::reset();
 	
@@ -67,7 +67,7 @@ TestRunner::Result TestRunner::runTest(TestInterface* test)
 
 		output->reportProgress();
 
-		if (!isSynthetic)
+		if (!synthetic)
 			FailureInjector::firstRunDone();
 
 		if(!FailureInjector::hasMore())
@@ -78,7 +78,7 @@ TestRunner::Result TestRunner::runTest(TestInterface* test)
 		FailureInjector::step();
 
 		ret.synthetic++;
-		isSynthetic = true;
+		synthetic = true;
 	}
 
 	return ret;
@@ -121,13 +121,13 @@ bool TestRunner::installPlugin(TestPlugin* plugin)  {
 void TestRunner::failTestAlways(const char* sourceInfo, const char* text)
 {
 	failing = true;
-    output->reportTestFailure(isSynthetic, currentTest->getName(), currentTest->getSourceInfo(), sourceInfo, text);
+    output->reportTestFailure(synthetic, currentTest->getName(), currentTest->getSourceInfo(), sourceInfo, text);
     longjmp(jmpBuff, 1);
 }
 
 void TestRunner::failTest(const char* sourceInfo, const char* text)
 {
-    if(!isSynthetic)
+    if(!synthetic)
         failTestAlways(sourceInfo, text);
 }
 

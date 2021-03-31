@@ -34,7 +34,7 @@ class TestRunner {
 
 	static TestInterface* currentTest;
 	static TestOutput* output;
-	static bool isSynthetic;
+	static bool synthetic;
 	static bool failing;
 	static LinkedPtrList<TestPlugin*> plugins;
 
@@ -52,6 +52,7 @@ public:
 	static inline TestInterface* getCurrentTest();
 
 	static inline bool isFailing() { return failing; }
+	static inline bool isSynthetic() { return synthetic; }
     static void failTest(const char* sourceInfo, const char* text);
     static void failTestAlways(const char* sourceInfo, const char* text);
     static void checkExpectation(bool condition, const char* sourceInfo, const char* text);
