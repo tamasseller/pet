@@ -8,10 +8,10 @@ namespace pet {
 class TestRunner::Experimental 
 {
     static void timerHandler(int);
-    static int runTestSubset();
+    static int runTestSubset(int timeLimitSec);
     
 public:
-    static int runTestsInParallel();
+    static int runTestsInParallel(int timeLimitSec = 30);
 };
 
 }

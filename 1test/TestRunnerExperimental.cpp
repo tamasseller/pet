@@ -99,7 +99,7 @@ void TestRunner::Experimental::timerHandler(int signum)
     write(STDOUT_FILENO, buffer, p - buffer);
 }
 
-inline int TestRunner::Experimental::runTestSubset()
+inline int TestRunner::Experimental::runTestSubset(int timeLimitSec)
 {
     int idx = 0, reqIdx = SharedState::instance->next++;
     auto it = Registry<TestInterface>::iterator();
@@ -111,7 +111,7 @@ inline int TestRunner::Experimental::runTestSubset()
 
     struct itimerval timer;
     memset(&timer, 0, sizeof(timer));
-    timer.it_value.tv_sec = 10;
+    timer.it_value.tv_sec = timeLimitSec;
 
     while(true)
 	{
@@ -136,7 +136,7 @@ inline int TestRunner::Experimental::runTestSubset()
             SharedState::instance->synthetic += ret.synthetic;
             SharedState::instance->run++;
 
-            if(time_spent > 10.0)
+            if(time_spent > timeLimitSec)
             {
                 char buffer[1024];
                 auto l = sprintf(buffer, "\n!!! Test took %.1fs: '%s' at: %s !!!\n", 
@@ -159,7 +159,7 @@ inline int TestRunner::Experimental::runTestSubset()
     exit(0);
 }
 
-int TestRunner::Experimental::runTestsInParallel()
+int TestRunner::Experimental::runTestsInParallel(int timeLimitSec)
 {
     auto ptr = mmap(NULL, sizeof(SharedState), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
     SharedState::instance = new(ptr) SharedState;
@@ -178,7 +178,7 @@ int TestRunner::Experimental::runTestsInParallel()
         else if(pid > 0)
             children.insert(pid);
         else
-            return runTestSubset();
+            return runTestSubset(timeLimitSec);
     }
 
     int ret = 0;
