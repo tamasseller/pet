@@ -218,7 +218,7 @@ class BuddyAllocator
 
     inline bool size2level(uint32_t &size, uint32_t &level)
     {
-        auto sBits = 32 - clz(size - 1);
+    	const uint32_t sBits = 32 - clz(size - 1);
 
         auto invLevel = (sBits <= minBlockSizeLog) ? 0 : sBits - minBlockSizeLog;
 
@@ -242,7 +242,7 @@ class BuddyAllocator
         auto *e = reinterpret_cast<char*>(end);
 
         auto size = e - this->start;
-        auto sBits = 31 - clz(size);
+        const uint32_t sBits = 31 - clz(size);
 
         // Check if largest allocation is greater then smallest
         if(sBits <= minBlockSizeLog)
@@ -257,7 +257,7 @@ class BuddyAllocator
 public:
     static inline int minimalTreeSize(size_t size)
     {
-    	const auto sBits = 31 - clz(size);
+    	const uint32_t sBits = 31 - clz(size);
 
         if(sBits <= minBlockSizeLog)
             return -1;
@@ -300,7 +300,7 @@ public:
 		this->tree = reinterpret_cast<decltype(tree)>(treeStart);
         this->end = reinterpret_cast<decltype(this->end)>(align(end, minBlockSize));
 
-        for(int i = 0; i < nNodeWords; i++)
+        for(auto i = 0u; i < nNodeWords; i++)
             this->tree[i] = 0;
 
         return true;
