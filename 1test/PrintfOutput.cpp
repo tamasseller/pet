@@ -1,6 +1,7 @@
 #include "PrintfOutput.h"
 
 #include <iostream>
+#include <iomanip>
 
 using namespace pet;
 
@@ -8,7 +9,7 @@ PrintfOutput PrintfOutput::instance;
 
 void PrintfOutput::reportProgress()
 {
-	std::cout << ((++nDots % 64 == 0) ? ".\n" : ".");
+	std::cout << ((++nDots % 64 == 0) ? ".\n" : ".") << std::flush;
 }
 
 void PrintfOutput::reportTestFailure(bool isSynthetic, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text)
