@@ -214,11 +214,6 @@ class MockDecorator {
         }
 
     public:
-        // TODO needed?
-        inline operator bool() {
-            return error != nullptr;
-        }
-
         /**
          * Add an expected/actual integral parameter to the chain initiated by the _Mock::call_ or _Mock::expect_.
          *

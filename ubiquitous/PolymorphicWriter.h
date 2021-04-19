@@ -115,7 +115,7 @@ class PolymorphicTraceWriterWrapper: public PolymorphicWriter::Receiver, public 
 public:
 	virtual inline ~PolymorphicTraceWriterWrapper() = default;
 
-	inline PolymorphicTraceWriterWrapper(pet::Level l, const char* n): Wrapped(l, n)... {}
+	inline PolymorphicTraceWriterWrapper(pet::LogLevel l, const char* n): Wrapped(l, n)... {}
 };
 
 }

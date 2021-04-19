@@ -30,7 +30,7 @@ namespace pet {
  * These can be used to identify the different levels of 
  * tracing information for filtering.
  */
-enum class Level: int {																					// TODO XXX rename LogLevel
+enum class LogLevel: int {
 	All,			//!< Use for filters to enable all levels.
 	Information,	//!< Generic information level, with no intention to report any kind of error.
 	Warning,		//!< Possibly erroneus level.
@@ -96,7 +96,8 @@ namespace pet {										\
 namespace pet {										\
 	template<>										\
 	struct Z<X> {									\
-		constexpr static Level level = Level::Y;	\
+		constexpr static LogLevel level				\
+			= LogLevel::Y;							\
 	};												\
 }
 

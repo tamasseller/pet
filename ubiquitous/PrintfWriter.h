@@ -65,7 +65,7 @@ struct PrintfWriter
 	/** Writes a pointer value to the output */
 	PrintfWriter& operator<<(const void* val);
 
-	PrintfWriter(pet::Level, const char* name);
+	PrintfWriter(pet::LogLevel, const char* name);
 	~PrintfWriter();
 
 	PrintfWriter(PrintfWriter&&) = delete;

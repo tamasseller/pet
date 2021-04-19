@@ -33,7 +33,6 @@ public:
 
 	inline AtomicCommon(Value value) {
 		data = value;
-		clrex();        // TODO is this ok (for example: preempted between write and clrex)?
 	}
 
 	inline operator Value() const {

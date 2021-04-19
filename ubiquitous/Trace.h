@@ -29,13 +29,13 @@ namespace pet {
 template<class Dummy>
 class DefaultTracePolicy {
 public:
-	constexpr static Level level = Level::None;
+	constexpr static LogLevel level = LogLevel::None;
 };
 
 template<class Tag>
 class TracePolicy {
 public:	
-	constexpr static Level level = DefaultTracePolicy<Global>::level;
+	constexpr static LogLevel level = DefaultTracePolicy<Global>::level;
 };
 
 struct DummyWriter
@@ -51,23 +51,23 @@ template<class Dummy> struct TraceWriter { using Writer = DummyWriter; };
 inline constexpr const char* getTagText(...) { return nullptr; }
 template<class C> inline constexpr auto getTagText(C&& c) -> decltype(c.name){ return c.name; }
 
-template<bool, Level, class Tag> struct TraceFilter;
+template<bool, LogLevel, class Tag> struct TraceFilter;
 
-template<Level level, class Tag> struct TraceFilter<true, level, Tag>
+template<LogLevel level, class Tag> struct TraceFilter<true, level, Tag>
 {
 	inline auto operator() () {
 		return typename TraceWriter<Global>::Writer(level, getTagText(Tag()));
 	}
 };
 
-template<Level level, class Tag> struct TraceFilter<false, level, Tag>
+template<LogLevel level, class Tag> struct TraceFilter<false, level, Tag>
 {
 	inline auto operator() () {
 		return DummyWriter{};
 	}
 };
 
-template<class Tag, Level level>
+template<class Tag, LogLevel level>
 struct TraceSource: TraceFilter<level >= TracePolicy<Tag>::level, level, Tag> {};
 
 /** @endcond */
@@ -87,28 +87,28 @@ struct Trace {
 	 * 
 	 * Output through this stream can be configured with the Level::Information level identifier.
 	 */
-	static TraceSource<Tag, Level::Information> info;
+	static TraceSource<Tag, LogLevel::Information> info;
 
 	/**
 	 * Output stream for possible errors.
 	 * 
 	 * Output through this stream can be configured with the Level::Warning level identifier.
 	 */
-	static TraceSource<Tag, Level::Warning> warn;
+	static TraceSource<Tag, LogLevel::Warning> warn;
 	
 	/**
 	 * Output stream for non-fatal errors.
 	 * 
 	 * Output through this stream can be configured with the Level::Failure level identifier.
 	 */
-	static TraceSource<Tag, Level::Failure> fail;
+	static TraceSource<Tag, LogLevel::Failure> fail;
 	
 	/**
 	 * Output stream for fatal errors.
 	 * 
 	 * Output through this stream can be configured with the Level::Critical level identifier.
 	 */
-	static TraceSource<Tag, Level::Critical> crit;
+	static TraceSource<Tag, LogLevel::Critical> crit;
 
 	/**
 	 * Output message on unmet condition.
@@ -117,7 +117,7 @@ struct Trace {
 	 * The level on which the message is to be output can be configured.
 	 * If not specified explicitly the level defaults to Level::Failure.
 	 */
-	template<Level level=Level::Failure>
+	template<LogLevel level=LogLevel::Failure>
 	static inline void assertThat(bool cond, const char* msg = "unspecified")
 	{
 		if constexpr(level >= TracePolicy<Tag>::level)
@@ -133,16 +133,16 @@ struct Trace {
 ////////////////////////////////////////////////////////////////////////////////////
 
 template<class Tag>
-TraceSource<Tag, Level::Information> 	Trace<Tag>::info;
+TraceSource<Tag, LogLevel::Information> 	Trace<Tag>::info;
 
 template<class Tag>
-TraceSource<Tag, Level::Warning> 		Trace<Tag>::warn;
+TraceSource<Tag, LogLevel::Warning> 		Trace<Tag>::warn;
 
 template<class Tag>
-TraceSource<Tag, Level::Failure> 		Trace<Tag>::fail;
+TraceSource<Tag, LogLevel::Failure> 		Trace<Tag>::fail;
 
 template<class Tag>
-TraceSource<Tag, Level::Critical> 		Trace<Tag>::crit;
+TraceSource<Tag, LogLevel::Critical> 		Trace<Tag>::crit;
 
 }
 

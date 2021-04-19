@@ -39,7 +39,7 @@ static inline bool checkWriterRecording()
 	return writerRecords;
 }
 
-inline MwMockBackend::MwMockBackend(pet::Level l, const char*) {
+inline MwMockBackend::MwMockBackend(pet::LogLevel l, const char*) {
 	if(checkWriterMocked()) MOCK(MockWriter)::CALL("Writer").withParam((int)l);
 }
 
@@ -135,7 +135,7 @@ inline void MwRecordingBackend::operator<<(const void* val) {
 	if(checkWriterRecording()) FAIL("Unimplemented");
 }
 
-inline pet::PolymorphicWriter::Receiver* MockWriter::createReceiver(pet::Level l, const char* name)
+inline pet::PolymorphicWriter::Receiver* MockWriter::createReceiver(pet::LogLevel l, const char* name)
 {
 	if(writerMocked)
 	{
@@ -149,4 +149,4 @@ inline pet::PolymorphicWriter::Receiver* MockWriter::createReceiver(pet::Level l
 	return state.construct<pet::PolymorphicTraceWriterWrapper<MwPrintfBackend>>(l, name);
 }
 
-MockWriter::MockWriter(pet::Level l, const char* name): PolymorphicWriter(createReceiver(l, name)) {}
+MockWriter::MockWriter(pet::LogLevel l, const char* name): PolymorphicWriter(createReceiver(l, name)) {}

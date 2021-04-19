@@ -86,7 +86,7 @@ protected:
 	/** Writes a pointer value to the output */
 	SemihostingWriter& operator<<(const void* val);
 
-	inline SemihostingWriter(pet::Level, const char*) {}
+	inline SemihostingWriter(pet::LogLevel, const char*) {}
 
 	SemihostingWriter(SemihostingWriter&&) = default;
 	SemihostingWriter(const SemihostingWriter&) = default;

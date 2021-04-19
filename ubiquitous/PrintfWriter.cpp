@@ -89,7 +89,7 @@ PrintfWriter& PrintfWriter::operator<<(long double val)
 	return *this;
 }
 
-PrintfWriter::PrintfWriter(pet::Level, const char* name)
+PrintfWriter::PrintfWriter(pet::LogLevel, const char* name)
 {
 	if(name)
 	{

@@ -40,7 +40,6 @@ template<class T> struct sameTypes<T, T> { static constexpr bool value = true; }
 template<bool B, class T=void> struct enableIf {};
 template<class T> struct enableIf<true, T> { typedef T type; };
 
-/// TODO forwarding
 
 }
 

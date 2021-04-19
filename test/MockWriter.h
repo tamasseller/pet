@@ -26,7 +26,7 @@
 
 struct MwMockBackend
 {
-	inline MwMockBackend(pet::Level, const char*);
+	inline MwMockBackend(pet::LogLevel, const char*);
 	inline ~MwMockBackend();
 	inline void operator delete(void*) {}
 
@@ -45,7 +45,7 @@ struct MwMockBackend
 
 struct MwRecordingBackend
 {
-	inline MwRecordingBackend(pet::Level, const char*) {}
+	inline MwRecordingBackend(pet::LogLevel, const char*) {}
 	inline void operator delete(void*) {}
 
 	inline void operator<<(const char* val);
@@ -69,7 +69,7 @@ struct MwPrintfBackend: pet::PrintfWriter
 
 class MockWriter: public pet::PolymorphicWriter
 {
-	inline pet::PolymorphicWriter::Receiver* createReceiver(pet::Level l, const char* name);
+	inline pet::PolymorphicWriter::Receiver* createReceiver(pet::LogLevel l, const char* name);
 
 	pet::MutableStorage <
 		pet::PolymorphicTraceWriterWrapper<MwMockBackend>,
@@ -78,7 +78,7 @@ class MockWriter: public pet::PolymorphicWriter
 	> state;
 
 public:
-	MockWriter(pet::Level, const char*);
+	MockWriter(pet::LogLevel, const char*);
 	inline ~MockWriter() = default;
 
 	MockWriter(MockWriter&&) = delete;
