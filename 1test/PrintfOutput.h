@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * Copyright (c) 2016, 2017 Tamás Seller. All rights reserved.
+ * Copyright (c) 2021 Tamás Seller. All rights reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,28 +17,25 @@
  *
  *******************************************************************************/
 
-#ifndef TRACEOUTPUT_H_
-#define TRACEOUTPUT_H_
+#ifndef PET_1TEST_PRINTFOUTPUT_H_
+#define PET_1TEST_PRINTFOUTPUT_H_
 
 #include "TestOutput.h"
 
-class TestTraceTag {};
-
 namespace pet {
 
-class TraceOutput: public TestOutput {
+class PrintfOutput: public TestOutput {
 protected:
     int nDots = 0;
-	virtual void reportProgress();
-	virtual void reportTestFailure(bool isSynthetic, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text);
-	virtual void reportFinal(uint32_t normal, uint32_t failure, uint32_t synthetic);
-	virtual inline ~TraceOutput() {}
+	virtual void reportProgress() override;
+	virtual void reportTestFailure(bool isSynthetic, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text) override;
+	virtual void reportFinal(uint32_t normal, uint32_t failure, uint32_t synthetic) override;
+	virtual inline ~PrintfOutput() {}
 
 public:
-	static TraceOutput instance;
+	static PrintfOutput instance;
 };
 
 }
 
-
-#endif /* TRACEOUTPUT_H_ */
+#endif /* PET_1TEST_PRINTFOUTPUT_H_ */

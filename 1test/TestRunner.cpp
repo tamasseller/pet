@@ -78,7 +78,14 @@ TestRunner::Result TestRunner::runTest(TestInterface* test)
 		FailureInjector::step();
 
 		ret.synthetic++;
-		synthetic = true;
+
+		if(!synthetic)
+		{
+			if(failed)
+				break;
+
+			synthetic = true;
+		}
 	}
 
 	return ret;
@@ -120,9 +127,12 @@ bool TestRunner::installPlugin(TestPlugin* plugin)  {
 
 void TestRunner::failTestAlways(const char* sourceInfo, const char* text)
 {
-	failing = true;
-    output->reportTestFailure(synthetic, currentTest->getName(), currentTest->getSourceInfo(), sourceInfo, text);
-    longjmp(jmpBuff, 1);
+	if(!failing)
+	{
+		failing = true;
+	    output->reportTestFailure(synthetic, currentTest->getName(), currentTest->getSourceInfo(), sourceInfo, text);
+	    longjmp(jmpBuff, 1);
+	}
 }
 
 void TestRunner::failTest(const char* sourceInfo, const char* text)

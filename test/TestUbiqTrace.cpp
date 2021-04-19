@@ -32,10 +32,10 @@ struct TestBase
 {
 	void testWrite() 
 	{
-		Client::crit << critMsg;
-		Client::fail << failMsg;
-		Client::warn << warnMsg;
-		Client::info << infoMsg;
+		Client::crit() << critMsg;
+		Client::fail() << failMsg;
+		Client::warn() << warnMsg;
+		Client::info() << infoMsg;
 	}
 
 	void testAssert() 
@@ -72,89 +72,167 @@ TEST_GROUP(TraceTest)
 
 TEST(TraceTest, GeneralFilter)
 {
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Critical);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam(critMsg);
+	MOCK(MockWriter)::EXPECT("~Writer");
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Failure);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam(failMsg);
+	MOCK(MockWriter)::EXPECT("~Writer");
 	a.testWrite();
 }
 
 TEST(TraceTest, ClassFilter)
 {
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Critical);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam(critMsg);
+	MOCK(MockWriter)::EXPECT("~Writer");
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Failure);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam(failMsg);
+	MOCK(MockWriter)::EXPECT("~Writer");
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Warning);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam(warnMsg);
+	MOCK(MockWriter)::EXPECT("~Writer");
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Information);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam(infoMsg);
+	MOCK(MockWriter)::EXPECT("~Writer");
 	b.testWrite();
 }
 
 TEST(TraceTest, NamespacedClassFilter) 
 {
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Critical);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam(critMsg);
+	MOCK(MockWriter)::EXPECT("~Writer");
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Failure);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam(failMsg);
+	MOCK(MockWriter)::EXPECT("~Writer");
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Warning);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam(warnMsg);
+	MOCK(MockWriter)::EXPECT("~Writer");
 	c.testWrite();
 }
 
 TEST(TraceTest, GeneralFilterAssert)
 {
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Failure);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("Assertation failed: ");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("unspecified");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam((const char*)pet::endl);
+	MOCK(MockWriter)::EXPECT("~Writer");
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Failure);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("Assertation failed: ");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("bar");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam((const char*)pet::endl);
+	MOCK(MockWriter)::EXPECT("~Writer");
 	a.testAssert();
 }
 
 TEST(TraceTest, ClassFilterAssert)
 {
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Failure);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("Assertation failed: ");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("unspecified");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam((const char*)pet::endl);
+	MOCK(MockWriter)::EXPECT("~Writer");
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Failure);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("Assertation failed: ");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("bar");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam((const char*)pet::endl);
+	MOCK(MockWriter)::EXPECT("~Writer");
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Warning);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("Assertation failed: ");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("foobar");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam((const char*)pet::endl);
+	MOCK(MockWriter)::EXPECT("~Writer");
 	b.testAssert();
 }
 
 TEST(TraceTest, NamespacedClassFilterAssert)
 {
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Failure);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("Assertation failed: ");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("unspecified");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam((const char*)pet::endl);
+	MOCK(MockWriter)::EXPECT("~Writer");
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Failure);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("Assertation failed: ");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("bar");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam((const char*)pet::endl);
+	MOCK(MockWriter)::EXPECT("~Writer");
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Warning);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("Assertation failed: ");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam("foobar");
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam((const char*)pet::endl);
+	MOCK(MockWriter)::EXPECT("~Writer");
+
 	c.testAssert();
 }
 
 TEST(TraceTest, Callthrough)
 {
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Critical);
 	MOCK(MockWriter)::EXPECT("write<const char*>").withParam(critMsg);
-	A::crit << critMsg;
+	MOCK(MockWriter)::EXPECT("~Writer");
+	A::crit() << critMsg;
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Critical);
 	MOCK(MockWriter)::EXPECT("write<void*>").withParam((void*)critMsg);
-	A::crit << (void*)critMsg;
+	MOCK(MockWriter)::EXPECT("~Writer");
+	A::crit() << (void*)critMsg;
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Critical);
 	MOCK(MockWriter)::EXPECT("write<short>").withParam(1);
-	A::crit << (short)1;
+	MOCK(MockWriter)::EXPECT("~Writer");
+	A::crit() << (short)1;
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Critical);
 	MOCK(MockWriter)::EXPECT("write<unsigned short>").withParam(1);
-	A::crit << (unsigned short)1;
+	MOCK(MockWriter)::EXPECT("~Writer");
+	A::crit() << (unsigned short)1;
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Critical);
 	MOCK(MockWriter)::EXPECT("write<int>").withParam(1);
-	A::crit << (int)1;
+	MOCK(MockWriter)::EXPECT("~Writer");
+	A::crit() << (int)1;
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Critical);
 	MOCK(MockWriter)::EXPECT("write<unsigned int>").withParam(1);
-	A::crit << (unsigned int)1;
+	MOCK(MockWriter)::EXPECT("~Writer");
+	A::crit() << (unsigned int)1;
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Critical);
 	MOCK(MockWriter)::EXPECT("write<long>").withParam(1);
-	A::crit << (long)1;
+	MOCK(MockWriter)::EXPECT("~Writer");
+	A::crit() << (long)1;
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Critical);
 	MOCK(MockWriter)::EXPECT("write<unsigned long>").withParam(1);
-	A::crit << (unsigned long)1;
+	MOCK(MockWriter)::EXPECT("~Writer");
+	A::crit() << (unsigned long)1;
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Critical);
 	MOCK(MockWriter)::EXPECT("write<float>").withParam(1.0);
-	A::crit << (float)1;
+	MOCK(MockWriter)::EXPECT("~Writer");
+	A::crit() << (float)1;
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Critical);
 	MOCK(MockWriter)::EXPECT("write<double>").withParam(1.0f);
-	A::crit << (double)1;
+	MOCK(MockWriter)::EXPECT("~Writer");
+	A::crit() << (double)1;
+
+	MOCK(MockWriter)::EXPECT("Writer").withParam((int)pet::Level::Critical);
 	MOCK(MockWriter)::EXPECT("write<long double>").withParam(1.0l);
-	A::crit << (long double)1;
+	MOCK(MockWriter)::EXPECT("~Writer");
+	A::crit() << (long double)1;
 }

@@ -26,54 +26,46 @@ typedef Trace<TestTraceTag> trace;
 
 TraceOutput TraceOutput::instance;
 
-void TraceOutput::reportProgress()
-{
-	trace::info << ".";
-
-    if(++nDots == 64) {
-        trace::info << "\n";
-        nDots = 0;
-    }
+void TraceOutput::reportProgress() {
+	trace::info() << "Test #" << ++nDots << " completed";
 }
 
 void TraceOutput::reportTestFailure(bool isSynthetic, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text)
 {
-	trace::warn << "\n";
-    trace::warn << (isSynthetic ? "Synthetic test based on '" : "Test '") << testName << "' (" << sourceInfo <<  ")\n";
-    trace::warn << "\n";
-
-    trace::warn << "    failed at " << failureSourceInfo;
-
-    if(text)
-        trace::warn << ": " << text;
-
-    trace::warn << "\n";
-    trace::warn << "\n";
+	trace::warn() << pet::endl << (isSynthetic ? "Synthetic test based on '" : "Test '") << testName << "' (" << sourceInfo <<  ")" << pet::endl
+			<< pet::endl << "    failed at " << failureSourceInfo
+			<< ((text) ? ": " : "") << ((text) ? text : "") << pet::endl;
 }
 
 void TraceOutput::reportFinal(uint32_t normal, uint32_t failure, uint32_t synthetic)
 {
-    trace::info << "\n";
-
-    if(failure) {
-        trace::info << "ERROR (" << failure << " of " << normal << " regular ";
-
+    if(failure)
+    {
         if(synthetic)
-            trace::info << "plus " << synthetic << " synthetic ";
-
-        trace::info << "tests failed)\n";
-    } else {
-    	if(normal) {
-			trace::info << "OK (all " << normal << " regular ";
-
+        {
+        	trace::info() << pet::endl << "ERROR: " << failure << " of " << normal << " regular and " << synthetic << " synthetic tests failed !" << pet::endl;
+        }
+        else
+        {
+        	trace::info() << pet::endl << "ERROR: " << failure << " of " << normal << " tests failed !" << pet::endl;
+        }
+    }
+    else
+    {
+    	if(normal)
+    	{
 			if(synthetic)
-				trace::info << "and " << synthetic << " synthetic ";
-
-			trace::info << "tests have been ran successfully)\n";
-    	} else {
-    		trace::info << "No tests registered to run !\n";
+			{
+				trace::info() << pet::endl << "OK: all " << normal << " regular and " << synthetic << " synthetic tests have been ran successfully." << pet::endl;
+			}
+			else
+			{
+				trace::info() << pet::endl << "OK: all " << normal << " tests have been ran successfully." << pet::endl;
+			}
+    	}
+    	else
+    	{
+    		trace::info() << pet::endl << "No tests registered to run !" << pet::endl;
     	}
     }
-
-    trace::info << "\n";
 }

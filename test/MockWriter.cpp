@@ -23,110 +23,130 @@
 
 #include "ubiquitous/PrintfWriter.h"
 
-void MockWriter::write(const char* val)
+static inline bool checkWriterMocked()
 {
-	if(writerMocked)
-		MOCK(MockWriter)::CALL("write<const char*>").withParam(val);
-	else if(writerRecords)
-		recorded += val;
-	else
-		pet::PrintfWriter::write(val);
+	if(pet::TestRunner::isFailing())
+		writerMocked = writerRecords = false;
+
+	return writerMocked;
 }
 
-void MockWriter::write(void* val)
+static inline bool checkWriterRecording()
 {
-	if(writerMocked)
-		MOCK(MockWriter)::CALL("write<void*>").withParam(val);
-	else
-		pet::PrintfWriter::write(val);
+	if(pet::TestRunner::isFailing())
+		writerMocked = writerRecords = false;
+
+	return writerRecords;
 }
 
-void MockWriter::write(short val)
-{
-	if(writerMocked)
-		MOCK(MockWriter)::CALL("write<short>").withParam(val);
-	else if(writerRecords)
-		recorded += std::to_string(val);
-	else
-		pet::PrintfWriter::write(val);
+inline MwMockBackend::MwMockBackend(pet::Level l, const char*) {
+	if(checkWriterMocked()) MOCK(MockWriter)::CALL("Writer").withParam((int)l);
 }
 
-void MockWriter::write(unsigned short val)
-{
-	if(writerMocked)
-		MOCK(MockWriter)::CALL("write<unsigned short>").withParam(val);
-	else if(writerRecords)
-		recorded += std::to_string(val);
-	else
-		pet::PrintfWriter::write(val);
+inline MwMockBackend::~MwMockBackend() {
+	if(checkWriterMocked()) MOCK(MockWriter)::CALL("~Writer");
 }
 
-void MockWriter::write(int val)
-{
-	if(writerMocked)
-		MOCK(MockWriter)::CALL("write<int>").withParam(val);
-	else if(writerRecords)
-		recorded += std::to_string(val);
-	else
-		pet::PrintfWriter::write(val);
+inline void MwMockBackend::operator<<(const char* val) {
+	if(checkWriterMocked()) MOCK(MockWriter)::CALL("write<const char*>").withParam(val);
 }
 
-void MockWriter::write(unsigned int val)
-{
-	if(writerMocked)
-		MOCK(MockWriter)::CALL("write<unsigned int>").withParam(val);
-	else if(writerRecords)
-		recorded += std::to_string(val);
-	else
-		pet::PrintfWriter::write(val);
+inline void MwMockBackend::operator<<(short val) {
+	if(checkWriterMocked()) MOCK(MockWriter)::CALL("write<short>").withParam(val);
 }
 
-void MockWriter::write(long val)
-{
-	if(writerMocked)
-		MOCK(MockWriter)::CALL("write<long>").withParam(val);
-	else if(writerRecords)
-		recorded += std::to_string(val);
-	else
-		pet::PrintfWriter::write(val);
+inline void MwMockBackend::operator<<(unsigned short val) {
+	if(checkWriterMocked()) MOCK(MockWriter)::CALL("write<unsigned short>").withParam(val);
 }
 
-void MockWriter::write(unsigned long val)
-{
-	if(writerMocked)
-		MOCK(MockWriter)::CALL("write<unsigned long>").withParam(val);
-	else if(writerRecords)
-		recorded += std::to_string(val);
-	else
-		pet::PrintfWriter::write(val);
+inline void MwMockBackend::operator<<(int val) {
+	if(checkWriterMocked()) MOCK(MockWriter)::CALL("write<int>").withParam(val);
 }
 
-void MockWriter::write(float val)
-{
-	if(writerMocked)
-		MOCK(MockWriter)::CALL("write<float>").withParam(val);
-	else if(writerRecords)
-		recorded += std::to_string(val);
-	else
-		pet::PrintfWriter::write(val);
+inline void MwMockBackend::operator<<(unsigned int val) {
+	if(checkWriterMocked()) MOCK(MockWriter)::CALL("write<unsigned int>").withParam(val);
 }
 
-void MockWriter::write(double val)
-{
-	if(writerMocked)
-		MOCK(MockWriter)::CALL("write<double>").withParam(val);
-	else if(writerRecords)
-		recorded += std::to_string(val);
-	else
-		pet::PrintfWriter::write(val);
+inline void MwMockBackend::operator<<(long val) {
+	if(checkWriterMocked()) MOCK(MockWriter)::CALL("write<long>").withParam(val);
 }
 
-void MockWriter::write(long double val)
+inline void MwMockBackend::operator<<(unsigned long val) {
+	if(checkWriterMocked()) MOCK(MockWriter)::CALL("write<unsigned long>").withParam(val);
+}
+
+inline void MwMockBackend::operator<<(float val) {
+	if(checkWriterMocked()) MOCK(MockWriter)::CALL("write<float>").withParam(val);
+}
+
+inline void MwMockBackend::operator<<(double val) {
+	if(checkWriterMocked()) MOCK(MockWriter)::CALL("write<double>").withParam(val);
+}
+
+inline void MwMockBackend::operator<<(long double val) {
+	if(checkWriterMocked()) MOCK(MockWriter)::CALL("write<long double>").withParam(val);
+}
+
+inline void MwMockBackend::operator<<(const void* val) {
+	if(checkWriterMocked()) MOCK(MockWriter)::CALL("write<void*>").withParam(val);
+}
+
+inline void MwRecordingBackend::operator<<(const char* val) {
+	if(checkWriterRecording()) recorded += val;
+}
+
+inline void MwRecordingBackend::operator<<(short val) {
+	if(checkWriterRecording()) recorded += std::to_string(val);
+}
+
+inline void MwRecordingBackend::operator<<(unsigned short val) {
+	if(checkWriterRecording()) recorded += std::to_string(val);
+}
+
+inline void MwRecordingBackend::operator<<(int val) {
+	if(checkWriterRecording()) recorded += std::to_string(val);
+}
+
+inline void MwRecordingBackend::operator<<(unsigned int val) {
+	if(checkWriterRecording()) recorded += std::to_string(val);
+}
+
+inline void MwRecordingBackend::operator<<(long val) {
+	if(checkWriterRecording()) recorded += std::to_string(val);
+}
+
+inline void MwRecordingBackend::operator<<(unsigned long val) {
+	if(checkWriterRecording()) recorded += std::to_string(val);
+}
+
+inline void MwRecordingBackend::operator<<(float val) {
+	if(checkWriterRecording()) recorded += std::to_string(val);
+}
+
+inline void MwRecordingBackend::operator<<(double val) {
+	if(checkWriterRecording()) recorded += std::to_string(val);
+}
+
+inline void MwRecordingBackend::operator<<(long double val) {
+	if(checkWriterRecording()) recorded += std::to_string(val);
+}
+
+inline void MwRecordingBackend::operator<<(const void* val) {
+	if(checkWriterRecording()) FAIL("Unimplemented");
+}
+
+inline pet::PolymorphicWriter::Receiver* MockWriter::createReceiver(pet::Level l, const char* name)
 {
 	if(writerMocked)
-		MOCK(MockWriter)::CALL("write<long double>").withParam(val);
+	{
+		return state.construct<pet::PolymorphicTraceWriterWrapper<MwMockBackend>>(l, name);
+	}
 	else if(writerRecords)
-		recorded += std::to_string(val);
-	else
-		pet::PrintfWriter::write(val);
+	{
+		return state.construct<pet::PolymorphicTraceWriterWrapper<MwRecordingBackend>>(l, name);
+	}
+
+	return state.construct<pet::PolymorphicTraceWriterWrapper<MwPrintfBackend>>(l, name);
 }
+
+MockWriter::MockWriter(pet::Level l, const char* name): PolymorphicWriter(createReceiver(l, name)) {}

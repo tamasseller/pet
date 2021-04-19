@@ -18,10 +18,13 @@
  *******************************************************************************/
 
 #include "1test/TestRunner.h"
+#include "1test/TestRunnerExperimental.h"
+#include "1test/PrintfOutput.h"
 
 int main(int ac, char** av)
 {
-    int ret = pet::TestRunner::runAllTests();
-    if(ret)
-        return ret;
+	if(pet::TestRunner::getTestCount() > 50)
+	    return pet::TestRunner::Experimental::runTestsInParallel();
+	else
+		return pet::TestRunner::runAllTests(&pet::PrintfOutput::instance);
 }

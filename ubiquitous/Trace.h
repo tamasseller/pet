@@ -38,25 +38,37 @@ public:
 	constexpr static Level level = DefaultTracePolicy<Global>::level;
 };
 
-template<class Dummy>
-class TraceWriter {
-public:
-	template<class T>
-	inline static void write(T val) {}
+struct DummyWriter
+{
+	inline DummyWriter(...) {}
+
+	template<class C>
+	inline auto &operator<<(C&&) { return *this; }
+};
+
+template<class Dummy> struct TraceWriter { using Writer = DummyWriter; };
+
+inline constexpr const char* getTagText(...) { return nullptr; }
+template<class C> inline constexpr auto getTagText(C&& c) -> decltype(c.name){ return c.name; }
+
+template<bool, Level, class Tag> struct TraceFilter;
+
+template<Level level, class Tag> struct TraceFilter<true, level, Tag>
+{
+	inline auto operator() () {
+		return typename TraceWriter<Global>::Writer(level, getTagText(Tag()));
+	}
+};
+
+template<Level level, class Tag> struct TraceFilter<false, level, Tag>
+{
+	inline auto operator() () {
+		return DummyWriter{};
+	}
 };
 
 template<class Tag, Level level>
-class TraceSource {
-private:
-public:
-	template<class T>
-	inline TraceSource& operator<< (T val) {
-		if(level >= TracePolicy<Tag>::level)
-			TraceWriter<Global>::write(val);
-
-		return *this;
-	}
-};
+struct TraceSource: TraceFilter<level >= TracePolicy<Tag>::level, level, Tag> {};
 
 /** @endcond */
 
@@ -106,12 +118,13 @@ struct Trace {
 	 * If not specified explicitly the level defaults to Level::Failure.
 	 */
 	template<Level level=Level::Failure>
-	static inline void assertThat(bool cond, const char* msg = "unspecified") {
-		if(level >= TracePolicy<Tag>::level) {
-			if(!cond) {
-				TraceWriter<Global>::write("Assertation failed: ");
-				TraceWriter<Global>::write(msg);
-				TraceWriter<Global>::write(endl);
+	static inline void assertThat(bool cond, const char* msg = "unspecified")
+	{
+		if constexpr(level >= TracePolicy<Tag>::level)
+		{
+			if(!cond)
+			{
+				TraceSource<Tag, level>().operator()() << "Assertation failed: " << msg << endl;
 			}
 		}
 	}

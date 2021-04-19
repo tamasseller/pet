@@ -92,15 +92,15 @@ struct INTERNAL_TEST_CLASS_NAME(name, group):                                   
 
 #define INTERNAL_TEST_CLASS_MEMBERS(name, group, parent, gName)                         \
     typedef INTERNAL_TEST_GROUP_NAME(parent) Group;                                     \
-    virtual const char* getName() {                                                     \
+    virtual const char* getName() const override {                                      \
         return INTERNAL_STRINGIFY(name) gName;                                          \
     }                                                                                   \
                                                                                         \
-    virtual const char* getSourceInfo() {                                               \
+    virtual const char* getSourceInfo() const override {                                \
         return INTERNAL_AT();                                                           \
     }                                                                                   \
                                                                                         \
-    virtual void runTest()                                                              \
+    virtual void runTest() override                                                     \
     {                                                                                   \
         using Base = pet::TestBase<INTERNAL_TEST_CLASS_NAME(name, group)>;              \
         Base::instance.Base::dummy();                                                   \

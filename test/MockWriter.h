@@ -21,20 +21,70 @@
 #define MOCKWRITER_H_
 
 #include "ubiquitous/PrintfWriter.h"
+#include "ubiquitous/PolymorphicWriter.h"
+#include "data/MutableStorage.h"
 
-class MockWriter: pet::PrintfWriter {
-protected:
-	static void write(const char* val);
-	static void write(short val);
-	static void write(unsigned short val);
-	static void write(int val);
-	static void write(unsigned int val);
-	static void write(long val);
-	static void write(unsigned long val);
-	static void write(float val);
-	static void write(double val);
-	static void write(long double val);
-	static void write(void* val);
+struct MwMockBackend
+{
+	inline MwMockBackend(pet::Level, const char*);
+	inline ~MwMockBackend();
+	inline void operator delete(void*) {}
+
+	inline void operator<<(const char* val);
+	inline void operator<<(short val);
+	inline void operator<<(unsigned short val);
+	inline void operator<<(int val);
+	inline void operator<<(unsigned int val);
+	inline void operator<<(long val);
+	inline void operator<<(unsigned long val);
+	inline void operator<<(float val);
+	inline void operator<<(double val);
+	inline void operator<<(long double val);
+	inline void operator<<(const void* val);
+};
+
+struct MwRecordingBackend
+{
+	inline MwRecordingBackend(pet::Level, const char*) {}
+	inline void operator delete(void*) {}
+
+	inline void operator<<(const char* val);
+	inline void operator<<(short val);
+	inline void operator<<(unsigned short val);
+	inline void operator<<(int val);
+	inline void operator<<(unsigned int val);
+	inline void operator<<(long val);
+	inline void operator<<(unsigned long val);
+	inline void operator<<(float val);
+	inline void operator<<(double val);
+	inline void operator<<(long double val);
+	inline void operator<<(const void* val);
+};
+
+struct MwPrintfBackend: pet::PrintfWriter
+{
+	using PrintfWriter::PrintfWriter;
+	inline void operator delete(void*) {}
+};
+
+class MockWriter: public pet::PolymorphicWriter
+{
+	inline pet::PolymorphicWriter::Receiver* createReceiver(pet::Level l, const char* name);
+
+	pet::MutableStorage <
+		pet::PolymorphicTraceWriterWrapper<MwMockBackend>,
+		pet::PolymorphicTraceWriterWrapper<MwPrintfBackend>,
+		pet::PolymorphicTraceWriterWrapper<MwRecordingBackend>
+	> state;
+
+public:
+	MockWriter(pet::Level, const char*);
+	inline ~MockWriter() = default;
+
+	MockWriter(MockWriter&&) = delete;
+	MockWriter(const MockWriter&) = delete;
+	MockWriter& operator =(MockWriter&&) = delete;;
+	MockWriter& operator =(const MockWriter&) = delete;
 };
 
 #endif /* MOCKWRITER_H_ */

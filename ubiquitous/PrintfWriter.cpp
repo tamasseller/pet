@@ -23,58 +23,83 @@
 
 namespace pet {
 
-void PrintfWriter::write(const char* val) {
+PrintfWriter& PrintfWriter::operator<<(const char* val)
+{
 	printf("%s", val);
-	fflush(stdout);
+	return *this;
 }
 
-void PrintfWriter::write(const void* val) {
+PrintfWriter& PrintfWriter::operator<<(const void* val)
+{
 	printf("%p", val);
-	fflush(stdout);
+	return *this;
 }
 
-void PrintfWriter::write(short val) {
+PrintfWriter& PrintfWriter::operator<<(short val)
+{
 	printf("%hd", val);
-	fflush(stdout);
+	return *this;
 }
 
-void PrintfWriter::write(unsigned short val) {
+PrintfWriter& PrintfWriter::operator<<(unsigned short val)
+{
 	printf("%hu", val);
-	fflush(stdout);
+	return *this;
 }
 
-void PrintfWriter::write(int val) {
+PrintfWriter& PrintfWriter::operator<<(int val)
+{
 	printf("%d", val);
-	fflush(stdout);
+	return *this;
 }
 
-void PrintfWriter::write(unsigned int val) {
+PrintfWriter& PrintfWriter::operator<<(unsigned int val)
+{
 	printf("%u", val);
-	fflush(stdout);
+	return *this;
 }
 
-void PrintfWriter::write(long val) {
+PrintfWriter& PrintfWriter::operator<<(long val)
+{
 	printf("%ld", val);
-	fflush(stdout);
+	return *this;
 }
 
-void PrintfWriter::write(unsigned long val) {
+PrintfWriter& PrintfWriter::operator<<(unsigned long val)
+{
 	printf("%ld", val);
-	fflush(stdout);
+	return *this;
 }
 
-void PrintfWriter::write(float val) {
+PrintfWriter& PrintfWriter::operator<<(float val)
+{
 	printf("%f", val);
-	fflush(stdout);
+	return *this;
 }
 
-void PrintfWriter::write(double val) {
+PrintfWriter& PrintfWriter::operator<<(double val)
+{
 	printf("%f", val);
-	fflush(stdout);
+	return *this;
 }
 
-void PrintfWriter::write(long double val) {
+PrintfWriter& PrintfWriter::operator<<(long double val)
+{
 	printf("%Lf", val);
+	return *this;
+}
+
+PrintfWriter::PrintfWriter(pet::Level, const char* name)
+{
+	if(name)
+	{
+		printf("%s ", name);
+	}
+}
+
+PrintfWriter::~PrintfWriter()
+{
+	printf("\n");
 	fflush(stdout);
 }
 

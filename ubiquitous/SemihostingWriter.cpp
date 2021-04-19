@@ -22,70 +22,80 @@
 #include "algorithm/Str.h"
 
 namespace pet {
-	char SemihostingWriter::buffer[SemihostingWriter::bufferSize];
 
-	uint32_t SemihostingWriter::idx = 0;
+char SemihostingWriter::buffer[SemihostingWriter::bufferSize];
 
-	void SemihostingWriter::flush()
+uint32_t SemihostingWriter::idx = 0;
+
+void SemihostingWriter::flush()
+{
+	if(idx)
 	{
-		if(idx) {
-			uint32_t msg[3];
-			msg[0] = 2;
-			msg[1] = (uint32_t)buffer;
-			msg[2] = idx;
-			asm("mov r0, #5;"
-				"mov r1, %[msg];"
-				"bkpt #0xab"
-				: // no output
-				: [msg] "r" (msg)
-				: "r0", "r1", "memory");
+		uint32_t msg[3];
+		msg[0] = 2;
+		msg[1] = (uint32_t)buffer;
+		msg[2] = idx;
+		asm("mov r0, #5;"
+			"mov r1, %[msg];"
+			"bkpt #0xab"
+			: // no output
+			: [msg] "r" (msg)
+			: "r0", "r1", "memory");
 
-			idx = 0;
-		}
+		idx = 0;
+	}
+}
+
+SemihostingWriter& SemihostingWriter::operator<<(const char* val)
+{
+	while(*val)
+	{
+		buffer[idx++] = *val;
+
+		if(idx == sizeof(buffer) || ((*val == '\n') && flushOnNewline))
+			flush();
+
+		val++;
 	}
 
-	void SemihostingWriter::write(const char* val) {
-		while(*val) {
-			buffer[idx++] = *val;
+	return *this;
+}
 
-			if(idx == sizeof(buffer) || ((*val == '\n') && flushOnNewline))
-				flush();
+SemihostingWriter& SemihostingWriter::operator<<(long val) {
+	return *this << ((int)val);
+}
 
-			val++;
-		}
-	}
+SemihostingWriter& SemihostingWriter::operator<<(unsigned long val) {
+	return *this << ((unsigned int)val);
+}
 
-	void SemihostingWriter::write(long val) {
-		write((int)val);
-	}
+SemihostingWriter& SemihostingWriter::operator<<(int val)
+{
+	char temp[16];
+	pet::Str::itoa<10>(val, temp, sizeof(temp));
+	return *this << (temp);
+}
 
-	void SemihostingWriter::write(unsigned long val) {
-		write((unsigned int)val);
-	}
+SemihostingWriter& SemihostingWriter::operator<<(unsigned int val)
+{
+	char temp[16];
+	pet::Str::utoa<10>(val, temp, sizeof(temp));
+	return *this << (temp);
+}
 
-	void SemihostingWriter::write(int val) {
-		char temp[16];
-		pet::Str::itoa<10>(val, temp, sizeof(temp));
-		write(temp);
-	}
+SemihostingWriter& SemihostingWriter::operator<<(short val) {
+	return *this << ((int)val);
+}
 
-	void SemihostingWriter::write(unsigned int val) {
-		char temp[16];
-		pet::Str::utoa<10>(val, temp, sizeof(temp));
-		write(temp);
-	}
+SemihostingWriter& SemihostingWriter::operator<<(unsigned short val) {
+	return *this << ((unsigned int)val);
+}
 
-	void SemihostingWriter::write(short val) {
-		write((int)val);
-	}
+SemihostingWriter& SemihostingWriter::operator<<(const void* val)
+{
+	char temp[16];
+	pet::Str::utoa<16>((uintptr_t)val, temp, sizeof(temp));
+	return *this << (temp);
+}
 
-	void SemihostingWriter::write(unsigned short val) {
-		write((unsigned int)val);
-	}
-
-	void SemihostingWriter::write(const void* val) {
-		char temp[16];
-		pet::Str::utoa<16>((uintptr_t)val, temp, sizeof(temp));
-		write(temp);
-	}
 }

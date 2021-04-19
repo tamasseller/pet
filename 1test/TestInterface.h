@@ -33,8 +33,8 @@ class TestInterface
         friend TestRunner;
         virtual void runTest() = 0;
         virtual void reset() = 0;
-        virtual const char* getName() = 0;
-        virtual const char* getSourceInfo() = 0;
+        virtual const char* getName() const = 0;
+        virtual const char* getSourceInfo() const = 0;
     public:
         inline virtual ~TestInterface() {}
 };

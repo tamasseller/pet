@@ -2,6 +2,9 @@ OUTPUT = pet-test
 
 # Test code
 
+ifeq (,_)
+endif
+
 SOURCES += TestAlgoCharLookup.cpp
 SOURCES += TestAlgoCharTraits.cpp
 SOURCES += TestAlgoStr.cpp
@@ -61,6 +64,7 @@ SOURCES += TestUbiqTrace.cpp
 
 # Test support
 
+SOURCES += ../1test/TestRunnerExperimental.cpp
 SOURCES += ../ubiquitous/PrintfWriter.cpp
 SOURCES += MockWriter.cpp
 SOURCES += MockAllocator.cpp

@@ -20,6 +20,8 @@
 #ifndef TRACECOMMON_H_
 #define TRACECOMMON_H_
 
+#include "meta/Utility.h"
+
 namespace pet {
 
 /**
@@ -28,7 +30,7 @@ namespace pet {
  * These can be used to identify the different levels of 
  * tracing information for filtering.
  */
-enum class Level: int {
+enum class Level: int {																					// TODO XXX rename LogLevel
 	All,			//!< Use for filters to enable all levels.
 	Information,	//!< Generic information level, with no intention to report any kind of error.
 	Warning,		//!< Possibly erroneus level.
@@ -37,7 +39,9 @@ enum class Level: int {
 	None,			//!< Use for filters to disable all levels.
 };
 
-/** @cond */
+template<class> class TracePolicy;
+template<class> class DefaultTracePolicy;
+template<class> class TraceWriter;
 
 struct LineEnding {
 	operator const char*() const {
@@ -79,27 +83,14 @@ struct KeyValueSeparator {
 
 static constexpr inline auto val = KeyValueSeparator();
 
-
-
-
 class Global;
-
-template<class>
-class TracePolicy;
-
-template<class>
-class DefaultTracePolicy;
-
-template<class>
-class TraceWriter;
 
 #define TRACE_WRITER(X) 							\
 namespace pet {										\
-	template<> struct TraceWriter<Global>: X {		\
-		using X::write;								\
+	template<> struct TraceWriter<Global> {			\
+		using Writer = X;							\
 	};												\
 }
-
 
 #define __TRACE_POLICY(X, Y, Z)						\
 namespace pet {										\
@@ -120,7 +111,5 @@ namespace NS {class X;}								\
 __TRACE_POLICY(NS::X, Y, TracePolicy)
 
 #define GLOBAL_TRACE_POLICY(Y) __TRACE_POLICY(Global, Y, DefaultTracePolicy)
-
-/** @endcond */
 
 #endif /* TRACECOMMON_H_ */

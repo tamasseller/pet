@@ -409,14 +409,14 @@ class Heap:	public Policy,
 			Block block = (char*)start + Block::headerSize;
         	while(1) {
         		if(block.isFree())
-        			info << "(";
+        			info() << "(";
 
-        		info << decode(block.getSize());
+        		info() << decode(block.getSize());
 
         		if(block.isFree())
-        			info << ")";
+        			info() << ")";
 
-        		info << " ";
+        		info() << " ";
 
         		if(!block.hasNext(end))
         			break;
@@ -427,7 +427,7 @@ class Heap:	public Policy,
         		block = block.getNext();
         	}
 
-        	info << "\n";
+        	info() << "\n";
         	return ok;
 		}
 		/** @endcond */
@@ -505,7 +505,7 @@ inline void Heap<Policy, SizeType, alignmentBits, useChecksum>::init(void* start
 	first.setPrev(first);
 	first.updateChecksum();
 	Policy::init(first);
-	info << "Heap created at: " << start << " - " << (void*)(((char*)start) + size) << "\n";
+	info() << "Heap created at: " << start << " - " << (void*)(((char*)start) + size) << "\n";
 }
 
 
@@ -515,7 +515,7 @@ inline pet::FailPointer<void> Heap<Policy, SizeType, alignmentBits, useChecksum>
     unsigned int size = sizeParam;
 
 	if(size > maxBlockSize) {
-		warn << "Heap::alloc(): Too large block requested !\n";
+		warn() << "Heap::alloc(): Too large block requested !\n";
         return 0;
     }
 
@@ -527,7 +527,7 @@ inline pet::FailPointer<void> Heap<Policy, SizeType, alignmentBits, useChecksum>
     Block ret(Policy::findAndRemove(size));
 
     if(ret.ptr == 0) {
-    	warn << "Heap::alloc(): Can not allocate " << decode(size) << " bytes\n";
+    	warn() << "Heap::alloc(): Can not allocate " << decode(size) << " bytes\n";
     	return 0;
     }
 
@@ -540,7 +540,7 @@ inline pet::FailPointer<void> Heap<Policy, SizeType, alignmentBits, useChecksum>
     	Policy::add(leftover);
 	}
 
-	info << "Heap::alloc(" << sizeParam << "): " << ret.ptr << "\n";
+	info() << "Heap::alloc(" << sizeParam << "): " << ret.ptr << "\n";
 
 	ret.setFree(false);
 	ret.updateChecksum();
@@ -557,7 +557,7 @@ inline void Heap<Policy, SizeType, alignmentBits, useChecksum>::free(void* r) {
 	assertThat(block.checkChecksum(), "Heap corruption");
 	assertThat(!block.isFree(), "Heap corruption (probably double free)");
 
-	info << "Heap::free(" <<  r << "): " << decode(block.getSize()) << " freed\n";
+	info() << "Heap::free(" <<  r << "): " << decode(block.getSize()) << " freed\n";
 
     bool prevFree = block.hasPrev() && block.getPrev().isFree();
     bool nextFree = block.hasNext(end) && block.getNext().isFree();
@@ -606,23 +606,23 @@ template<class Policy, class SizeType, unsigned int alignmentBits, bool useCheck
 inline unsigned int Heap<Policy, SizeType, alignmentBits, useChecksum>::shrink(void* ptr, unsigned int shrunkSizeParam)
 {
 	assertThat(ptr, "Heap::shrink(): Null argument\n");
-	info << "Heap::shrink(" <<  ptr << "): ";
+	info() << "Heap::shrink(" <<  ptr << "): ";
 
     Block block(ptr);
     assertThat(block.checkChecksum(), "Heap corruption");
 
 	unsigned int oldSize = decode(block.getSize());
 
-    info << oldSize << " -> " << shrunkSizeParam;
+    info() << oldSize << " -> " << shrunkSizeParam;
 
     unsigned int shrunkSize = encode(align((shrunkSizeParam < Policy::freeHeaderSize) ?
     		Policy::freeHeaderSize :
     		shrunkSizeParam));
 
     if(block.getSize() < shrunkSize) {
-    	info << " (enlargement requested)\n";
-    	warn << "Heap::shrink(" <<  ptr << "): " << oldSize << " -> " << shrunkSizeParam;
-    	warn << " (enlargement requested)\n";
+    	info() << " (enlargement requested)\n";
+    	warn() << "Heap::shrink(" <<  ptr << "): " << oldSize << " -> " << shrunkSizeParam;
+    	warn() << " (enlargement requested)\n";
     	return decode(block.getSize());
     }
 
@@ -651,9 +651,9 @@ inline unsigned int Heap<Policy, SizeType, alignmentBits, useChecksum>::shrink(v
     unsigned int newSize = decode(block.getSize());
 
     if(oldSize == newSize)
-    	info << " (not changed)\n";
+    	info() << " (not changed)\n";
     else
-    	info << " (shrunk to: " << newSize << ")\n";
+    	info() << " (shrunk to: " << newSize << ")\n";
 
     return newSize;
 }

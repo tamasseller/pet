@@ -20,48 +20,58 @@
 #ifndef PRINTFWRITER_H_
 #define PRINTFWRITER_H_
 
+#include "ubiquitous/TraceCommon.h"
+
 namespace pet {
 
 /**
- * Tarce writer that uses printf.
+ * Trace writer that uses printf.
  * 
  * This writer is intended to be used in a hosted test environment, where
  * stdlibc io functions are present and are quite straightforward to use.
  */
-class PrintfWriter {
-protected:
+struct PrintfWriter
+{
 	/** Writes a zero terminated string to the output */
-	static void write(const char* val);
+	PrintfWriter& operator<<(const char* val);
 	
-	/** Writes a zero short value to the output */
-	static void write(short val);
+	/** Writes a short value to the output */
+	PrintfWriter& operator<<(short val);
 	
-	/** Writes a zero unsigned short value to the output */
-	static void write(unsigned short val);
+	/** Writes an unsigned short value to the output */
+	PrintfWriter& operator<<(unsigned short val);
 	
-	/** Writes a zero int value to the output */
-	static void write(int val);
+	/** Writes an int value to the output */
+	PrintfWriter& operator<<(int val);
 	
-	/** Writes a zero unsigned int value to the output */
-	static void write(unsigned int val);
+	/** Writes an unsigned int value to the output */
+	PrintfWriter& operator<<(unsigned int val);
 	
-	/** Writes a zero long value to the output */
-	static void write(long val);
+	/** Writes a long value to the output */
+	PrintfWriter& operator<<(long val);
 	
-	/** Writes a zero unsigned long value to the output */
-	static void write(unsigned long val);
+	/** Writes an unsigned long value to the output */
+	PrintfWriter& operator<<(unsigned long val);
 	
-	/** Writes a zero float value to the output */
-	static void write(float val);
+	/** Writes a float value to the output */
+	PrintfWriter& operator<<(float val);
 	
-	/** Writes a zero double value to the output */
-	static void write(double val);
+	/** Writes a double value to the output */
+	PrintfWriter& operator<<(double val);
 	
-	/** Writes a zero long value to the output */
-	static void write(long double val);
+	/** Writes a long value to the output */
+	PrintfWriter& operator<<(long double val);
 	
-	/** Writes a zero pointer value to the output */
-	static void write(const void* val);
+	/** Writes a pointer value to the output */
+	PrintfWriter& operator<<(const void* val);
+
+	PrintfWriter(pet::Level, const char* name);
+	~PrintfWriter();
+
+	PrintfWriter(PrintfWriter&&) = delete;
+	PrintfWriter(const PrintfWriter&) = delete;
+	PrintfWriter& operator =(PrintfWriter&&) = delete;
+	PrintfWriter& operator =(const PrintfWriter&) = delete;
 };
 
 }

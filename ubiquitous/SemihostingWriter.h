@@ -20,13 +20,15 @@
 #ifndef SEMIHOSTINGWRITER_H_
 #define SEMIHOSTINGWRITER_H_
 
+#include "TraceCommon.h"
+
 #include <stddef.h>
 #include <stdint.h>
 
 namespace pet {
 
 /**
- * Tarce writer that uses ARM semihosting output.
+ * Trace writer that uses ARM semihosting output.
  * 
  * This writer is intended to be used in a hosted an ARM based embedded
  * environment, where a debugger that can process the semihosting requests
@@ -52,37 +54,44 @@ public:
 protected:
 
 	/** Writes a zero terminated string to the output */
-	static void write(const char* val);
+	SemihostingWriter& operator<<(const char* val);
 	
-	/** Writes a zero short value to the output */
-	static void write(short val);
+	/** Writes a short value to the output */
+	SemihostingWriter& operator<<(short val);
 	
-	/** Writes a zero unsigned short value to the output */
-	static void write(unsigned short val);
+	/** Writes an unsigned short value to the output */
+	SemihostingWriter& operator<<(unsigned short val);
 	
-	/** Writes a zero int value to the output */
-	static void write(int val);
+	/** Writes an int value to the output */
+	SemihostingWriter& operator<<(int val);
 	
-	/** Writes a zero unsigned int value to the output */
-	static void write(unsigned int val);
+	/** Writes an unsigned int value to the output */
+	SemihostingWriter& operator<<(unsigned int val);
 	
-	/** Writes a zero long value to the output */
-	static void write(long val);
+	/** Writes a long value to the output */
+	SemihostingWriter& operator<<(long val);
 	
-	/** Writes a zero unsigned long value to the output */
-	static void write(unsigned long val);
+	/** Writes an unsigned long value to the output */
+	SemihostingWriter& operator<<(unsigned long val);
 	
-	/** Writes a zero float value to the output */
-	static void write(float val);
+	/** Writes a float value to the output */
+	SemihostingWriter& operator<<(float val);
 	
-	/** Writes a zero double value to the output */
-	static void write(double val);
+	/** Writes a double value to the output */
+	SemihostingWriter& operator<<(double val);
 	
-	/** Writes a zero long value to the output */
-	static void write(long double val);
+	/** Writes a long value to the output */
+	SemihostingWriter& operator<<(long double val);
 	
-	/** Writes a zero pointer value to the output */
-	static void write(const void* val);
+	/** Writes a pointer value to the output */
+	SemihostingWriter& operator<<(const void* val);
+
+	inline SemihostingWriter(pet::Level, const char*) {}
+
+	SemihostingWriter(SemihostingWriter&&) = default;
+	SemihostingWriter(const SemihostingWriter&) = default;
+	SemihostingWriter& operator =(SemihostingWriter&&) = default;
+	SemihostingWriter& operator =(const SemihostingWriter&) = default;
 };
 
 }

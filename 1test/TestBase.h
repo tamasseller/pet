@@ -45,7 +45,7 @@ class TestBase: public Registry<TestInterface>::StaticElement<Child> {
 
 protected:
     inline void run();
-    virtual inline void reset();
+    virtual inline void reset() override;
     inline void dummy() {}
 };
 

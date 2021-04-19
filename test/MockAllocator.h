@@ -35,7 +35,7 @@ struct Allocator {
 		void *ret = malloc(s);
 		count++;
 
-		MockAllocatorTrace::info << "alloc   " << s << " -> " << ret << "\n";
+		MockAllocatorTrace::info() << "alloc   " << s << " -> " << ret << "\n";
 
 		return ret;
 	}
@@ -43,13 +43,13 @@ struct Allocator {
 	static void free(void* p) {
 		count--;
 
-		MockAllocatorTrace::info << "free   " << p << "\n";
+		MockAllocatorTrace::info() << "free   " << p << "\n";
 
 		return ::free(p);
 	}
 
 	static unsigned int shrink(void* p, unsigned int s) {
-		MockAllocatorTrace::info << "shrink " << p << " to " << s << "\n";
+		MockAllocatorTrace::info() << "shrink " << p << " to " << s << "\n";
 		return s;
 	}
 

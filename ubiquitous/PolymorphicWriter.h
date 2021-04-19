@@ -21,6 +21,7 @@
 #define PET_UBIQUITOUS_POLYMORPHICWRITER_H_
 
 #include "meta/Utility.h"
+#include "ubiquitous/TraceCommon.h"
 
 namespace pet
 {
@@ -31,50 +32,57 @@ public:
 	class Receiver
 	{
 		friend PolymorphicWriter;
-		virtual void write(const char* val) = 0;
-		virtual void write(short val) = 0;
-		virtual void write(unsigned short val) = 0;
-		virtual void write(int val) = 0;
-		virtual void write(unsigned int val) = 0;
-		virtual void write(long val) = 0;
-		virtual void write(unsigned long val) = 0;
-		virtual void write(float val) = 0;
-		virtual void write(double val) = 0;
-		virtual void write(long double val) = 0;
-		virtual void write(const void* val) = 0;
-		virtual void write(const LineEnding &val) = 0;
-		virtual void write(const CollectionStart &val) = 0;
-		virtual void write(const CollectionEnd &val) = 0;
-		virtual void write(const ElementSeparator &val) = 0;
-		virtual void write(const KeyValueSeparator&val) = 0;
+		virtual void operator<<(const char* val) = 0;
+		virtual void operator<<(short val) = 0;
+		virtual void operator<<(unsigned short val) = 0;
+		virtual void operator<<(int val) = 0;
+		virtual void operator<<(unsigned int val) = 0;
+		virtual void operator<<(long val) = 0;
+		virtual void operator<<(unsigned long val) = 0;
+		virtual void operator<<(float val) = 0;
+		virtual void operator<<(double val) = 0;
+		virtual void operator<<(long double val) = 0;
+		virtual void operator<<(const void* val) = 0;
+		virtual void operator<<(const LineEnding &val) = 0;
+		virtual void operator<<(const CollectionStart &val) = 0;
+		virtual void operator<<(const CollectionEnd &val) = 0;
+		virtual void operator<<(const ElementSeparator &val) = 0;
+		virtual void operator<<(const KeyValueSeparator&val) = 0;
 
 	public:
 		inline virtual ~Receiver() {}
 	};
 
 private:
-	static inline Receiver* impl = nullptr;
+	Receiver* const impl;
 
 protected:
-	static inline void write(const char* val) 				{impl->write(val);}
-	static inline void write(short val) 					{impl->write(val);}
-	static inline void write(unsigned short val) 			{impl->write(val);}
-	static inline void write(int val) 						{impl->write(val);}
-	static inline void write(unsigned int val) 				{impl->write(val);}
-	static inline void write(long val) 						{impl->write(val);}
-	static inline void write(unsigned long val) 			{impl->write(val);}
-	static inline void write(float val) 					{impl->write(val);}
-	static inline void write(double val) 					{impl->write(val);}
-	static inline void write(long double val) 				{impl->write(val);}
-	static inline void write(const void* val) 				{impl->write(val);}
-	static inline void write(const LineEnding &val) 		{impl->write(val);}
-	static inline void write(const CollectionStart &val) 	{impl->write(val);}
-	static inline void write(const CollectionEnd &val) 		{impl->write(val);}
-	static inline void write(const KeyValueSeparator &val) 	{impl->write(val);}
-	static inline void write(const ElementSeparator &val) 	{impl->write(val);}
+	PolymorphicWriter(const PolymorphicWriter&) = delete;
+	PolymorphicWriter& operator=(const PolymorphicWriter&) = delete;
+	PolymorphicWriter(PolymorphicWriter&&) = delete;
+	PolymorphicWriter& operator=(PolymorphicWriter&&) = delete;
+
+	inline PolymorphicWriter(Receiver* impl): impl(impl) {}
+	inline ~PolymorphicWriter() { delete impl; }
 
 public:
-	static inline void setReceiver(Receiver* r) {impl = r;}
+	inline PolymorphicWriter& operator<<(const char* val)              { *impl << val; return *this; }
+	inline PolymorphicWriter& operator<<(short val)                    { *impl << val; return *this; }
+	inline PolymorphicWriter& operator<<(unsigned short val)           { *impl << val; return *this; }
+	inline PolymorphicWriter& operator<<(int val)                      { *impl << val; return *this; }
+	inline PolymorphicWriter& operator<<(unsigned int val)             { *impl << val; return *this; }
+	inline PolymorphicWriter& operator<<(long val)                     { *impl << val; return *this; }
+	inline PolymorphicWriter& operator<<(unsigned long val)            { *impl << val; return *this; }
+	inline PolymorphicWriter& operator<<(float val)                    { *impl << val; return *this; }
+	inline PolymorphicWriter& operator<<(double val)                   { *impl << val; return *this; }
+	inline PolymorphicWriter& operator<<(long double val)              { *impl << val; return *this; }
+	inline PolymorphicWriter& operator<<(const void* val)              { *impl << val; return *this; }
+	inline PolymorphicWriter& operator<<(const LineEnding &val)        { *impl << val; return *this; }
+	inline PolymorphicWriter& operator<<(const CollectionStart &val)   { *impl << val; return *this; }
+	inline PolymorphicWriter& operator<<(const CollectionEnd &val)     { *impl << val; return *this; }
+	inline PolymorphicWriter& operator<<(const KeyValueSeparator &val) { *impl << val; return *this; }
+	inline PolymorphicWriter& operator<<(const ElementSeparator &val)  { *impl << val; return *this; }
+
 };
 
 template<class... Wrapped>
@@ -83,29 +91,31 @@ class PolymorphicTraceWriterWrapper: public PolymorphicWriter::Receiver, public 
 	template<class C>
 	inline void fwd(C&& c)
 	{
-		int dummy[] = {0, (this->Wrapped::write(forward<C>(c)), void(), 0)... };
+		int dummy[] = {0, (this->Wrapped::operator<<(forward<C>(c)), void(), 0)... };
 		static_cast<void>(dummy);
 	}
 
-	virtual inline void write(const char* val) 				{fwd(val);}
-	virtual inline void write(short val) 					{fwd(val);}
-	virtual inline void write(unsigned short val)			{fwd(val);}
-	virtual inline void write(int val) 						{fwd(val);}
-	virtual inline void write(unsigned int val) 			{fwd(val);}
-	virtual inline void write(long val) 					{fwd(val);}
-	virtual inline void write(unsigned long val) 			{fwd(val);}
-	virtual inline void write(float val) 					{fwd(val);}
-	virtual inline void write(double val) 					{fwd(val);}
-	virtual inline void write(long double val) 				{fwd(val);}
-	virtual inline void write(const void* val) 				{fwd(val);}
-	virtual inline void write(const LineEnding &val) 		{fwd(val);}
-	virtual inline void write(const CollectionStart &val) 	{fwd(val);}
-	virtual inline void write(const CollectionEnd &val) 	{fwd(val);}
-	virtual inline void write(const KeyValueSeparator &val) {fwd(val);}
-	virtual inline void write(const ElementSeparator &val) 	{fwd(val);}
+	virtual void operator<<(const char* val) override              { fwd(val); }
+	virtual void operator<<(short val) override                    { fwd(val); }
+	virtual void operator<<(unsigned short val) override           { fwd(val); }
+	virtual void operator<<(int val) override                      { fwd(val); }
+	virtual void operator<<(unsigned int val) override             { fwd(val); }
+	virtual void operator<<(long val) override                     { fwd(val); }
+	virtual void operator<<(unsigned long val) override            { fwd(val); }
+	virtual void operator<<(float val) override                    { fwd(val); }
+	virtual void operator<<(double val) override                   { fwd(val); }
+	virtual void operator<<(long double val) override              { fwd(val); }
+	virtual void operator<<(const void* val) override              { fwd(val); }
+	virtual void operator<<(const LineEnding &val) override        { fwd(val); }
+	virtual void operator<<(const CollectionStart &val) override   { fwd(val); }
+	virtual void operator<<(const CollectionEnd &val) override     { fwd(val); }
+	virtual void operator<<(const KeyValueSeparator &val) override { fwd(val); }
+	virtual void operator<<(const ElementSeparator &val) override  { fwd(val); }
 
 public:
-	virtual inline ~PolymorphicTraceWriterWrapper() {}
+	virtual inline ~PolymorphicTraceWriterWrapper() = default;
+
+	inline PolymorphicTraceWriterWrapper(pet::Level l, const char* n): Wrapped(l, n)... {}
 };
 
 }
