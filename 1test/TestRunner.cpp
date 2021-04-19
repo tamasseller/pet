@@ -77,8 +77,6 @@ TestRunner::Result TestRunner::runTest(TestInterface* test)
 
 		FailureInjector::step();
 
-		ret.synthetic++;
-
 		if(!synthetic)
 		{
 			if(failed)
@@ -86,6 +84,8 @@ TestRunner::Result TestRunner::runTest(TestInterface* test)
 
 			synthetic = true;
 		}
+
+		ret.synthetic++;
 	}
 
 	return ret;
