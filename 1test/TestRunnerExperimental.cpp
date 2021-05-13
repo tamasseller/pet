@@ -156,7 +156,7 @@ inline int TestRunner::Experimental::runTestSubset(int timeLimitSec)
         }
 	}
 
-    exit(0);
+    return 0;
 }
 
 int TestRunner::Experimental::runTestsInParallel(int timeLimitSec)
