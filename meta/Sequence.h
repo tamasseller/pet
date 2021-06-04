@@ -29,22 +29,22 @@ namespace detail {
 template<int... rest> struct SequenceMaker;
 
 template<int min, int... rest> struct SequenceMaker<min, rest...> {
-  using type = typename SequenceMaker<min - 1, min, rest...>::type;
+	using type = typename SequenceMaker<min - 1, min, rest...>::type;
 };
 
 template<int... rest> struct SequenceMaker<0, rest...> {
-  using type = Sequence<0, rest...>;
+	using type = Sequence<0, rest...>;
 };
 
 template<> struct SequenceMaker<-1> {
-        using type = Sequence<>;
+	using type = Sequence<>;
 };
 
 
 template<int shift>
 struct SequenceShifter {
-        template<int... idx>
-        static Sequence<(idx + shift)...> x(const Sequence<idx...>&) {return Sequence<(idx + shift)...>();}
+	template<int... idx>
+	static Sequence<(idx + shift)...> x(const Sequence<idx...>&) {return Sequence<(idx + shift)...>();}
 };
 
 }
