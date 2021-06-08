@@ -30,9 +30,8 @@ namespace pet {
 /**
  * Trace writer that uses ARM semihosting output.
  * 
- * This writer is intended to be used in a hosted an ARM based embedded
- * environment, where a debugger that can process the semihosting requests
- * is present.
+ * This writer is intended to be used in an ARM based embedded environment,
+ * where a debugger that can process the semihosting requests is present.
  *
  * It does buffer the output to counteract the exceptionally poor performance
  * of semihosting output. The buffer is flushed when a newline is encountered
@@ -41,7 +40,6 @@ namespace pet {
 
 class SemihostingWriter {
 	static constexpr auto bufferSize = 4 * 1024u;
-	static constexpr bool flushOnNewline = false;
 	static char buffer[bufferSize];
 
 	/** Index of the next byte to be written in the buffer */
@@ -51,11 +49,14 @@ public:
 	/** Method that flushes the semihosting output buffer if not empty already. */
 	static void flush();
 
-protected:
-
 	/** Writes a zero terminated string to the output */
 	SemihostingWriter& operator<<(const char* val);
-	
+
+	/** Writes a character value to the output */
+	SemihostingWriter& operator<<(char val);
+	SemihostingWriter& operator<<(signed char val);
+	SemihostingWriter& operator<<(unsigned char val);
+
 	/** Writes a short value to the output */
 	SemihostingWriter& operator<<(short val);
 	
@@ -86,7 +87,8 @@ protected:
 	/** Writes a pointer value to the output */
 	SemihostingWriter& operator<<(const void* val);
 
-	inline SemihostingWriter(pet::LogLevel, const char*) {}
+	inline SemihostingWriter(pet::LogLevel, const char* name) { if(name) *this << name << ' '; }
+	inline ~SemihostingWriter() { *this << '\n'; flush();}
 
 	SemihostingWriter(SemihostingWriter&&) = default;
 	SemihostingWriter(const SemihostingWriter&) = default;

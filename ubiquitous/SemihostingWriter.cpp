@@ -46,16 +46,32 @@ void SemihostingWriter::flush()
 	}
 }
 
+
+SemihostingWriter& SemihostingWriter::operator<<(char val)
+{
+	buffer[idx++] = val;
+
+	if(idx == sizeof(buffer))
+	{
+		flush();
+	}
+
+	return *this;
+}
+
+SemihostingWriter& SemihostingWriter::operator<<(signed char val) {
+	return *this << (char)val;
+}
+
+SemihostingWriter& SemihostingWriter::operator<<(unsigned char val) {
+	return *this << (char)val;
+}
+
 SemihostingWriter& SemihostingWriter::operator<<(const char* val)
 {
-	while(*val)
+	for(; auto c = *val; val++)
 	{
-		buffer[idx++] = *val;
-
-		if(idx == sizeof(buffer) || ((*val == '\n') && flushOnNewline))
-			flush();
-
-		val++;
+		*this << c;
 	}
 
 	return *this;
