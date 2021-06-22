@@ -62,10 +62,13 @@ public:
 	 */
 	class Iterator {
 		friend LinkedPtrList;
-		Ptr* prevsNext;
+		Ptr* prevsNext = nullptr;
 
 		really_inline Iterator(Ptr* prevsNext);
 	public:
+		really_inline Iterator() = default;
+		really_inline Iterator(const Iterator&) = default;
+
 		/**
 		 * Current element or NULL.
 		 *

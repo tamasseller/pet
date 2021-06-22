@@ -20,9 +20,9 @@
 #ifndef MANAGED_REFCNT_H_
 #define MANAGED_REFCNT_H_
 
-#include <platform/Atomic.h>
-#include <meta/Resettable.h>
-#include <meta/Utility.h>
+#include "platform/Atomic.h"
+#include "meta/Resettable.h"
+#include "meta/Utility.h"
 #include <stdint.h>
 
 namespace pet
@@ -44,13 +44,13 @@ class RefCnt
 			{
 				Allocator::traceReferenceAcquistion(this, newTarget);
 
-	    		target->counter([](auto o, auto &n) { n = o + 1; return true;});
+	    		target->RefCnt::counter([](auto o, auto &n) { n = o + 1; return true;});
 			}
     	}
 
     	inline void release(Target* trg)
     	{
-    		if(trg && 1 == trg->counter([](auto o, auto &n) { n = o - 1; return true;}))
+    		if(trg && 1 == trg->RefCnt::counter([](auto o, auto &n) { n = o - 1; return true;}))
     			delete trg;
     	}
 
