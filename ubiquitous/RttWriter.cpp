@@ -1,3 +1,22 @@
+/*******************************************************************************
+ *
+ * Copyright (c) 2021 Tamás Seller. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *******************************************************************************/
+
 #ifndef PET_UBIQUITOUS_RTTWRITER_CPP_
 #define PET_UBIQUITOUS_RTTWRITER_CPP_
 
@@ -14,6 +33,52 @@ using namespace pet;
 
 char RttWriter::buffer[RttWriter::bufferSize];
 
+/*
+
+OpenOCD Setup (through GDB command line)
+
+set $rttcbaddr=&pet::RttWriter::controlBlock
+set $rttcbsize=sizeof(pet::RttWriter::controlBlock)
+eval "monitor rtt setup 0x%x 0x%x rtt-trace", $rttcbaddr, $rttcbsize
+monitor rtt start
+monitor rtt server start 37773 0
+define hook-load
+monitor rtt stop
+end
+define hookpost-load
+monitor rtt start
+end
+
+
+Netcat output
+
+nc localhost 37773
+
+ */
+
+RttWriter::RttWriter(pet::LogLevel, const char* name)
+{
+	if constexpr(disableInterruptsForCompleteLine)
+	{
+		asm volatile ("cpsid i");
+	}
+
+	if(name)
+	{
+		*this << name << ' ';
+	}
+}
+
+RttWriter::~RttWriter()
+{
+	*this << '\n';
+
+	if constexpr(disableInterruptsForCompleteLine)
+	{
+		asm volatile ("cpsie i");
+	}
+}
+
 struct RttWriter::UpBufferDescriptor
 {
 	const char* const name = "Terminal";
@@ -24,7 +89,10 @@ struct RttWriter::UpBufferDescriptor
 
 	inline void write(const char* str, size_t length)
 	{
-		asm volatile("cpsid i" ::: "memory");
+		if constexpr(!disableInterruptsForCompleteLine)
+		{
+			asm volatile("cpsid i" ::: "memory");
+		}
 
 		const auto used = wIdx - rIdx;
 		const auto free = sizeof(buffer) - 1 - used;
@@ -51,7 +119,10 @@ struct RttWriter::UpBufferDescriptor
 			}
 		}
 
-		asm volatile ("cpsie i" ::: "memory");
+		if constexpr(!disableInterruptsForCompleteLine)
+		{
+			asm volatile ("cpsie i" ::: "memory");
+		}
 	}
 };
 
@@ -62,18 +133,14 @@ class InvertedString<pet::Sequence<idx...>>
 {
 public:
 	static constexpr auto length = sizeof...(idx);
-
 	constexpr inline InvertedString(const char (&in)[length]): value{(char)~in[idx]...} {}
-
-	really_inline constexpr char operator[](size_t n) const {
-		return value[n];
-	}
+	really_inline constexpr char operator[](size_t n) const { return value[n]; }
 
 private:
 	const char value[length];
 };
 
-struct RttWriter::ControlBlock
+struct alignas(256) RttWriter::ControlBlock
 {
 	static constexpr inline auto obfuscatedId = InvertedString<pet::sequence<0, sizeof(RttWriter::id)>>(RttWriter::id);
 

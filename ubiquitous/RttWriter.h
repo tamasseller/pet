@@ -37,6 +37,7 @@ namespace pet {
  */
 class RttWriter
 {
+	static constexpr bool disableInterruptsForCompleteLine = false;
 	static constexpr auto bufferSize = 4 * 1024u;
 	static char buffer[bufferSize];
 
@@ -85,8 +86,8 @@ public:
 	/** Writes a pointer value to the output */
 	RttWriter& operator<<(const void* val);
 
-	inline RttWriter(pet::LogLevel, const char* name) { if(name) *this << name << ' '; }
-	inline ~RttWriter() { *this << '\n';}
+	RttWriter(pet::LogLevel, const char* name);
+	~RttWriter();
 
 	RttWriter(RttWriter&&) = default;
 	RttWriter(const RttWriter&) = default;
