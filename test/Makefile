@@ -7,6 +7,7 @@ endif
 
 SOURCES += TestAlgoCharLookup.cpp
 SOURCES += TestAlgoCharTraits.cpp
+SOURCES += TestAlgoCobs.cpp
 SOURCES += TestAlgoStr.cpp
 SOURCES += TestAlgoMinMaxHeap.cpp
 SOURCES += TestAlgoIntegerDivision.cpp
