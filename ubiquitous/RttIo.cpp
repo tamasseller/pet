@@ -28,10 +28,7 @@ define hook-load
 printf "stopping RTT\n"
 monitor rtt stop
 end
-define hookpost-stop
-printf "(re-)starting RTT\n"
-monitor rtt start
-end
+b main
 
 **************** Netcat output setup ******************
 
