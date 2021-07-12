@@ -22,8 +22,8 @@
 /****** OpenOCD Setup (through GDB command line) ******
 
 monitor rtt setup 0x20000000 0x100000 real-time-xfer
-monitor rtt start
 monitor rtt server start 37773 0
+monitor rtt start
 define hook-load
 printf "stopping RTT\n"
 monitor rtt stop
