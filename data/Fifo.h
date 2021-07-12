@@ -40,13 +40,13 @@ namespace pet {
  *  or full there is no contention, both sides can progress without affecting
  *  the other in any way.
  *
- *  However, in the specific corner cases, when the _fifo_ is being free/empty
- *  or one element away from that, and both the reader and writer sides
+ *  However, in the specific corner cases, when the _fifo_ is free/empty
+ *  or one operation away from that, and both the reader and writer sides
  *  manipulate the _fifo_ at the same time the result is nondeterministic.
  *  But for the above mentioned reasons it can be easily seen that if there
- *  are concurrent modifications even in these corner cases the state of the
- *  _fifo_ is kept consistent. In other words, under any reading or writing
- *  will atomically fail or succeed.
+ *  are concurrent modifications even in these corner cases, the state of the
+ *  _fifo_ is kept consistent. In other words, any reading or writing will
+ *  atomically fail or succeed.
  *
  *  Circular buffers, that represent their state in the form of reader and
  *  writer pointers (as opposed to start pointer and size) bear that property
@@ -66,6 +66,11 @@ namespace pet {
  *  and full states can easily be differentiated. The _fifo_ buffer is
  *  empty when the indices are equal, and it is full when the writer is
  *  ahead of the reader by exactly the size of the buffer.
+ *
+ *  This optimization is not important for sparing that single byte of memory
+ *  from being wasted, but because it enables actual power of two sized
+ *  buffers with a modulus that is also power of two (the same value as the
+ *  size of the buffer).
  */
 template<uint16_t size>
 class FifoBase
@@ -172,7 +177,13 @@ public:
 		inline auto operator*() const { return idx % size; }
 		inline auto operator==(const Iterator& o) const { return idx == o.idx; }
 		inline auto operator!=(const Iterator& o) const { return idx != o.idx; }
-		inline auto operator++() { return idx = (idx + 1) % (2 * size); }
+		inline Iterator operator++() { return idx = (idx + 1) % (2 * size); }
+		inline Iterator operator++(int)
+		{
+			const auto ret = idx;
+			++*this;
+			return ret;
+		}
 	};
 
 	/**
@@ -191,6 +202,16 @@ public:
 	 */
 	inline Iterator end() const {
 		return {writeIdx};
+	}
+
+	/**
+	 * Set the internal read index according the iterator provided.
+	 *
+	 * @note This method can be used to implement conditional consumption
+	 *       of the stored data.
+	 */
+	inline void commitRead(const Iterator& it) {
+		readIdx = it.idx;
 	}
 };
 
@@ -346,8 +367,11 @@ public:
 	using Base::doneWriting;
 	using Base::isEmpty;
 	using Base::isFull;
+
+	using Base::Iterator;
 	using Base::begin;
 	using Base::end;
+	using Base::commitRead;
 
 	/**
 	 * Read single data element.
