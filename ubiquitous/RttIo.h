@@ -158,6 +158,30 @@ public:
 	really_inline static bool write(const char* data, size_t length) {
 		return controlBlock.up.write(data, length);
 	}
+
+	really_inline static auto beginUpTransfer() {
+		return controlBlock.up.startWriting();
+	}
+
+	really_inline static auto beginDownTransfer() {
+		return controlBlock.down.startReading();
+	}
+
+	really_inline static auto accessUpTransfer(RttBufferDescriptor::Iterator& it) {
+		return controlBlock.up.writeAccess(it);
+	}
+
+	really_inline static auto accessDownTransfer(RttBufferDescriptor::Iterator& it) {
+		return controlBlock.down.readAccess(it);
+	}
+
+	really_inline static auto commitUpTransfer(RttBufferDescriptor::Iterator& it) {
+		return controlBlock.up.commitWrite(it);
+	}
+
+	really_inline static auto commitDownTransfer(RttBufferDescriptor::Iterator& it) {
+		return controlBlock.down.commitRead(it);
+	}
 };
 
 template<size_t upBufferSize, size_t downBufferSize>
