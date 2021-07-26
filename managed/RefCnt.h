@@ -196,7 +196,7 @@ public:
 
     template<class T = Target, class... Args>
     really_inline static Ptr<T> make(Args&&... args) {
-        return Ptr<T>::init(new (Allocator::alloc(sizeof(T)), NewOperatorDisambiguator()) T(pet::forward<Args>(args)...));
+        return Ptr<T>::init(new (Allocator::template allocFor<T>(), NewOperatorDisambiguator()) T(pet::forward<Args>(args)...));
     }
 
     template<class T=Target>
