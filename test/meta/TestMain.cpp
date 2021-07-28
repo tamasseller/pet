@@ -52,40 +52,40 @@ struct FailureRecord
 
 bool printActualFailureRecords = false;
 
-int normalExpected = 55;
-int syntheticExpected = 9;
+int normalExpected = 58;
+int syntheticExpected = 10;
 
 std::list<FailureRecord> expectedFailures
 {
-	FailureRecord("CheckAlways@FailureInjector", "TestFailureInjector.cpp:45", "TestFailureInjector.cpp:47", "Expectation: 'false' failed"),
-	FailureRecord("CheckAlways@FailureInjector", "TestFailureInjector.cpp:45", "TestFailureInjector.cpp:47", "Expectation: 'false' failed"),
-	FailureRecord("Check@FailureInjector", "TestFailureInjector.cpp:41", "TestFailureInjector.cpp:42", "Expectation: 'FailureInjector::shouldSimulateError()' failed"),
-    FailureRecord("CheckWithText", "TestNoGroup.cpp:41", "TestNoGroup.cpp:42", "Expectation: '\"Message can be hacked here\", true == false' failed"),
-    FailureRecord("NonEmptyMessageFailure", "TestNoGroup.cpp:37", "TestNoGroup.cpp:38", "NonEmpty"),
-    FailureRecord("EmptyMessageFailure", "TestNoGroup.cpp:33", "TestNoGroup.cpp:34", ""),
-    FailureRecord("CheckFalse", "TestNoGroup.cpp:29", "TestNoGroup.cpp:30", "Expectation: 'false' failed"),
-	FailureRecord("ParamsNonconstStringWrong@Mock", "TestMock.cpp:210", "TestMock.cpp:215", "Mock - string parameter error"),
+    FailureRecord("BodyNotOk@Group", "TestGroups.cpp:47", "TestGroups.cpp:28", "Expectation: 'ok' failed"),
     FailureRecord("CapacityOverload@Mock", "TestMock.cpp:196", "TestMock.cpp:199", "Mock - pool is full"),
+	FailureRecord("CheckAlways@FailureInjector", "TestFailureInjector.cpp:54", "TestFailureInjector.cpp:56", "Expectation: 'FailureInjector::shouldSimulateError()' failed"),
+	FailureRecord("CheckFailSynthetic@FailureInjector", "TestFailureInjector.cpp:44", "TestFailureInjector.cpp:46", "Expectation: 'FailureInjector::shouldSimulateError()' failed"),
+    FailureRecord("CheckFalse", "TestNoGroup.cpp:29", "TestNoGroup.cpp:30", "Expectation: 'false' failed"),
+    FailureRecord("CheckWithText", "TestNoGroup.cpp:41", "TestNoGroup.cpp:42", "Expectation: '\"Message can be hacked here\", true == false' failed"),
     FailureRecord("DisabledIndependentUnexpected@Mock", "TestMock.cpp:189", "--- Finalization ---", "Mock - unmet expectations"),
-    FailureRecord("ParamsPointerWrong@Mock", "TestMock.cpp:163", "TestMock.cpp:167", "Mock - pointer parameter error"),
+    FailureRecord("EmptyMessageFailure", "TestNoGroup.cpp:33", "TestNoGroup.cpp:34", ""),
+    FailureRecord("Incomplete@Mock", "TestMock.cpp:31", "--- Finalization ---", "Mock - unmet expectations"),
+    FailureRecord("IndependentSourcesFail@Mock", "TestMock.cpp:72", "TestMock.cpp:75", "Mock - unexpected call"),
+	FailureRecord("MockAlways@FailureInjector", "TestFailureInjector.cpp:84", "TestFailureInjector.cpp:87", "Mock - unexpected call"),
+    FailureRecord("MultipleIncomplete@Mock", "TestMock.cpp:44", "--- Finalization ---", "Mock - unmet expectations"),
+    FailureRecord("NonEmptyMessageFailure", "TestNoGroup.cpp:37", "TestNoGroup.cpp:38", "NonEmpty"),
+    FailureRecord("ParametricTest2@ParametricGroup1", "TestGenericSuite.cpp:41", "TestGenericSuite.cpp:43", "Expectation: '!this->ok' failed"),
+    FailureRecord("ParametricTest2@ParametricGroup1", "TestGenericSuite.cpp:41", "TestGenericSuite.cpp:43", "Expectation: '!this->ok' failed"),
+    FailureRecord("ParametricTest3@ParametricGroup2", "TestGenericSuite.cpp:51", "TestGenericSuite.cpp:53", "Expectation: 'this->ok' failed"),
+    FailureRecord("ParametricTest3@ParametricGroup2", "TestGenericSuite.cpp:51", "TestGenericSuite.cpp:53", "Expectation: 'this->ok' failed"),
     FailureRecord("ParamsDataWrongLength@Mock", "TestMock.cpp:148", "TestMock.cpp:153", "Mock - data block parameter error"),
     FailureRecord("ParamsDataWrong@Mock", "TestMock.cpp:140", "TestMock.cpp:145", "Mock - data block parameter error"),
-    FailureRecord("ParamsStringWrong@Mock", "TestMock.cpp:116", "TestMock.cpp:121", "Mock - string parameter error"),
-    FailureRecord("ParamsWrong@Mock", "TestMock.cpp:102", "TestMock.cpp:105", "Mock - parameter error"),
+	FailureRecord("ParamsNonconstStringWrong@Mock", "TestMock.cpp:210", "TestMock.cpp:215", "Mock - string parameter error"),
     FailureRecord("ParamsNoParamConsumed@Mock", "TestMock.cpp:90", "--- Finalization ---", "Mock - unmet expectations"),
     FailureRecord("ParamsNoParamExpected@Mock", "TestMock.cpp:84", "TestMock.cpp:87", "Mock - parameter error"),
-    FailureRecord("IndependentSourcesFail@Mock", "TestMock.cpp:72", "TestMock.cpp:75", "Mock - unexpected call"),
+    FailureRecord("ParamsPointerWrong@Mock", "TestMock.cpp:163", "TestMock.cpp:167", "Mock - pointer parameter error"),
+    FailureRecord("ParamsStringWrong@Mock", "TestMock.cpp:116", "TestMock.cpp:121", "Mock - string parameter error"),
+    FailureRecord("ParamsWrong@Mock", "TestMock.cpp:102", "TestMock.cpp:105", "Mock - parameter error"),
+    FailureRecord("SetupNotOk@OtherGroup", "TestGroups.cpp:60", "TestGroups.cpp:56", "User message"),
+    FailureRecord("TeardownNotOk@Group", "TestGroups.cpp:44", "TestGroups.cpp:28", "Expectation: 'ok' failed"),
     FailureRecord("Unexpected@Mock", "TestMock.cpp:58", "TestMock.cpp:60", "Mock - unexpected call"),
     FailureRecord("WrongOrder@Mock", "TestMock.cpp:51", "TestMock.cpp:55", "Mock - unexpected call"),
-    FailureRecord("MultipleIncomplete@Mock", "TestMock.cpp:44", "--- Finalization ---", "Mock - unmet expectations"),
-    FailureRecord("Incomplete@Mock", "TestMock.cpp:31", "--- Finalization ---", "Mock - unmet expectations"),
-    FailureRecord("SetupNotOk@OtherGroup", "TestGroups.cpp:60", "TestGroups.cpp:56", "User message"),
-    FailureRecord("BodyNotOk@Group", "TestGroups.cpp:47", "TestGroups.cpp:28", "Expectation: 'ok' failed"),
-    FailureRecord("TeardownNotOk@Group", "TestGroups.cpp:44", "TestGroups.cpp:28", "Expectation: 'ok' failed"),
-    FailureRecord("ParametricTest2@ParametricGroup1", "TestGenericSuite.cpp:41", "TestGenericSuite.cpp:43", "Expectation: '!this->ok' failed"),
-    FailureRecord("ParametricTest3@ParametricGroup2", "TestGenericSuite.cpp:51", "TestGenericSuite.cpp:53", "Expectation: 'this->ok' failed"),
-    FailureRecord("ParametricTest2@ParametricGroup1", "TestGenericSuite.cpp:41", "TestGenericSuite.cpp:43", "Expectation: '!this->ok' failed"),
-    FailureRecord("ParametricTest3@ParametricGroup2", "TestGenericSuite.cpp:51", "TestGenericSuite.cpp:53", "Expectation: 'this->ok' failed"),
 };
 
 ////

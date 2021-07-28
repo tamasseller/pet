@@ -128,30 +128,40 @@ uint16_t ExpectPool<size>::readIdx = 0;
 template<uint16_t size>
 inline bool ExpectPool<size>::expect(uintptr_t value)
 {
-    if (writeIdx != (readIdx + size) % (2 * size)) {
+    if (writeIdx != (readIdx + size) % (2 * size))
+    {
         pool[writeIdx % size] = value;
         writeIdx = static_cast<uint16_t>((writeIdx + 1) % (2 * size));
         return true;
-    } else
+    }
+    else
+    {
         return false;
+    }
 }
 
 template<uint16_t size>
 inline bool ExpectPool<size>::call(uintptr_t value)
 {
-    if (readIdx != writeIdx) {
+    if (readIdx != writeIdx)
+    {
         bool ret = pool[readIdx % size] == value;
         readIdx = static_cast<uint16_t>((readIdx + 1) % (2 * size));
         return ret;
-    } else
-        return false;
+    }
+    else
+    {
+    	return false;
+    }
 }
 
 template<uint16_t size>
 inline void ExpectPool<size>::check()
 {
     if(readIdx != writeIdx)
+    {
         TestRunner::failTest("--- Finalization ---", "Mock - unmet expectations");
+    }
 }
 
 template<uint16_t size>
@@ -198,10 +208,17 @@ class MockDecorator {
         typedef bool (*Output)(uintptr_t value);
         Output output;
 
-        template<uintptr_t hash>
-        friend class Mock;
+        /**
+         * Function used for reporting failure.
+         *
+         * Can be set to TestRunner::failTest to only fail on non-synthetic
+         * tests or to TestRunner::failTestAlways to always report failures.
+         */
+        void (*fail)(const char* sourceInfo, const char* text);
 
-        inline MockDecorator(Output output, const char* srcInfo) : error(nullptr), srcInfo(srcInfo), output(output) {}
+        template<uintptr_t hash> friend class Mock;
+
+        inline MockDecorator(Output output, const char* srcInfo, decltype(fail) fail) : error(nullptr), srcInfo(srcInfo), output(output), fail(fail) {}
         inline MockDecorator(const MockDecorator& other) = default;
 
         /**
@@ -209,7 +226,7 @@ class MockDecorator {
          *
          * This is required so that only the last destructor will report the error.
          */
-        inline MockDecorator(MockDecorator&& other) : error(other.error), srcInfo(other.srcInfo), output(other.output) {
+        inline MockDecorator(MockDecorator&& other) : error(other.error), srcInfo(other.srcInfo), output(other.output), fail(other.fail) {
             other.error = nullptr;
         }
 
@@ -220,9 +237,12 @@ class MockDecorator {
          * @return Returns a copy of the current object, for further chaining of expectations/calls.
          */
         template<class T>
-        inline MockDecorator withParam(T param) {
+        inline MockDecorator withParam(T param)
+        {
             if (!error && !output(param))
+            {
                 error = "Mock - parameter error";
+            }
 
             return *this;
         }
@@ -235,9 +255,12 @@ class MockDecorator {
          * @NOTE The pointer is checked not the content.
          */
         template<class T>
-        inline MockDecorator withParam(T* param) {
+        inline MockDecorator withParam(T* param)
+        {
             if (!error && !output(reinterpret_cast<uintptr_t>(param)))
+            {
                 error = "Mock - pointer parameter error";
+            }
 
             return *this;
         }
@@ -249,9 +272,12 @@ class MockDecorator {
          *
          * @NOTE The contents of the string are checked not the pointer itself.
          */
-        inline MockDecorator withStringParam(const char* param) {
+        inline MockDecorator withStringParam(const char* param)
+        {
             if (!error && !output(javaHash(param)))
+            {
                 error = "Mock - string parameter error";
+            }
 
             return *this;
         }
@@ -263,9 +289,12 @@ class MockDecorator {
          *
          * @NOTE The contents of the string are checked not the pointer itself.
          */
-        inline MockDecorator withStringParam(char* param) {
+        inline MockDecorator withStringParam(char* param)
+        {
             if (!error && !output(javaHash(param)))
+            {
                 error = "Mock - string parameter error";
+            }
 
             return *this;
         }
@@ -275,9 +304,12 @@ class MockDecorator {
          *
          * @return Returns a copy of the current object, for further chaining of expectations/calls.
          */
-        inline MockDecorator withParam(const void* param, uintptr_t length) {
+        inline MockDecorator withParam(const void* param, uintptr_t length)
+        {
             if (!error && !output(javaHash(static_cast<const char*>(param), length)))
+            {
                 error = "Mock - data block parameter error";
+            }
 
             return *this;
         }
@@ -287,9 +319,12 @@ class MockDecorator {
          *
          * Triggers test failure if there is an error set in the chain.
          */
-        inline ~MockDecorator() {
+        inline ~MockDecorator()
+        {
             if (error)
-                TestRunner::failTest(srcInfo, error);
+            {
+                (*fail)(srcInfo, error);
+            }
         }
 };
 
@@ -353,7 +388,7 @@ class Mock {
          *
          * Returns a _MockDecorator_ carrying the error if there is any.
          */
-        inline static MockDecorator call(const char* str, const char* srcInfo);
+        inline static MockDecorator call(const char* str, const char* srcInfo, void (*fail)(const char* sourceInfo, const char* text));
 
         /**
          * Enable this mock category.
@@ -393,13 +428,13 @@ inline MockDecorator Mock<hash>::expect(const char* str, const char* srcInfo)
      * no modification are made to the buffer.
      */
     if(disabledForTest == TestRunner::getCurrentTest())
-        return MockDecorator(&nopOutput, srcInfo);
+        return MockDecorator(&nopOutput, srcInfo, pet::TestRunner::failTestAlways);
 
     /*
      * Decorator _withParam_ methods shall use the
      * _ExpectPool::expect_ method for writing the hashes.
      */
-    MockDecorator ret(&MockExpectPool::expect, srcInfo);
+    MockDecorator ret(&MockExpectPool::expect, srcInfo, pet::TestRunner::failTestAlways);
 
     /*
      * Write the category hash first.
@@ -417,20 +452,20 @@ inline MockDecorator Mock<hash>::expect(const char* str, const char* srcInfo)
 }
 
 template<uintptr_t hash>
-inline MockDecorator Mock<hash>::call(const char* str, const char* srcInfo)
+inline MockDecorator Mock<hash>::call(const char* str, const char* srcInfo, void (*fail)(const char* sourceInfo, const char* text))
 {
     /*
      * Use no-op output method for disabled test,
      * no actual accesses are made to the buffer.
      */
     if(disabledForTest == TestRunner::getCurrentTest())
-        return MockDecorator(&nopOutput, srcInfo);
+        return MockDecorator(&nopOutput, srcInfo, fail);
 
     /*
      * Decorator _withParam_ methods shall use the
      * _ExpectPool::call_ method for checking the hashes.
      */
-    MockDecorator ret(&MockExpectPool::call, srcInfo);
+    MockDecorator ret(&MockExpectPool::call, srcInfo, fail);
 
     /*
      * Check the category hash first.
@@ -475,12 +510,15 @@ inline void Mock<hash>::disable() {
 #define EXPECT(name) expect(#name, INTERNAL_AT())
 
 /// Mock _call_ method facade for source location injection (see _Mock::expect_ for details).
-#define CALL(name) call(#name, INTERNAL_AT())
+#define CALL(name) call(#name, INTERNAL_AT(), pet::TestRunner::failTest)
+
+/// Mock _call_ method facade for source location injection (see _Mock::expect_ for details).
+#define CALL_ALWAYS(name) call(#name, INTERNAL_AT(), pet::TestRunner::failTestAlways)
 
 /// Mock _expect_ method facade for source location injection (see _Mock::expect_ for details).
 #define EXPECTNC(name) expect(name, INTERNAL_AT())
 
 /// Mock _call_ method facade for source location injection (see _Mock::expect_ for details).
-#define CALLNC(name) call(name, INTERNAL_AT())
+#define CALLNC(name) call(name, INTERNAL_AT(), pet::TestRunner::failTest)
 
 #endif /* MOCK_H_ */
