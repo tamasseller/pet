@@ -40,6 +40,11 @@ struct Allocator {
 		return ret;
 	}
 
+	template<class T>
+	static void* allocFor() {
+		return alloc(sizeof(T));
+	}
+
 	static void free(void* p) {
 		count--;
 
