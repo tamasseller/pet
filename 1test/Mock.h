@@ -388,7 +388,7 @@ class Mock {
          *
          * Returns a _MockDecorator_ carrying the error if there is any.
          */
-        inline static MockDecorator call(const char* str, const char* srcInfo, void (*fail)(const char* sourceInfo, const char* text));
+        inline static MockDecorator call(const char* str, const char* srcInfo, void (*fail)(const char* sourceInfo, const char* text) = &pet::TestRunner::failTest);
 
         /**
          * Enable this mock category.
@@ -510,10 +510,10 @@ inline void Mock<hash>::disable() {
 #define EXPECT(name) expect(#name, INTERNAL_AT())
 
 /// Mock _call_ method facade for source location injection (see _Mock::expect_ for details).
-#define CALL(name) call(#name, INTERNAL_AT(), pet::TestRunner::failTest)
+#define CALL(name) call(#name, INTERNAL_AT(), &pet::TestRunner::failTest)
 
 /// Mock _call_ method facade for source location injection (see _Mock::expect_ for details).
-#define CALL_ALWAYS(name) call(#name, INTERNAL_AT(), pet::TestRunner::failTestAlways)
+#define CALL_ALWAYS(name) call(#name, INTERNAL_AT(), &pet::TestRunner::failTestAlways)
 
 /// Mock _expect_ method facade for source location injection (see _Mock::expect_ for details).
 #define EXPECTNC(name) expect(name, INTERNAL_AT())
