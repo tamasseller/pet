@@ -678,31 +678,3 @@ TEST(RefCnt, TwoObjectRingMove)
 
     Allocator::tracer = nullptr;
 }
-
-#if 0
-TEST(RefCnt, NonFirstMoveInit)
-{
-	Allocator::tracer = &tracer;
-	MOCK(RefTrace)::EXPECT(acquire);
-	MOCK(RefTrace)::EXPECT(release).withParam(ptr.get());
-
-	NonFirstSuperClass::Ptr<NonFirstSuperClass> ptr = NonFirstRefPtrSuperclassTarget::make<NonFirstRefPtrSuperclassTarget>();
-    MOCK(Target)::EXPECT(ChildDtor);
-	MOCK(Target)::EXPECT(FirstSuperclassDtor);
-    Allocator::tracer = nullptr;
-}
-
-TEST(RefCnt, NonFirstCopyInit)
-{
-	Allocator::tracer = &tracer;
-	MOCK(RefTrace)::EXPECT(acquire);
-	MOCK(RefTrace)::EXPECT(release).withParam(ptr.get());
-
-	const auto child = NonFirstRefPtrSuperclassTarget::make<NonFirstRefPtrSuperclassTarget>();
-	NonFirstSuperClass::Ptr<NonFirstSuperClass> ptr = child;
-    MOCK(Target)::EXPECT(ChildDtor);
-	MOCK(Target)::EXPECT(FirstSuperclassDtor);
-    Allocator::tracer = nullptr;
-}
-
-#endif
