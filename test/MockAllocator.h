@@ -28,8 +28,9 @@
 
 class MockAllocatorTrace: public pet::Trace<MockAllocatorTrace> {};
 
-struct Allocator {
-	static unsigned int count;
+struct Allocator
+{
+	static inline unsigned int count;
 
 	static void* alloc(unsigned int s) {
 		void *ret = malloc(s);
@@ -64,16 +65,40 @@ struct Allocator {
 		return ret;
 	}
 
-	static inline void traceReferenceAcquistion(...) {}
-	static inline void traceReferenceRelease(...) {}
+	struct ReferenceTracer
+	{
+		virtual void acquistion(void* refLoc, void* trg) = 0;
+		virtual void release(void* refLoc, void* trg) = 0;
+		inline virtual ~ReferenceTracer() = default;
+	};
+
+	static inline ReferenceTracer* tracer;
+	static inline void traceReferenceAcquistion(void* refLoc, void* trg)
+	{
+		if(tracer)
+		{
+			tracer->acquistion(refLoc, trg);
+		}
+	}
+
+	static inline void traceReferenceRelease(void* refLoc, void* trg)
+	{
+		if(tracer)
+		{
+			tracer->release(refLoc, trg);
+		}
+	}
 };
 
-struct FailableAllocator: public Allocator {
-	virtual const char* getFailureSourceName() {
+struct FailableAllocator: public Allocator
+{
+	virtual const char* getFailureSourceName()
+	{
 		return "Allocator";
 	}
 
-	static void* alloc(unsigned int s) {
+	static void* alloc(unsigned int s)
+	{
 		if(pet::FailureInjector::shouldSimulateError())
 			return 0;
 

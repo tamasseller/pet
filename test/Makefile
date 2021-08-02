@@ -68,7 +68,6 @@ SOURCES += TestUbiqTrace.cpp
 SOURCES += ../1test/TestRunnerExperimental.cpp
 SOURCES += ../ubiquitous/PrintfWriter.cpp
 SOURCES += MockWriter.cpp
-SOURCES += MockAllocator.cpp
 SOURCES += DebugConfig.cpp
 SOURCES += TestMain.cpp
 
@@ -86,7 +85,7 @@ CXXFLAGS += -fno-inline								# Do not inline (coverage again)
 CXXFLAGS += -fmax-errors=5							# Avoid blowing up the console
 CXXFLAGS += -rdynamic								# Allows meaningful backtraces 
 CXXFLAGS += --coverage								# Generate program flow data and inject profiling code
-CXXFLAGS += -fno-exceptions
+CXXFLAGS += -fno-exceptions -fno-inline
 CXXFLAGS += -fdelete-null-pointer-checks
 
 LIBS += gcov
