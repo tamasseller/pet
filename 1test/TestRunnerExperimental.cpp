@@ -31,6 +31,7 @@
 #include <set>
 #include <atomic>
 #include <sstream>
+#include <iostream>
 
 #include "TestRunnerExperimental.h"
 
@@ -210,12 +211,17 @@ int TestRunner::Experimental::runTestsInParallel(int timeLimitSec)
             return -3;
 
         if(!WIFEXITED(status) || WEXITSTATUS(status) != 0)
-            ret = -4;
+        {
+        	std::cerr << std::endl << "Child " << pid << " exited abnormally!" << std::endl << std::endl;
+        	ret = -4;
+        }
 
         if(children.erase(pid) != 1)
             return -5;
     }
     
+    assert(SharedState::instance->run == pet::TestRunner::getTestCount());
+
     SharedState::instance->reportFinal(
         SharedState::instance->run, 
         SharedState::instance->failed, 
