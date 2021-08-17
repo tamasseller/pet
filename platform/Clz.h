@@ -24,7 +24,9 @@
 
 #if defined(PET_COMPILER_IS_GCC)
 
+#ifndef clz
 #define     clz                 __builtin_clz
+#endif
 
 #elif defined(PET_COMPILER_IS_MSVC)
 
