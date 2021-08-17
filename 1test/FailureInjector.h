@@ -22,12 +22,16 @@
 
 namespace pet {
 
-class FailureInjector {
+class FailureInjector
+{
+    friend class TestRunner;
+
     static int max, counter, failAt;
     static bool enabled;
+
 protected:
-    friend class TestRunner;
-    static void reset() {
+    static void reset()
+    {
         max = counter = failAt = 0;
         enabled = true;
     }
@@ -40,11 +44,13 @@ protected:
         return failAt < max;
     }
 
-    static bool step() {
+    static bool step()
+    {
         counter = 0;
         failAt++;
         return true;
     }
+
 public:
     static bool shouldSimulateError()
     {

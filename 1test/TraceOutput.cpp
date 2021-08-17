@@ -26,8 +26,8 @@ typedef Trace<TestTraceTag> trace;
 
 TraceOutput TraceOutput::instance;
 
-void TraceOutput::reportProgress() {
-	trace::info() << "Test #" << ++nDots << " completed";
+void TraceOutput::reportProgress(const char* name, bool synth) {
+	trace::info() << "Completed test #" << ++testCounter << ": " << (synth ? "synthetic test based on " : "regular test ") << name;
 }
 
 void TraceOutput::reportTestFailure(bool isSynthetic, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text)

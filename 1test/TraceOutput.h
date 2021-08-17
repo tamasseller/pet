@@ -26,12 +26,13 @@ class TestTraceTag {};
 
 namespace pet {
 
-class TraceOutput: public TestOutput {
+class TraceOutput: public TestOutput
+{
 protected:
-    int nDots = 0;
-	virtual void reportProgress();
-	virtual void reportTestFailure(bool isSynthetic, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text);
-	virtual void reportFinal(uint32_t normal, uint32_t failure, uint32_t synthetic);
+    int testCounter = 0;
+	virtual void reportProgress(const char* testName, bool isSynthetic) override;
+	virtual void reportTestFailure(bool isSynthetic, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text) override;
+	virtual void reportFinal(uint32_t normal, uint32_t failure, uint32_t synthetic) override;
 	virtual inline ~TraceOutput() {}
 
 public:

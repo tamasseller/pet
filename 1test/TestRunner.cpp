@@ -57,21 +57,29 @@ TestRunner::Result TestRunner::runTest(TestInterface* test)
 		else
 		{
 			for(auto pluginIt = plugins.iterator(); pluginIt.current(); pluginIt.step())
+			{
 				pluginIt.current()->beforeTest();
+			}
 
 			currentTest->runTest();
 		}
 
 		for(auto pluginIt = plugins.iterator(); pluginIt.current(); pluginIt.step())
+		{
 			pluginIt.current()->afterTest(failed);
+		}
 
-		output->reportProgress();
+		output->reportProgress(currentTest->getName(), synthetic);
 
 		if (!synthetic)
+		{
 			FailureInjector::firstRunDone();
+		}
 
 		if(!FailureInjector::hasMore())
+		{
 			break;
+		}
 
 		currentTest->reset();
 
