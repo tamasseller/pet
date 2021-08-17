@@ -198,13 +198,17 @@ public:
         really_inline Ptr(Ptr<U>&& other): PtrBase(pet::move(other)) {}
 
         template<class U>
-        really_inline Ptr &operator=(const Ptr<U>& other) {
-        	return PtrBase::operator =(other);
+        really_inline Ptr &operator=(const Ptr<U>& other)
+        {
+        	PtrBase::operator =(other);
+        	return *this;
         }
 
         template<class U>
-        really_inline Ptr &operator=(Ptr<U>&& other) {
-        	return PtrBase::operator =(pet::move(other));
+        really_inline Ptr &operator=(Ptr<U>&& other)
+        {
+        	PtrBase::operator =(pet::move(other));
+        	return *this;
         }
 
         really_inline Ptr(nullptr_t): PtrBase() {}
