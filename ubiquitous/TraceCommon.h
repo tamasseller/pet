@@ -32,6 +32,7 @@ namespace pet {
  */
 enum class LogLevel: int {
 	All,			//!< Use for filters to enable all levels.
+	Debug, 			//!< Normally disabled level for debugging.
 	Information,	//!< Generic information level, with no intention to report any kind of error.
 	Warning,		//!< Possibly erroneous level.
 	Failure,		//!< Definitely erroneous but not fatal level.

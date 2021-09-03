@@ -83,30 +83,37 @@ struct TraceSource: TraceFilter<level >= TracePolicy<Tag>::level, level, Tag> {}
 template<class Tag>
 struct Trace {
 	/**
-	 * Output stream for informations.
+	 * Output stream for messages intended for debugging.
 	 * 
-	 * Output through this stream can be configured with the Level::Information level identifier.
+	 * Output through this stream can be configured with the LogLevel::Debug level identifier.
+	 */
+	static TraceSource<Tag, LogLevel::Debug> dbg;
+
+	/**
+	 * Output stream for informations.
+	 *
+	 * Output through this stream can be configured with the LogLevel::Information level identifier.
 	 */
 	static TraceSource<Tag, LogLevel::Information> info;
 
 	/**
 	 * Output stream for possible errors.
 	 * 
-	 * Output through this stream can be configured with the Level::Warning level identifier.
+	 * Output through this stream can be configured with the LogLevel::Warning level identifier.
 	 */
 	static TraceSource<Tag, LogLevel::Warning> warn;
 	
 	/**
 	 * Output stream for non-fatal errors.
 	 * 
-	 * Output through this stream can be configured with the Level::Failure level identifier.
+	 * Output through this stream can be configured with the LogLevel::Failure level identifier.
 	 */
 	static TraceSource<Tag, LogLevel::Failure> fail;
 	
 	/**
 	 * Output stream for fatal errors.
 	 * 
-	 * Output through this stream can be configured with the Level::Critical level identifier.
+	 * Output through this stream can be configured with the LogLevel::Critical level identifier.
 	 */
 	static TraceSource<Tag, LogLevel::Critical> crit;
 
@@ -131,6 +138,9 @@ struct Trace {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////
+
+template<class Tag>
+TraceSource<Tag, LogLevel::Debug> 			Trace<Tag>::dbg;
 
 template<class Tag>
 TraceSource<Tag, LogLevel::Information> 	Trace<Tag>::info;
