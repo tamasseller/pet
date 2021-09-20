@@ -1,3 +1,6 @@
 [submodule "test/ultimate-makefile"]
 	path = test/ultimate-makefile
 	url = http://github.com/tamasseller/ultimate-makefile
+[submodule "test"]
+	path = test
+	url = https://github.com/tamasseller/pet-test.git
