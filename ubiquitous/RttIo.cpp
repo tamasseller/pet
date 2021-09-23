@@ -28,6 +28,7 @@ define hook-load
 printf "stopping RTT\n"
 monitor rtt stop
 end
+
 b main
 
 **************** Netcat output setup ******************

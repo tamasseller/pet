@@ -388,7 +388,7 @@ public:
 		if(!nextReadable(from))
 			return false;
 
-		data = *from;
+		data = pet::move(*from);
 		doneReading(1);
 		return true;
 	}
@@ -408,6 +408,25 @@ public:
 			return false;
 
 		*to = data;
+		doneWriting(1);
+		return true;
+	}
+
+	/**
+	 * Write single data element.
+	 *
+	 * Convenience method that wraps the next/done sequence of writing one element into the _fifo_.
+	 *
+	 * @param data The element to be stored.
+	 * @return True on success, false if already full.
+	 */
+	inline bool writeOne(DataType &&data)
+	{
+		DataType *to;
+		if(!nextWritable(to))
+			return false;
+
+		*to = pet::move(data);
 		doneWriting(1);
 		return true;
 	}
