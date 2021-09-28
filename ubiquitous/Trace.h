@@ -134,6 +134,10 @@ struct Trace {
 				TraceSource<Tag, level>().operator()() << "Assertation failed: " << msg << endl;
 			}
 		}
+		else
+		{
+			(void)cond, (void)msg;
+		}
 	}
 };
 
