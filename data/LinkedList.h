@@ -45,9 +45,22 @@ namespace pet {
  * @note 	An object can be added to a list only once.
  */
 template<class Ptr>
-class LinkedPtrList {
+class LinkedPtrList
+{
 	Ptr first = nullptr;
+
 public:
+	/**
+	 * Take over the content of another list.
+	 *
+	 * Drops the current content and takes over the other lists
+	 * content, also sets the other list to be empty.
+	 */
+	really_inline LinkedPtrList(LinkedPtrList&& other);
+
+	really_inline LinkedPtrList() = default;
+	really_inline LinkedPtrList(const LinkedPtrList&) = delete;
+
 	/**
 	 * Forward iterator.
 	 *
@@ -60,14 +73,19 @@ public:
 	 * 			This condition is not checked, because there is no zero-overhead way to do it, so avoiding
 	 * 			this usage is entirely up to the user.
 	 */
-	class Iterator {
+	class Iterator
+	{
 		friend LinkedPtrList;
 		Ptr* prevsNext = nullptr;
 
 		really_inline Iterator(Ptr* prevsNext);
+
 	public:
 		really_inline Iterator() = default;
 		really_inline Iterator(const Iterator&) = default;
+		really_inline Iterator(Iterator&&) = default;
+		really_inline Iterator& operator=(const Iterator&) = default;
+		really_inline Iterator& operator=(Iterator&&) = default;
 
 		/**
 		 * Current element or NULL.
@@ -107,7 +125,7 @@ public:
 		/**
 		 * Operators for STL style iterator usage.
 		 */
-		inline Ptr operator*() const;
+		inline const Ptr& operator*() const;
 		inline bool operator==(const Iterator& o) const;
 		inline bool operator!=(const Iterator& o) const;
 		inline Iterator& operator++();
@@ -140,7 +158,7 @@ public:
 	 * Add to back.
 	 *
 	 * Adds an element at the last position.
-	 * The list is searched to check that it is not already added.
+	 * The list is searched to check that it is not already contained.
 	 *
 	 * @param	elem is a pointer to the element to add.
 	 * @return 	True if successful.
@@ -150,12 +168,12 @@ public:
 	/**
 	 * Remove an element.
 	 *
-	 * Searches an element by reference and if found deletes it from the list.
+	 * Look for an element by reference and if found removes it from the list.
 	 *
 	 * @param	elem is a pointer to the element to remove.
-	 * @return 	True if successful.
+	 * @return 	The pointer to the removed element.
 	 */
-	inline bool remove(Ptr elem);
+	inline Ptr remove(const Ptr &elem);
 
 	/**
 	 * Remove all elements.
@@ -165,7 +183,8 @@ public:
 	/**
 	 * Remove all elements.
 	 */
-	inline bool isEmpty() const volatile ;
+	inline bool isEmpty() const volatile;
+	inline bool isEmpty() const;
 
 	/**
 	 * Get an all through iterator.
@@ -184,28 +203,28 @@ public:
 	 * STL style iterator getter for the beginning of the list.
 	 */
 	really_inline Iterator end();
-
-	/**
-	 * Take over the content of another list.
-	 *
-	 * Drops the current content and takes over the other lists
-	 * content, also sets the other list to be empty.
-	 */
-	really_inline void take(LinkedPtrList& other);
 };
 
 template<class Ptr>
-inline void LinkedPtrList<Ptr>::fastAdd(Ptr elem)
-{
-	iterator().insert(elem);
+really_inline LinkedPtrList<Ptr>::LinkedPtrList(LinkedPtrList&& other): first(pet::move(other.first)) {
+	other.clear();
+}
+
+template<class Ptr>
+inline void LinkedPtrList<Ptr>::fastAdd(Ptr elem) {
+	iterator().insert(pet::move(elem));
 }
 
 template<class Ptr>
 inline bool LinkedPtrList<Ptr>::add(Ptr elem)
 {
-	for(Iterator it=iterator(); it.current(); it.step())
+	for(Iterator it = iterator(); !(it.current() == nullptr); it.step())
+	{
 		if(it.current() == elem)
+		{
 			return false;
+		}
+	}
 
 	iterator().insert(pet::move(elem));
 	return true;
@@ -215,25 +234,31 @@ template<class Ptr>
 inline bool LinkedPtrList<Ptr>::addBack(Ptr elem)
 {
 	Iterator it = iterator();
-	for(; it.current(); it.step())
+
+	for(; !(it.current() == nullptr); it.step())
+	{
 		if(it.current() == elem)
+		{
 			return false;
+		}
+	}
 
 	it.insert(pet::move(elem));
 	return true;
 }
 
 template<class Ptr>
-inline bool LinkedPtrList<Ptr>::remove(Ptr elem)
+inline Ptr LinkedPtrList<Ptr>::remove(const Ptr &elem)
 {
-	for(Iterator it = iterator(); it.current(); it.step()) {
-		if(it.current() == elem) {
-			it.remove();
-			return true;
+	for(Iterator it = iterator(); !(it.current() == nullptr); it.step())
+	{
+		if(it.current() == elem)
+		{
+			return it.remove();
 		}
 	}
 
-	return false;
+	return Ptr{nullptr};
 }
 
 template<class Ptr>
@@ -247,53 +272,75 @@ inline bool LinkedPtrList<Ptr>::isEmpty() const volatile {
 }
 
 template<class Ptr>
-inline void LinkedPtrList<Ptr>::take(LinkedPtrList& other) {
-	first = other.first;
-	other.clear();
+inline bool LinkedPtrList<Ptr>::isEmpty() const {
+	return first == nullptr;
 }
 
 template<class Ptr>
 really_inline typename LinkedPtrList<Ptr>::Iterator
 LinkedPtrList<Ptr>::iterator() {
-	return Iterator(&first);
+	return {&first};
 }
 
 template<class Ptr>
 really_inline typename LinkedPtrList<Ptr>::Iterator
 LinkedPtrList<Ptr>::begin() {
-	return Iterator(&first);
+	return {&first};
 }
 
 template<class Ptr>
 really_inline typename LinkedPtrList<Ptr>::Iterator
 LinkedPtrList<Ptr>::end() {
-	return Iterator(nullptr);
+	return {nullptr};
 }
 
 template<class Ptr>
 really_inline LinkedPtrList<Ptr>::Iterator::Iterator(Ptr* prevsNext):prevsNext(prevsNext) {}
 
 template<class Ptr>
-really_inline const Ptr &LinkedPtrList<Ptr>::Iterator::current() const
-{
+really_inline const Ptr &LinkedPtrList<Ptr>::Iterator::current() const {
 	return *this->prevsNext;
 }
 
 template<class Ptr>
 really_inline void LinkedPtrList<Ptr>::Iterator::step()
 {
-	if(*this->prevsNext)
+	if(!(*this->prevsNext == nullptr))
+	{
 		this->prevsNext = &((*this->prevsNext)->next);
+	}
 }
 
 template<class Ptr>
-inline Ptr LinkedPtrList<Ptr>::Iterator::operator*() const {
+inline const Ptr &LinkedPtrList<Ptr>::Iterator::operator*() const {
 	return *this->prevsNext;
 }
 
 template<class Ptr>
-inline bool LinkedPtrList<Ptr>::Iterator::operator==(const Iterator& o) const {
-	return (this->prevsNext ? *this->prevsNext : nullptr) == (o.prevsNext ? *o.prevsNext : nullptr);
+inline bool LinkedPtrList<Ptr>::Iterator::operator==(const Iterator& o) const
+{
+	if(this->prevsNext)
+	{
+		if(o.prevsNext)
+		{
+			return *this->prevsNext == *o.prevsNext;
+		}
+		else
+		{
+			return *this->prevsNext == nullptr;
+		}
+	}
+	else
+	{
+		if(o.prevsNext)
+		{
+			return *o.prevsNext == nullptr;
+		}
+		else
+		{
+			return true;
+		}
+	}
 }
 
 template<class Ptr>
@@ -320,14 +367,15 @@ really_inline Ptr LinkedPtrList<Ptr>::Iterator::remove() const
 {
 	auto ret(pet::move(*this->prevsNext));
 
-	if(ret)
-		*this->prevsNext = ret->next;
+	if(!(ret == nullptr))
+	{
+		*this->prevsNext = pet::move(ret->next);
+	}
 
 	return ret;
 }
 
-template<class Element>
-using LinkedList = LinkedPtrList<decltype(Element::next)>;
+template<class Element> using LinkedList = LinkedPtrList<decltype(Element::next)>;
 
 }
 

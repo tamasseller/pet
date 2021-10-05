@@ -22,6 +22,8 @@
 
 #include <stdint.h>
 
+#include "meta/Utility.h"
+
 namespace pet {
 
 /**
