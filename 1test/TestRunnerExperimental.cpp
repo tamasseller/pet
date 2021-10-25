@@ -213,7 +213,14 @@ int TestRunner::Experimental::runTestsInParallel(int timeLimitSec)
         if(!WIFEXITED(status) || WEXITSTATUS(status) != 0)
         {
         	std::cerr << std::endl << "Child " << pid << " exited abnormally!" << std::endl << std::endl;
+
+        	for(auto ch: children)
+        	{
+        		kill(ch, SIGTERM);
+        	}
+
         	ret = -4;
+        	break;
         }
 
         if(children.erase(pid) != 1)
