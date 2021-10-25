@@ -107,9 +107,9 @@ int TestRunner::runAllTests(TestOutput* output)
 	for(auto it = Registry<TestInterface>::iterator(); it.current(); it.step())
 	{
 		auto ret = runTest(it.current());
-		failed += ret.failed;
-		synthetic += ret.synthetic;
-		run++;
+		failed = failed + ret.failed;
+		synthetic = synthetic + ret.synthetic;
+		run = run + 1;
 	}
 
 	currentTest = nullptr;
