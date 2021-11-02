@@ -30,6 +30,7 @@ struct Pair
 	T first;
 	U second;
 
+	inline Pair() = default;
 	template<typename X, typename Y> Pair(X&& a, Y&& b): first(pet::forward<X>(a)), second(pet::forward<Y>(b)) { }
 	template<typename X, typename Y> Pair(const Pair<X, Y>& p): Pair(p.first, p.second) { }
 	template<typename X, typename Y> Pair(Pair<X, Y>&& p): Pair(pet::move(p.first), pet::move(p.second)) { }
