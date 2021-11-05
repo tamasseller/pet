@@ -34,6 +34,14 @@ namespace pet {
  */
 class AllHeapsTrace: public pet::Trace<AllHeapsTrace> {};
 
+struct HeapStat
+{
+	size_t longestFree;
+	size_t totalFree;
+	size_t nUsed;
+	size_t totalUsed;
+};
+
 /**
  * Common base for the heap host and the policies.
  *
@@ -404,31 +412,63 @@ class Heap:	public Policy,
 
 	public:
     	/** @cond */
-    	inline bool dump(void *start) {
+    	inline bool dump(void *start)
+    	{
 			bool ok = true;
 			Block block = (char*)start + Block::headerSize;
-        	while(1) {
-        		if(block.isFree())
-        			info() << "(";
 
-        		info() << decode(block.getSize());
-
-        		if(block.isFree())
-        			info() << ")";
-
-        		info() << " ";
+        	while(1)
+        	{
+       			info() << (block.isFree() ? 'f' : 'u') << block.ptr << ": " << decode(block.getSize());
 
         		if(!block.hasNext(end))
         			break;
         		else
         			ok = ok && (block.getNext().getPrev().ptr == block.ptr);
 
-
         		block = block.getNext();
         	}
 
-        	info() << "\n";
         	return ok;
+		}
+		/** @endcond */
+
+    	/** @cond */
+		inline HeapStat getStats(void *start)
+		{
+			HeapStat ret{0, 0, 0, 0};
+			Block block = (char*)start + Block::headerSize;
+
+			while(true)
+			{
+				const auto len = decode(block.getSize());
+
+				if(block.isFree())
+				{
+					if(ret.longestFree < len)
+					{
+						ret.longestFree = len;
+					}
+
+					ret.totalFree += len;
+				}
+				else
+				{
+					ret.nUsed++;
+					ret.totalUsed += len;
+				}
+
+				if(block.hasNext(end))
+				{
+					block = block.getNext();
+				}
+				else
+				{
+					break;
+				}
+			}
+
+			return ret;
 		}
 		/** @endcond */
 
@@ -540,7 +580,7 @@ inline pet::FailPointer<void> Heap<Policy, SizeType, alignmentBits, useChecksum>
     	Policy::add(leftover);
 	}
 
-	info() << "Heap::alloc(" << sizeParam << "): " << ret.ptr << "\n";
+	dbg() << "Heap::alloc(" << sizeParam << "): " << ret.ptr << "\n";
 
 	ret.setFree(false);
 	ret.updateChecksum();
@@ -557,7 +597,7 @@ inline void Heap<Policy, SizeType, alignmentBits, useChecksum>::free(void* r) {
 	assertThat(block.checkChecksum(), "Heap corruption");
 	assertThat(!block.isFree(), "Heap corruption (probably double free)");
 
-	info() << "Heap::free(" <<  r << "): " << decode(block.getSize()) << " freed\n";
+	dbg() << "Heap::free(" <<  r << "): " << decode(block.getSize()) << " freed\n";
 
     bool prevFree = block.hasPrev() && block.getPrev().isFree();
     bool nextFree = block.hasNext(end) && block.getNext().isFree();
@@ -606,21 +646,21 @@ template<class Policy, class SizeType, unsigned int alignmentBits, bool useCheck
 inline unsigned int Heap<Policy, SizeType, alignmentBits, useChecksum>::shrink(void* ptr, unsigned int shrunkSizeParam)
 {
 	assertThat(ptr, "Heap::shrink(): Null argument\n");
-	info() << "Heap::shrink(" <<  ptr << "): ";
+	dbg() << "Heap::shrink(" <<  ptr << "): ";
 
     Block block(ptr);
     assertThat(block.checkChecksum(), "Heap corruption");
 
 	unsigned int oldSize = decode(block.getSize());
 
-    info() << oldSize << " -> " << shrunkSizeParam;
+    dbg() << oldSize << " -> " << shrunkSizeParam;
 
     unsigned int shrunkSize = encode(align((shrunkSizeParam < Policy::freeHeaderSize) ?
     		Policy::freeHeaderSize :
     		shrunkSizeParam));
 
     if(block.getSize() < shrunkSize) {
-    	info() << " (enlargement requested)\n";
+    	warn() << " (enlargement requested)\n";
     	warn() << "Heap::shrink(" <<  ptr << "): " << oldSize << " -> " << shrunkSizeParam;
     	warn() << " (enlargement requested)\n";
     	return decode(block.getSize());
@@ -651,9 +691,9 @@ inline unsigned int Heap<Policy, SizeType, alignmentBits, useChecksum>::shrink(v
     unsigned int newSize = decode(block.getSize());
 
     if(oldSize == newSize)
-    	info() << " (not changed)\n";
+    	dbg() << " (not changed)\n";
     else
-    	info() << " (shrunk to: " << newSize << ")\n";
+    	dbg() << " (shrunk to: " << newSize << ")\n";
 
     return newSize;
 }
