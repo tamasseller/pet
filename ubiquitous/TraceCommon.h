@@ -40,9 +40,9 @@ enum class LogLevel: int {
 	None,			//!< Use for filters to disable all levels.
 };
 
-template<class> class TracePolicy;
-template<class> class DefaultTracePolicy;
-template<class> class TraceWriter;
+template<class = void> class TracePolicy;
+template<class = void> class DefaultTracePolicy;
+template<class = void> class TraceWriter;
 
 struct LineEnding {
 	operator const char*() const {
@@ -84,11 +84,9 @@ struct KeyValueSeparator {
 
 static constexpr inline auto val = KeyValueSeparator();
 
-class Global;
-
 #define TRACE_WRITER(X) 							\
 namespace pet {										\
-	template<> struct TraceWriter<Global> {			\
+	template<> struct TraceWriter<void> {			\
 		using Writer = X;							\
 	};												\
 }
@@ -112,6 +110,8 @@ __TRACE_POLICY(X, Y, TracePolicy)					\
 namespace NS {class X;}								\
 __TRACE_POLICY(NS::X, Y, TracePolicy)
 
-#define GLOBAL_TRACE_POLICY(Y) __TRACE_POLICY(Global, Y, DefaultTracePolicy)
+#define GLOBAL_TRACE_POLICY(Y) __TRACE_POLICY(void, Y, DefaultTracePolicy)
+
+#define TRACE_INIT() pet::TraceWriter<>::Writer::setup()
 
 #endif /* TRACECOMMON_H_ */

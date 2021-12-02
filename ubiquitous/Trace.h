@@ -29,13 +29,13 @@ namespace pet {
 template<class Dummy>
 class DefaultTracePolicy {
 public:
-	constexpr static LogLevel level = LogLevel::None;
+	constexpr static LogLevel level = LogLevel::Warning;
 };
 
 template<class Tag>
 class TracePolicy {
 public:	
-	constexpr static LogLevel level = DefaultTracePolicy<Global>::level;
+	constexpr static LogLevel level = DefaultTracePolicy<>::level;
 };
 
 struct DummyWriter
@@ -44,6 +44,8 @@ struct DummyWriter
 
 	template<class C>
 	inline auto &operator<<(C&&) { return *this; }
+
+	static void setup(...) {}
 };
 
 template<class Dummy> struct TraceWriter { using Writer = DummyWriter; };
@@ -56,7 +58,7 @@ template<bool, LogLevel, class Tag> struct TraceFilter;
 template<LogLevel level, class Tag> struct TraceFilter<true, level, Tag>
 {
 	inline auto operator() () {
-		return typename TraceWriter<Global>::Writer(level, getTagText(Tag()));
+		return typename TraceWriter<>::Writer(level, getTagText(Tag()));
 	}
 };
 

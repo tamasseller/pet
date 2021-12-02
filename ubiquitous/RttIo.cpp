@@ -19,23 +19,21 @@
 
 #include "RttIo.h"
 
-/****** OpenOCD Setup (through GDB command line) ******
+#include <cstring>
 
-monitor rtt setup 0x20000000 0x100000 real-time-xfer
-monitor rtt server start 37773 0
-monitor rtt start
-define hook-load
-printf "stopping RTT\n"
-monitor rtt stop
-end
+/****************************/
+/*                          */
+/*      OpenOCD config      */
+/*                          */
+/****************************/
 
-b main
+/*
 
-**************** Netcat output setup ******************
+semihosting on
+semihosting_user_op on
+semihosting_user_op_bind 0x169 rtt
 
-nc localhost 37773
-
-******************************************************/
+*/
 
 using namespace pet;
 
@@ -59,4 +57,60 @@ bool RttBufferDescriptor::write(const char* str, size_t length)
 
 	commitWrite(wIt);
 	return true;
+}
+
+
+static void sendTclCommand(const char* const command, const uint32_t len)
+{
+	uint32_t msg[2];
+	msg[0] = (uint32_t)command;
+	msg[1] = len;
+
+	asm
+	(
+		"ldr r0, =0x169;"
+		"mov r1, %[msg];"
+		"bkpt #0xab"
+		: // no output
+		: [msg] "r" (msg)
+		: "r0", "r1", "memory"
+	);
+}
+
+template<size_t n>
+static inline void sendTclCommand(const char (&command)[n]) {
+	sendTclCommand(command, n);
+}
+
+static inline void writeHex(unsigned int x, char* output)
+{
+	static constexpr const char digits[] = "0123456789abcdef";
+
+	for(unsigned int i = 0; i < 32; i += 4)
+	{
+		const auto nibble = (x << i) >> 28;
+		*output++ = digits[nibble];
+	}
+}
+
+void RttControlBlock::setupOpenocdRttSink()
+{
+    sendTclCommand("stop");
+
+    char setupCommand[] = "setup 0x________ 0x________                  auto_stop";
+    writeHex((uint32_t)this, setupCommand + 8);
+    writeHex(sizeof(*this), setupCommand + 19);
+    memcpy(setupCommand + 28, (const char*)id, obfuscatedId.length);
+
+    sendTclCommand(setupCommand);
+    sendTclCommand("server start pipe 0");
+    sendTclCommand("start");
+}
+
+RttControlBlock::~RttControlBlock()
+{
+	for(auto &c: id)
+	{
+		c = 0;
+	}
 }

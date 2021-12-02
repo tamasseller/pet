@@ -21,8 +21,6 @@
 #define TREEMAP_H_
 
 #include "data/AvlTree.h"
-#include "pool/Pool.h"
-#include "pool/Arena.h"
 
 #include <stddef.h>
 
@@ -194,9 +192,9 @@ public:
  *
  * @note 	Uses the subtraction operator on the KeyType to obtain the ordering over the keys.
  */
-template <class KeyType, class ValueType, class Pool>
-class TreeMap: public ImmutableTreeMap<KeyType, ValueType> {
-	Pool pool;
+template <class KeyType, class ValueType, class Allocator>
+class TreeMap: public ImmutableTreeMap<KeyType, ValueType>, Allocator
+{
 public:
 	/** The node is simply inherited from ImmutableTreeMap */
 	typedef typename ImmutableTreeMap<KeyType, ValueType>::Node Node;
@@ -213,16 +211,22 @@ public:
 	bool put(const KeyType &key, const ValueType &value)
 	{
 		BinaryTree::Position pos = BinaryTree::seek<KeyType, ImmutableTreeMap<KeyType, ValueType>::comparator>(key);
-		if(pos.getNode()){
+
+		if(pos.getNode())
+		{
 			((Node*)pos.getNode())->setValue(value);
-		}else{
-			auto ptr = pool.acquire();
-
-			if(ptr.failed())
+		}
+		else
+		{
+			if(auto ptr = this->Allocator::template allocFor<Node>())
+			{
+				auto nnode = new(ptr) Node(key, value);
+				AvlTree::insert(pos, nnode);
+			}
+			else
+			{
 				return false;
-
-			Node* nnode = new(ptr) Node(key, value);
-			AvlTree::insert(pos, nnode);
+			}
 		}
 		
 		return true;
@@ -236,14 +240,19 @@ public:
 	 * @param 	key key whose mapping is to be removed from the map
 	 * @return	True on success, false if not found.
 	 */
-	bool remove(const KeyType &key){
+	bool remove(const KeyType &key)
+	{
 		BinaryTree::Position pos = BinaryTree::seek<KeyType, ImmutableTreeMap<KeyType, ValueType>::comparator>(key);
-		if(pos.getNode()){
+
+		if(pos.getNode())
+		{
 			Node* node = (Node*)pos.getNode();
 			AvlTree::remove(pos);
-			pool.release(node);
+
+			this->Allocator::free(node);
 			return true;
 		}
+
 		return false;
 	}
 
@@ -270,7 +279,7 @@ public:
 				node = big;
 			} else {
 				BinaryTree::Node* parent = node->parent;
-				pool.release((Node*)node);
+				this->Allocator::free((Node*)node);
 				node = parent;
 			}
 		}
@@ -279,32 +288,5 @@ public:
 	}
 };
 
-/**
- * Arena allocator backed KV store.
- *
- * A pre-configured TreeMap that uses the Arena allocator.
- *
- * @tparam	Allocator the low-level allocator that the arena uses.
- *
- * @see 	TreeMap for details.
- */
-template <class KeyType, class ValueType, class Allocator>
-using ArenaTreeMap = TreeMap<	KeyType,
-								ValueType,
-								pet::Arena<typename ImmutableTreeMap<KeyType, ValueType>::Node, Allocator>>;
-
-/**
- * Dynamic pool backed KV store.
- *
- * A pre-configured TreeMap that uses the DynamicPool allocator.
- *
- * @tparam	Allocator the low-level allocator that the DynamicPool uses.
- *
- * @see 	TreeMap for details.
- */
-template <class KeyType, class ValueType, class Allocator, unsigned int poolParam = 16>
-using DynamicTreeMap = TreeMap<	KeyType,
-								ValueType,
-								pet::DynamicPool<typename ImmutableTreeMap<KeyType, ValueType>::Node, Allocator, poolParam>>;
 }
 #endif

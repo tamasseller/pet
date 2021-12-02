@@ -21,12 +21,9 @@
 #define CONFIGHELPER_H_
 
 #include "ubiquitous/TraceCommon.h"
-#include "ubiquitous/FailableCommon.h"
 
 #include "DebugConfig.h"
 
 #include "ubiquitous/Trace.h"
-#include "ubiquitous/Failable.h"
-
 
 #endif /* CONFIGHELPER_H_ */

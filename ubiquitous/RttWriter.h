@@ -35,7 +35,7 @@ namespace pet {
  *
  * It writes the output directly to the circular buffer used for communication.
  */
-template<class Rtt = RttIo<1024, 64>>
+template<auto &rtt>
 class RttWriter
 {
 	static constexpr bool disableInterruptsForCompleteLine = false;
@@ -58,7 +58,7 @@ public:
 	{
 		if constexpr(!disableInterruptsForCompleteLine) { asm volatile("cpsid i" ::: "memory"); }
 
-		if(!Rtt::write(&val, 1))
+		if(!rtt.write(&val, 1))
 		{
 			asm volatile("bkpt 42" ::: "memory");
 		}
@@ -72,7 +72,7 @@ public:
 	{
 		if constexpr(!disableInterruptsForCompleteLine) { asm volatile("cpsid i" ::: "memory"); }
 
-		if(!Rtt::write(val, pet::Str::nLength(val, Rtt::upBufferLength)))
+		if(!rtt.write(val, pet::Str::nLength(val, rtt.upBufferLength)))
 		{
 			asm volatile("bkpt 42" ::: "memory");
 		}
@@ -127,6 +127,10 @@ public:
 	inline RttWriter(const RttWriter&) = default;
 	inline RttWriter& operator =(RttWriter&&) = default;
 	inline RttWriter& operator =(const RttWriter&) = default;
+
+	static inline void setup() {
+		rtt.openocdInit();
+	}
 };
 
 }

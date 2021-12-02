@@ -21,7 +21,6 @@
 #define HEAP_H_
 
 #include "ubiquitous/Trace.h"
-#include "ubiquitous/Error.h"
 
 class HeapInternalsTest;
 
@@ -497,7 +496,7 @@ class Heap:	public Policy,
     	 * @param	size The amount (in bytes) to be allocated.
     	 * @return	A pointer to the start of the allocated region or NULL on failure.
     	 */
-		inline pet::FailPointer<void> alloc(unsigned int size);
+		inline void* alloc(unsigned int size);
 
     	/**
     	 * Release used memory.
@@ -550,7 +549,7 @@ inline void Heap<Policy, SizeType, alignmentBits, useChecksum>::init(void* start
 
 
 template<class Policy, class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline pet::FailPointer<void> Heap<Policy, SizeType, alignmentBits, useChecksum>::alloc(unsigned int sizeParam)
+inline void* Heap<Policy, SizeType, alignmentBits, useChecksum>::alloc(unsigned int sizeParam)
 {
     unsigned int size = sizeParam;
 

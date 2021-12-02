@@ -136,60 +136,54 @@ struct alignas(256) RttControlBlock
 		}
 	}
 
-	inline ~RttControlBlock()
-	{
-		for(auto &c: id)
-		{
-			c = 0;
-		}
-	}
+	void setupOpenocdRttSink();
+	~RttControlBlock();
 };
 
 template<size_t upBufferSize, size_t downBufferSize>
 class RttIo
 {
-	static RttControlBlock controlBlock;
-	static inline char upBuffer[upBufferSize], downBuffer[downBufferSize];
+	RttControlBlock controlBlock;
+	char upBuffer[upBufferSize], downBuffer[downBufferSize];
 
 public:
 	static constexpr auto upBufferLength = upBufferSize;
 	static constexpr auto downBufferLength = downBufferSize;
 
-	really_inline static bool write(const char* data, size_t length) {
+	inline RttIo(): controlBlock(upBuffer, downBuffer) {}
+
+	really_inline bool write(const char* data, size_t length) {
 		return controlBlock.up.write(data, length);
 	}
 
-	really_inline static auto beginUpTransfer() {
+	really_inline auto beginUpTransfer() {
 		return controlBlock.up.startWriting();
 	}
 
-	really_inline static auto beginDownTransfer() {
+	really_inline auto beginDownTransfer() {
 		return controlBlock.down.startReading();
 	}
 
-	really_inline static auto accessUpTransfer(RttBufferDescriptor::Iterator& it) {
+	really_inline auto accessUpTransfer(RttBufferDescriptor::Iterator& it) {
 		return controlBlock.up.writeAccess(it);
 	}
 
-	really_inline static auto accessDownTransfer(RttBufferDescriptor::Iterator& it) {
+	really_inline auto accessDownTransfer(RttBufferDescriptor::Iterator& it) {
 		return controlBlock.down.readAccess(it);
 	}
 
-	really_inline static auto commitUpTransfer(RttBufferDescriptor::Iterator& it) {
+	really_inline auto commitUpTransfer(RttBufferDescriptor::Iterator& it) {
 		return controlBlock.up.commitWrite(it);
 	}
 
-	really_inline static auto commitDownTransfer(RttBufferDescriptor::Iterator& it) {
+	really_inline auto commitDownTransfer(RttBufferDescriptor::Iterator& it) {
 		return controlBlock.down.commitRead(it);
 	}
-};
 
-template<size_t upBufferSize, size_t downBufferSize>
-RttControlBlock RttIo<upBufferSize, downBufferSize>::controlBlock
-(
-	RttIo<upBufferSize, downBufferSize>::upBuffer,
-	RttIo<upBufferSize, downBufferSize>::downBuffer
-);
+	inline void openocdInit() {
+		controlBlock.setupOpenocdRttSink();
+	}
+};
 
 }
 
