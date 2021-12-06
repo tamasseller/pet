@@ -99,17 +99,20 @@ TestRunner::Result TestRunner::runTest(TestInterface* test)
 	return ret;
 }
 
-int TestRunner::runAllTests(TestOutput* output)
+int TestRunner::runAllTests(TestOutput* output, const char* filter)
 {
 	TestRunner::output = output;
 	volatile unsigned int run = 0, failed = 0, synthetic = 0;
 
 	for(auto it = Registry<TestInterface>::iterator(); it.current(); it.step())
 	{
-		auto ret = runTest(it.current());
-		failed = failed + ret.failed;
-		synthetic = synthetic + ret.synthetic;
-		run = run + 1;
+		if(!filter || it.current()->matches(filter))
+		{
+			auto ret = runTest(it.current());
+			failed = failed + ret.failed;
+			synthetic = synthetic + ret.synthetic;
+			run = run + 1;
+		}
 	}
 
 	currentTest = nullptr;
@@ -119,12 +122,17 @@ int TestRunner::runAllTests(TestOutput* output)
     return failed ? -1 : 0;
 }
 
-int TestRunner::getTestCount()
+int TestRunner::getTestCount(const char* filter)
 {
 	int ret = 0;
 
 	for(auto it = Registry<TestInterface>::iterator(); it.current(); it.step())
-		ret++;
+	{
+		if(!filter || it.current()->matches(filter))
+		{
+			ret++;
+		}
+	}
 
 	return ret;
 }

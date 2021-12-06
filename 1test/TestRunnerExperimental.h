@@ -27,10 +27,12 @@ namespace pet {
 class TestRunner::Experimental 
 {
     static void timerHandler(int);
-    static int runTestSubset(int timeLimitSec);
+    static int runTestSubset(const char* filter, int timeLimitSec);
     
 public:
-    static int runTestsInParallel(int timeLimitSec = 30);
+    static int runTestsInParallel(int timeLimitSec = 30, const char* filter = nullptr);
+
+    static int main(int argc, const char* argv[], TestOutput* output = &TraceOutput::instance);
 };
 
 }

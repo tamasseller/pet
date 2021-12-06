@@ -36,6 +36,7 @@ class TestInterface
         virtual const char* getName() const = 0;
         virtual const char* getSourceInfo() const = 0;
     public:
+        bool matches(const char* filter);
         inline virtual ~TestInterface() {}
 };
 

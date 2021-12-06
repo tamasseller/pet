@@ -47,8 +47,8 @@ class TestRunner {
 public:
 	static bool installPlugin(TestPlugin*);
 
-	static int getTestCount();
-	static int runAllTests(TestOutput* output = &TraceOutput::instance);
+	static int getTestCount(const char* filter = nullptr);
+	static int runAllTests(TestOutput* output = &TraceOutput::instance, const char* filter = nullptr);
 	static inline TestInterface* getCurrentTest();
 
 	static inline bool isFailing() { return failing; }
