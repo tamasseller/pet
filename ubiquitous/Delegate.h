@@ -22,6 +22,7 @@
 
 #include "meta/Utility.h"
 #include "meta/Resettable.h"
+#include "meta/TypeManipulation.h"
 
 #include <stdint.h>
 
@@ -132,7 +133,7 @@ public:
      * Implicit constructor for a lambda target.
      */
     template<class C>
-    inline Delegate(C &&c): Delegate(&LambdaCallHelper<C>::vtable, pet::move(c)) {}
+    inline Delegate(C &&c): Delegate(&LambdaCallHelper<removeReference<C>>::vtable, pet::move(c)) {}
 
     /**
      * The invocation operator, that transfers control to the target.
