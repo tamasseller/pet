@@ -103,7 +103,7 @@ struct INTERNAL_TEST_CLASS_NAME(name, group):                                   
     virtual void runTest() override                                                     \
     {                                                                                   \
         using Base = pet::TestBase<INTERNAL_TEST_CLASS_NAME(name, group)>;              \
-        Base::instance.Base::dummy();                                                   \
+        Base::instance.dummy();                                                   		\
         Base::run();                                                                    \
     }                                                                                   \
 
