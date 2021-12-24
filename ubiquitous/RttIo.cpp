@@ -29,9 +29,19 @@
 
 /*
 
-semihosting on
-semihosting_user_op on
-semihosting_user_op_bind 0x169 rtt
+$_TARGETNAME configure -event gdb-flash-write-start {
+
+    rtt stop
+}
+
+$_TARGETNAME configure -event semihosting-user-cmd-0x100 {
+	set command {rtt }
+	set params [arm semihosting_read_user_param]
+	eval "$command $params" 
+}
+
+init
+arm semihosting on
 
 */
 
@@ -68,7 +78,7 @@ static void sendTclCommand(const char* const command, const uint32_t len)
 
 	asm
 	(
-		"ldr r0, =0x169;"
+		"ldr r0, =0x100;"
 		"mov r1, %[msg];"
 		"bkpt #0xab"
 		: // no output
