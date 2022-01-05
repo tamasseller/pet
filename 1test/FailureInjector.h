@@ -55,7 +55,10 @@ public:
     static bool shouldSimulateError()
     {
     	if(!enabled)
+    	{
     		return false;
+    	}
+
         counter++;
         return counter == failAt;
     }
@@ -66,6 +69,10 @@ public:
 
     static void disable() {
     	enabled = false;
+    }
+
+    static auto getRerunOrdinal() {
+    	return failAt;
     }
 };
 

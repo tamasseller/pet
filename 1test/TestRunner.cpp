@@ -146,7 +146,7 @@ void TestRunner::failTestAlways(const char* sourceInfo, const char* text)
 	if(!failing)
 	{
 		failing = true;
-	    output->reportTestFailure(synthetic, currentTest->getName(), currentTest->getSourceInfo(), sourceInfo, text);
+	    output->reportTestFailure(FailureInjector::getRerunOrdinal(), currentTest->getName(), currentTest->getSourceInfo(), sourceInfo, text);
 	    longjmp(jmpBuff, 1);
 	}
 }

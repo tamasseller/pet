@@ -28,7 +28,7 @@ class TestOutput
 {
 	friend class TestRunner;
 	virtual void reportProgress() {}
-	virtual void reportTestFailure(bool isSynthetic, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text) = 0;
+	virtual void reportTestFailure(uint32_t rerunIdx, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text) = 0;
 	virtual void reportFinal(uint32_t normal, uint32_t failure, uint32_t synthetic) = 0;
 	inline virtual void reportProgress(const char* testName, bool isSynthetic) { this->reportProgress(); }
 

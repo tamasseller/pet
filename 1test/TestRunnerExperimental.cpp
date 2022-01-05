@@ -54,13 +54,23 @@ struct SharedState: TestOutput
             write(STDOUT_FILENO, ".", 1);
     }
 
-	inline virtual void reportTestFailure(bool isSynthetic, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text) 
+	inline virtual void reportTestFailure(uint32_t rerunIdx, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text)
     {
         std::stringstream ss;
 
-        ss << std::endl << (isSynthetic ? "Synthetic test based on '" : "Test '") 
-            << testName << "' (" << sourceInfo <<  ")" << std::endl << std::endl;
+        ss << std::endl;
 
+        if(rerunIdx)
+        {
+        	ss << "Synthetic #" << rerunIdx << " test based on '";
+        }
+        else
+        {
+        	ss << "Test '";
+        }
+
+
+        ss << testName << "' (" << sourceInfo <<  ")" << std::endl << std::endl;
         ss << "    failed at " << failureSourceInfo << ": " << text << std::endl << std::endl;
 
         auto str = ss.str();

@@ -30,11 +30,18 @@ void TraceOutput::reportProgress(const char* name, bool synth) {
 	trace::info() << "Completed test #" << ++testCounter << ": " << (synth ? "synthetic test based on " : "regular test ") << name;
 }
 
-void TraceOutput::reportTestFailure(bool isSynthetic, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text)
+void TraceOutput::reportTestFailure(uint32_t rerunIdx, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text)
 {
-	trace::warn() << pet::endl << (isSynthetic ? "Synthetic test based on '" : "Test '") << testName << "' (" << sourceInfo <<  ")" << pet::endl
-			<< pet::endl << "    failed at " << failureSourceInfo
-			<< ((text) ? ": " : "") << ((text) ? text : "") << pet::endl;
+	if(rerunIdx)
+	{
+		trace::warn() << pet::endl << "Synthetic test #" << rerunIdx << " based on '" << testName << "' (" << sourceInfo <<  ")" << pet::endl << pet::endl
+			<< "    failed at " << failureSourceInfo << ((text) ? ": " : "") << ((text) ? text : "") << pet::endl;
+	}
+	else
+	{
+		trace::warn() << pet::endl << "Test '" << testName << "' (" << sourceInfo <<  ")" << pet::endl << pet::endl
+			<< "    failed at " << failureSourceInfo << ((text) ? ": " : "") << ((text) ? text : "") << pet::endl;
+	}
 }
 
 void TraceOutput::reportFinal(uint32_t normal, uint32_t failure, uint32_t synthetic)

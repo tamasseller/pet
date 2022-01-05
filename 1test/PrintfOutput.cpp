@@ -31,11 +31,29 @@ void PrintfOutput::reportProgress()
 	std::cout << ((++nDots % 64 == 0) ? ".\n" : ".") << std::flush;
 }
 
-void PrintfOutput::reportTestFailure(bool isSynthetic, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text)
+void PrintfOutput::reportTestFailure(uint32_t rerunIdx, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text)
 {
-	std::cout << std::endl << (isSynthetic ? "Synthetic test based on '" : "Test '") << testName << "' (" << sourceInfo <<  ")" << std::endl
-			<< std::endl << "    failed at " << failureSourceInfo
-			<< ((text) ? ": " : "") << ((text) ? text : "") << std::endl << std::endl;
+	std::cout << std::endl;
+
+	if(rerunIdx)
+	{
+		std::cout << "Synthetic test #" << rerunIdx << " based on '";
+	}
+	else
+	{
+		std::cout << "Test '";
+	}
+
+
+	std::cout << testName << "' (" << sourceInfo <<  ")" << std::endl << std::endl;
+	std::cout << "    failed at " << failureSourceInfo;
+
+	if(text)
+	{
+		std::cout << ": " << text;
+	}
+
+	std::cout << std::endl << std::endl;
 }
 
 void PrintfOutput::reportFinal(uint32_t normal, uint32_t failure, uint32_t synthetic)
