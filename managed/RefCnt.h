@@ -232,8 +232,16 @@ public:
     }
 
     template<class T = Target, class... Args>
-    really_inline static Ptr<T> make(Args&&... args) {
-        return Ptr<T>(typename Ptr<T>::Disambiguator{}, new (Allocator::template allocFor<T>(), NewOperatorDisambiguator()) T(pet::forward<Args>(args)...));
+    really_inline static Ptr<T> make(Args&&... args)
+    {
+    	if(const auto ptr = Allocator::template allocFor<T>())
+    	{
+    		return Ptr<T>(typename Ptr<T>::Disambiguator{}, new (ptr, NewOperatorDisambiguator()) T(pet::forward<Args>(args)...));
+    	}
+    	else
+    	{
+    		return {};
+    	}
     }
 
     template<class T=Target>
