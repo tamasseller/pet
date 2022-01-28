@@ -51,14 +51,28 @@ struct DummyWriter
 template<class Dummy> struct TraceWriter { using Writer = DummyWriter; };
 
 inline constexpr const char* getTagText(...) { return nullptr; }
-template<class C> inline constexpr auto getTagText(C&& c) -> decltype(c.name){ return c.name; }
+template<class C>
+inline constexpr auto getTagText(C&& c) -> decltype(c.name){ return c.name; }
+
+template<class C>
+struct TagTextGetter {
+	static constexpr auto value = getTagText(C{});
+};
+
+template<>
+struct TagTextGetter<void> {
+	static constexpr auto value = nullptr;
+};
+
+template<class C>
+constexpr auto tagText = TagTextGetter<C>::value;
 
 template<bool, LogLevel, class Tag> struct TraceFilter;
 
 template<LogLevel level, class Tag> struct TraceFilter<true, level, Tag>
 {
 	inline auto operator() () {
-		return typename TraceWriter<>::Writer(level, getTagText(Tag()));
+		return typename TraceWriter<>::Writer(level, tagText<Tag>);
 	}
 };
 
