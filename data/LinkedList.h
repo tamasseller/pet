@@ -126,6 +126,7 @@ public:
 		 * Operators for STL style iterator usage.
 		 */
 		inline const Ptr& operator*() const;
+		inline const Ptr& operator->() const;
 		inline bool operator==(const Iterator& o) const;
 		inline bool operator!=(const Iterator& o) const;
 		inline Iterator& operator++();
@@ -313,6 +314,11 @@ really_inline void LinkedPtrList<Ptr>::Iterator::step()
 
 template<class Ptr>
 inline const Ptr &LinkedPtrList<Ptr>::Iterator::operator*() const {
+	return *this->prevsNext;
+}
+
+template<class Ptr>
+inline const Ptr &LinkedPtrList<Ptr>::Iterator::operator->() const {
 	return *this->prevsNext;
 }
 
