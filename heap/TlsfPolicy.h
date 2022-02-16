@@ -425,7 +425,7 @@ protected:
 	 * @param 	size The size of the block to be found.
 	 * @return	The block or NULL if none found.
 	 */
-	inline Block findAndRemove(unsigned int size)
+	inline Block findAndRemove(unsigned int size, bool hot)
 	{
 		typename Index::Entry findEntry = index.getGreaterEqualEntry(size);
 

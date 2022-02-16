@@ -64,7 +64,7 @@ protected:
 
 	really_inline void update(unsigned int oldSize, Block block) {}
 
-	really_inline Block findAndRemove(unsigned int size)
+	really_inline Block findAndRemove(unsigned int size, bool hot)
 	{
 		typename decltype(freeStore)::Iterator best = freeStore.end();
 		unsigned int bestSize = -1u;

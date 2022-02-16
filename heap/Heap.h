@@ -198,7 +198,7 @@ class Heap:	public Policy,
 			const uintptr_t diff = (char*)this->ptr - (char*)prev.ptr;
 			const auto encDiff = encodeRoundDown(diff);
 
-			assertThat(decode(encDiff) == diff, "Heap corruption");
+			assertThat(decode(encDiff) == diff, "Heap corruption: bad block offset in setPrev");
 
 			this->ptr[prevFieldIdx] = encDiff;
 		}
@@ -227,7 +227,7 @@ class Heap:	public Policy,
 			const uintptr_t diff = (char*)next.ptr - (char*)this->ptr;
 			const auto encDiff = encodeRoundDown(diff);
 
-			assertThat(decode(encDiff) == diff, "Heap corruption");
+			assertThat(decode(encDiff) == diff, "Heap corruption: bad block offset in setNext");
 
 		    this->setSize(encDiff);
 		}
@@ -423,47 +423,69 @@ public:
 	 * The allocated region is aligned to the specified bits (given as alignmentBits template argument).
 	 *
 	 * @param	size The amount (in bytes) to be allocated.
+	 * @param	hot Prefer lower addresses if true higher if false
 	 * @return	A pointer to the start of the allocated region or NULL on failure.
 	 */
-	inline void* alloc(uintptr_t sizeParam)
+	inline void* alloc(uintptr_t sizeParam, bool hot = false)
 	{
-		uintptr_t size = sizeParam;
-
-		if(size > maxBlockSize)
+		if(sizeParam > maxBlockSize)
 		{
 			warn() << "alloc(): Too large block requested !\n";
 			return 0;
 		}
 
-		size = encodeRoundUp(max(size, Policy::freeHeaderSize) + Block::headerSize);
+		const uintptr_t size = encodeRoundUp(max(sizeParam, Policy::freeHeaderSize) + Block::headerSize);
 
-		const Block ret(this->Policy::findAndRemove(size));
+		const Block block(this->Policy::findAndRemove(size, hot));
 
-		if(ret.ptr == 0)
+		if(block.ptr == 0)
 		{
 			warn() << "alloc(): Can not allocate " << decode(size) << " bytes\n";
+			return nullptr;
 		}
 		else
 		{
-			assertThat(ret.checkChecksum(), "Heap corruption");
+			assertThat(block.checkChecksum(), "Heap corruption: free block with invalid checksum fetched from storage");
+			assertThat(size <= block.getSize(), "Internal error");
+			assertThat(block.isFree(), "Internal error");
 
-			if(canSplit(ret, size))
+			if(hot)
 			{
-				const auto leftover(ret.split(size, true));
-				leftover.updateNext(end);
-				leftover.updateChecksum();
-				this->Policy::add(leftover);
+				if(canSplit(block, size))
+				{
+					const auto leftover(block.split(size, true));
+					leftover.updateNext(end);
+					leftover.updateChecksum();
+					this->Policy::add(leftover);
+				}
+			}
+			else
+			{
+				const auto splitPoint = block.getSize() - size;
+				if(minEncodedBlockSize <= splitPoint)
+				{
+					const auto leftover(block.split(splitPoint, false));
+					leftover.updateNext(end);
+					leftover.updateChecksum();
+
+					block.updateChecksum();
+					this->Policy::add(block);
+
+					dbg() << "alloc(" << sizeParam << "): " << block.ptr << "\n";
+					return leftover.ptr;
+				}
 			}
 
-			dbg() << "alloc(" << sizeParam << "): " << ret.ptr << "\n";
+			dbg() << "alloc(" << sizeParam << "): " << block.ptr << "\n";
 
-			ret.setFree(false);
-			ret.updateChecksum();
+			block.setFree(false);
+			block.updateChecksum();
 
-			assertThat(ret.getSize() >= size, "Heap corruption");
+			assertThat(block.getSize() >= size, "Internal error: output size less than requested");
+			return block.ptr;
 		}
 
-		return ret.ptr;
+
 	}
 
 	/**
@@ -479,8 +501,8 @@ public:
 		assertThat(r, "free(): Invalid argument\n");
 
 		const Block block(r);
-		assertThat(block.checkChecksum(), "Heap corruption");
-		assertThat(!block.isFree(), "Heap corruption (probably double free)");
+		assertThat(block.checkChecksum(), "Heap corruption: free called on block with invalid checksum");
+		assertThat(!block.isFree(), "Heap corruption: free called on block that is already free");
 
 		dbg() << "free(" <<  r << "): " << decode(block.getSize()) << " freed\n";
 
@@ -490,14 +512,14 @@ public:
 		if(prevFree)
 		{
 			const auto prev(block.getPrev());
-			assertThat(prev.checkChecksum(), "Heap corruption");
+			assertThat(prev.checkChecksum(), "Heap corruption: previous block has invalid checksum when freeing");
 
 			uintptr_t oldSize = prev.getSize();
 
 			if(nextFree)
 			{
 				const auto next(block.getNext());
-				assertThat(next.checkChecksum(), "Heap corruption");
+				assertThat(next.checkChecksum(), "Heap corruption: next block has invalid checksum when freeing");
 
 				this->Policy::remove(next);
 
@@ -508,7 +530,7 @@ public:
 			{
 				if(block.hasNext(end))
 				{
-					assertThat(block.getNext().checkChecksum(), "Heap corruption");
+					assertThat(block.getNext().checkChecksum(), "Heap corruption: next block has invalid checksum when freeing");
 				}
 
 				prev.merge(block);
@@ -524,7 +546,7 @@ public:
 			if(nextFree)
 			{
 				const Block next(block.getNext());
-				assertThat(next.checkChecksum(), "Heap corruption");
+				assertThat(next.checkChecksum(), "Heap corruption: next block has invalid checksum when freeing");
 
 				this->Policy::remove(next);
 
@@ -563,7 +585,8 @@ public:
 		assertThat(ptr, "shrink(): Null argument\n");
 
 		const Block block(ptr);
-		assertThat(block.checkChecksum(), "Heap corruption");
+		assertThat(block.checkChecksum(), "Heap corruption: resize called on a block with invalid checksum");
+		assertThat(!block.isFree(), "Heap corruption: resize called on free block");
 
 		dbg() << "resize(" <<  ptr << "): " << decode(block.getSize()) << " -> " << newSizeParam;
 
@@ -578,8 +601,8 @@ public:
 
 				if(leftover.hasNext(end))
 				{
-					Block next(leftover.getNext());
-					assertThat(next.checkChecksum(), "Heap corruption");
+					const auto next(leftover.getNext());
+					assertThat(next.checkChecksum(), "Heap corruption: next block has invalid checksum when resizing");
 
 					if(next.isFree())
 					{
@@ -606,7 +629,7 @@ public:
 			if(block.hasNext(end))
 			{
 				const auto next(block.getNext());
-				assertThat(next.checkChecksum(), "Heap corruption");
+				assertThat(next.checkChecksum(), "Heap corruption: next block has invalid checksum when resizing");
 
 				if(next.isFree() && requestedSize <= next.getSize() + block.getSize())
 				{
@@ -665,7 +688,8 @@ public:
 		dbg() << "dropFront(" <<  ptr << ", " << offset << ") ";
 
 		const Block block(ptr);
-		assertThat(block.checkChecksum(), "Heap corruption");
+		assertThat(block.checkChecksum(), "Heap corruption: dropFront called on a block that has invalid checksum");
+		assertThat(!block.isFree(), "Heap corruption: dropFront called on a free block");
 
 		const auto maxOffset = block.getSize() - minEncodedBlockSize;
 
@@ -674,10 +698,13 @@ public:
 			if(block.hasPrev() && block.getPrev().isFree())
 			{
 				const auto next(block.getNext());
-
 				const auto prev(block.getPrev());
+				assertThat(prev.checkChecksum(), "Heap corruption: previous block has invalid checksum in dropFront");
+
+				const auto oldSize = prev.getSize();
 				prev.setSize(prev.getSize() + splitOffset);
 				prev.updateChecksum();
+				this->Policy::update(oldSize, prev);
 
 				const auto newBlock(prev.getNext());
 				newBlock.setFree(false);
@@ -713,7 +740,7 @@ public:
 		bool prevFree = false;
 		while(true)
 		{
-			assertThat(block.checkChecksum(), "Heap corruption");
+			assertThat(block.checkChecksum(), "Heap corruption: invalid checksum found during getStats");
 
 			const auto len = decode(block.getSize()) - Block::headerSize;
 
@@ -725,7 +752,7 @@ public:
 				}
 
 				ret.totalFree += len;
-				assertThat(!prevFree, "Heap corruption");
+				assertThat(!prevFree, "Heap corruption: unmerged free blocks found during getStats");
 				prevFree = true;
 			}
 			else

@@ -74,17 +74,20 @@ protected:
 	}
 
 	/** @copydoc pet::TlsfPolicy::findAndRemove */
-	inline Block findAndRemove(unsigned int size)
+	inline Block findAndRemove(unsigned int size, bool hot)
 	{
 		BinaryTree::Position pos = BinaryTree::seek<unsigned int, &AvlTreePolicy::sizeCompare>(size);
 
-		if(Node *node = (Node*)pos.getNode()) {
+		if(Node *node = (Node*)pos.getNode())
+		{
 			remove(node);
 			return node;
 		}
 
-		for(BinaryTree::Iterator it = iterator(pos.parent); it.current(); it.step()) {
-			if(Block(it.current()).getSize() >= size) {
+		for(BinaryTree::Iterator it = iterator(pos.parent); it.current(); it.step())
+		{
+			if(Block(it.current()).getSize() >= size)
+			{
 				AvlTree::remove((AvlTree::Node*) it.current());
 				return it.current();
 			}
