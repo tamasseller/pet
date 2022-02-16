@@ -34,10 +34,10 @@ namespace pet {
  * block with logarithmic time complexity by the number of free blocks.
  */
 
-template <class SizeType, unsigned int alignmentBits>
-class AvlTreePolicy: protected HeapBase<SizeType, alignmentBits>, protected pet::AvlTree
+template <class SizeType>
+class AvlTreePolicy: protected HeapBase<SizeType>, protected pet::AvlTree
 {
-	using typename HeapBase<SizeType, alignmentBits>::Block;
+	using typename HeapBase<SizeType>::Block;
 
 	static int sizeCompare(BinaryTree::Node* block, const unsigned int &size) {
 		return (int)(Block(block).getSize() - size);
@@ -45,22 +45,61 @@ class AvlTreePolicy: protected HeapBase<SizeType, alignmentBits>, protected pet:
 
 protected:
 	/** @copydoc pet::TlsfPolicy::freeHeaderSize */
-	static constexpr unsigned int freeHeaderSize = sizeof(AvlTree::Node);
+	static constexpr uintptr_t freeHeaderSize = sizeof(AvlTree::Node);
 
 	/** @copydoc pet::TlsfPolicy::init */
-	inline void init(Block block);
+	inline void init(Block block)
+	{
+		root = nullptr;
+		add(block);
+	}
 
 	/** @copydoc pet::TlsfPolicy::add */
-	inline void add(Block block);
+	inline void add(Block block)
+	{
+		BinaryTree::Position pos = BinaryTree::seek<unsigned int, &AvlTreePolicy::sizeCompare>(block.getSize());
+
+		while(pos.getNode()) {
+			pos.parent = pos.getNode();
+			pos.origin = &pos.getNode()->small;
+		}
+
+		insert(pos, new(block.ptr) AvlTree::Node);
+	}
 
 	/** @copydoc pet::TlsfPolicy::remove */
-	inline void remove(Block block);
+	inline void remove(Block block)
+	{
+		AvlTree::remove((AvlTree::Node*) block.ptr);
+	}
 
 	/** @copydoc pet::TlsfPolicy::findAndRemove */
-	inline Block findAndRemove(unsigned int size);
+	inline Block findAndRemove(unsigned int size)
+	{
+		BinaryTree::Position pos = BinaryTree::seek<unsigned int, &AvlTreePolicy::sizeCompare>(size);
+
+		if(Node *node = (Node*)pos.getNode()) {
+			remove(node);
+			return node;
+		}
+
+		for(BinaryTree::Iterator it = iterator(pos.parent); it.current(); it.step()) {
+			if(Block(it.current()).getSize() >= size) {
+				AvlTree::remove((AvlTree::Node*) it.current());
+				return it.current();
+			}
+		}
+
+		return 0;
+	}
 
 	/** @copydoc pet::TlsfPolicy::update */
-	inline void update(unsigned int oldSize, Block block);
+	inline void update(unsigned int oldSize, Block block)
+	{
+		remove(block);
+		add(block);
+	}
+
 };
 
 /**
@@ -69,64 +108,7 @@ protected:
  * Facade to provide nicer usage, with automatically matching redundant parameters.
  */
 template<class SizeType, unsigned int alignmentBits, bool cheksummingOn = false>
-using AvlHeap = Heap<AvlTreePolicy<SizeType, alignmentBits>, SizeType, alignmentBits, cheksummingOn>;
-
-////////////////////////////////////////////////////////////////////////////////////////
-
-template <class SizeType, unsigned int alignmentBits>
-inline void AvlTreePolicy<SizeType, alignmentBits>::add(Block block)
-{
-	BinaryTree::Position pos = BinaryTree::seek<unsigned int, &AvlTreePolicy::sizeCompare>(block.getSize());
-
-	while(pos.getNode()) {
-		pos.parent = pos.getNode();
-		pos.origin = &pos.getNode()->small;
-	}
-
-	insert(pos, new(block.ptr) AvlTree::Node);
-}
-
-template <class SizeType, unsigned int alignmentBits>
-inline void AvlTreePolicy<SizeType, alignmentBits>::init(Block block)
-{
-	root = nullptr;
-	add(block);
-}
-
-template <class SizeType, unsigned int alignmentBits>
-inline void AvlTreePolicy<SizeType, alignmentBits>::remove(Block block)
-{
-	AvlTree::remove((AvlTree::Node*) block.ptr);
-}
-
-template <class SizeType, unsigned int alignmentBits>
-inline typename AvlTreePolicy<SizeType, alignmentBits>::Block
-AvlTreePolicy<SizeType, alignmentBits>::findAndRemove(unsigned int size)
-{
-	BinaryTree::Position pos = BinaryTree::seek<unsigned int, &AvlTreePolicy::sizeCompare>(size);
-
-	if(Node *node = (Node*)pos.getNode()) {
-		remove(node);
-		return node;
-	}
-
-	for(BinaryTree::Iterator it = iterator(pos.parent); it.current(); it.step()) {
-		if(Block(it.current()).getSize() >= size) {
-			AvlTree::remove((AvlTree::Node*) it.current());
-			return it.current();
-		}
-	}
-
-	return 0;
-}
-
-template <class SizeType, unsigned int alignmentBits>
-inline void AvlTreePolicy<SizeType, alignmentBits>::
-update(unsigned int oldSize, Block block)
-{
-	remove(block);
-	add(block);
-}
+using AvlHeap = Heap<AvlTreePolicy<SizeType>, SizeType, alignmentBits, cheksummingOn>;
 
 }
 

@@ -21,7 +21,7 @@
 #define BESTFITPOLICY_H_
 
 #include "data/LinkedList.h"
-#include "heap/Heap.h"
+#include "heap/HeapBase.h"
 
 namespace pet {
 
@@ -33,93 +33,75 @@ namespace pet {
  * block with linear time complexity by the number of free blocks.
  */
 
-template <class SizeType, unsigned int alignmentBits>
-class BestFitPolicy: protected HeapBase<SizeType, alignmentBits>
+template <class SizeType>
+class BestFitPolicy: protected HeapBase<SizeType>
 {
-	using typename HeapBase<SizeType, alignmentBits>::Block;
+	using typename HeapBase<SizeType>::Block;
 
-	struct FreeBlock {
+	struct FreeBlock
+	{
 		FreeBlock* next;
 	};
 
 	pet::LinkedList<FreeBlock> freeStore;
 
 protected:
-	/** @copydoc pet::TlsfPolicy::freeHeaderSize */
-	static constexpr unsigned int freeHeaderSize = sizeof(FreeBlock);
+	static constexpr auto freeHeaderSize = sizeof(FreeBlock);
 
-	/** @copydoc pet::TlsfPolicy::add(Block */
-	inline void add(Block block);
-    inline void init(Block block);
+	really_inline void init(Block block)
+    {
+    	freeStore.clear();
+    	add(block);
+    }
 
+    really_inline void add(Block block) {
+		freeStore.add((FreeBlock *)block.ptr);
+	}
 
-	/** @copydoc pet::TlsfPolicy::remove */
-	inline void remove(Block block);
+	really_inline void remove(Block block) {
+    	freeStore.remove((FreeBlock *)block.ptr);
+    }
 
-	/** @copydoc pet::TlsfPolicy::findAndRemove */
-	inline Block findAndRemove(unsigned int size);
+	really_inline void update(unsigned int oldSize, Block block) {}
 
-	/** @copydoc pet::TlsfPolicy::update */
-	inline void update(unsigned int oldSize, Block block);
+	really_inline Block findAndRemove(unsigned int size)
+	{
+		typename decltype(freeStore)::Iterator best = freeStore.end();
+		unsigned int bestSize = -1u;
+
+		for(auto it = freeStore.iterator(); it.current(); it.step())
+		{
+			unsigned int currSize = Block(it.current()).getSize();
+
+			if(currSize == size)
+			{
+				return it.remove();
+			}
+			else if (currSize > size && currSize < bestSize)
+			{
+				bestSize = currSize;
+				best = it;
+			}
+		}
+
+		if(best != freeStore.end())
+		{
+			return best.remove();
+		}
+
+		return {nullptr};
+	}
+
 };
-
 
 /**
  * Heap with BestFitPolicy.
  *
  * Facade to provide nicer usage, with automatically matching redundant parameters.
  */
-
 template<class SizeType, unsigned int alignmentBits, bool cheksummingOn = false>
-using BestFitHeap = Heap<BestFitPolicy<SizeType, alignmentBits>, SizeType, alignmentBits, cheksummingOn>;
-
-////////////////////////////////////////////////////////////////////////////////////////
-
-template <class SizeType, unsigned int alignmentBits>
-inline void BestFitPolicy<SizeType, alignmentBits>::add(Block block)
-{
-	freeStore.add((FreeBlock *)block.ptr);
-}
-
-template <class SizeType, unsigned int alignmentBits>
-inline void BestFitPolicy<SizeType, alignmentBits>::init(Block block)
-{
-	freeStore.clear();
-	add(block);
-}
-
-template <class SizeType, unsigned int alignmentBits>
-inline void BestFitPolicy<SizeType, alignmentBits>::remove(Block block)
-{
-	freeStore.remove((FreeBlock *)block.ptr);
-}
-
-template <class SizeType, unsigned int alignmentBits>
-inline typename BestFitPolicy<SizeType, alignmentBits>::Block
-BestFitPolicy<SizeType, alignmentBits>::findAndRemove(unsigned int size)
-{
-	unsigned int bestSize = 0xffffffff;
-	FreeBlock* best = nullptr;
-	for(auto it = freeStore.iterator(); it.current(); it.step()) {
-		unsigned int currSize = Block(it.current()).getSize();
-		if(currSize == size) {
-			FreeBlock* ret = it.current();
-			it.remove();
-			return ret;
-		} else if (currSize > size && currSize < bestSize) {
-			bestSize = currSize;
-			best = it.current();
-		}
-	}
-
-	freeStore.remove(best);
-	return best;
-}
-
-template <class SizeType, unsigned int alignmentBits>
-inline void BestFitPolicy<SizeType, alignmentBits>::update(unsigned int oldSize, Block block){}
+using BestFitHeap = Heap<BestFitPolicy<SizeType>, SizeType, alignmentBits, cheksummingOn>;
 
 }
-
 
 #endif /* BESTFITPOLICY_H_ */

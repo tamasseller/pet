@@ -1,6 +1,6 @@
 /*******************************************************************************
  *
- * Copyright (c) 2016, 2017 Tamás Seller. All rights reserved.
+ * Copyright (c) 2016 - 2021 Tamás Seller. All rights reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,271 +20,16 @@
 #ifndef HEAP_H_
 #define HEAP_H_
 
-#include "ubiquitous/Trace.h"
+#include "heap/HeapBase.h"
+
+#include "algorithm/Math.h"
+
+#include "platform/Compiler.h"
+#include "platform/Clz.h"
 
 class HeapInternalsTest;
 
 namespace pet {
-
-/**
- * Trace tag.
- *
- * Use this class as an identifier to enable tracing of heap events.
- */
-class AllHeapsTrace: public pet::Trace<AllHeapsTrace> {};
-
-struct HeapStat
-{
-	size_t longestFree;
-	size_t totalFree;
-	size_t nUsed;
-	size_t totalUsed;
-};
-
-/**
- * Common base for the heap host and the policies.
- *
- * Provides the constants and mappings that are essential for
- * the internal work of both parties. Also provides the Block
- * type that is the basis of the communication between the two.
- *
- * @tparam	SizeType The type to be used by the heap the express
- * 			the size of the free and used blocks in an internal
- * 			representation (ie. not necessarily bytes).
- *
- * @tparam	alignmentBits The number of **bits** of alignment. That
- * 			is the low bits that an address needs to have zeroed
- * 			out to satisfy the alignment criterion.
- */
-template<class SizeType, unsigned int alignmentBits>
-class HeapBase {
-protected:
-	/**
-	 * SizeType MSB mask.
-	 *
-	 * A mask that has only the most significant bit set for the type used to
-	 * represent block sizes internally. Irresponsibly assumes that a byte is 8 bits.
-	 */
-    static constexpr unsigned int sizeMsb = 1 << (sizeof(SizeType) * 8 - 1);
-
-    /**
-     * Heap block handle.
-     *
-     * Enables access to a (free or used) heap block.
-     *
-     * @see	Heap for the details.
-     */
-    struct Block {
-    		/**
-    	     * The offset of the next field from the start of the payload.
-    	     * @see	Heap for the details.
-    	     */
-            static constexpr int nextFieldIdx = -1;
-
-    		/**
-    	     * Pointer to the payload.
-    	     * @see	Heap for the details.
-    	     */
-            SizeType *ptr;
-
-    		/**
-    	     * Create from payload pointer.
-    	     * @see	Heap for the details.
-    	     */
-            inline Block(void* address);
-
-			/**
-			 * Get the size of the payload of this block.
-			 * @see	Heap for the details.
-			 */
-            inline unsigned int getSize() const;
-    };
-};
-
-/**
- * Inheritance helper.
- *
- * Base class disambiguator for the Heap host. Needed because
- * both the host and the policies need to inherit from the HeapBase.
- */
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-class HeapHostBase: protected HeapBase<SizeType, alignmentBits>
-{
-protected:
-	using HeapBase<SizeType, alignmentBits>::sizeMsb;
-
-	/**
-	 * Alignment **bytes**
-	 *
-	 * Alignment of the heap in the regular sense.
-	 */
-    static constexpr unsigned int alignmentBytes = 1 << (alignmentBits);
-
-    /**
-     * Round up to alignment.
-     *
-     * Used internally to enforce alignment of various addresses and sizes.
-     *
-     * @param	x The address/size to be aligned.
-     * @return	The lowest value that is:
-     * 				1. Not smaller than _x_ and
-     * 				2. Satisfies the alignment criterion.
-     */
-    static constexpr unsigned int align(unsigned int x);
-
-    /**
-     * Bytes to internal size.
-     *
-     * Converts a size from bytes to the internal representation.
-     *
-     * @param 	x The size (in bytes) to be converted to internal units.
-     * @return	The result of the conversion.
-     */
-    static constexpr unsigned int encode(unsigned int x);
-
-    /**
-     * Internal size to bytes.
-     *
-     * Converts a size from the internal representation to bytes.
-     *
-     * @param 	x The size (in internal units) to be converted to bytes.
-     * @return	The result of the conversion.
-     */
-    static constexpr unsigned int decode(unsigned int x);
-
-    /**
-     * Heap block handle.
-     *
-     * Enables access to a (free or used) heap block, with added
-     * functionality available only for the HeapHost.
-     *
-     * @see	Heap for the details.
-     */
-    struct Block: HeapBase<SizeType, alignmentBits>::Block {
-    		using HeapBase<SizeType, alignmentBits>::Block::getSize;
-    		using HeapBase<SizeType, alignmentBits>::Block::ptr;
-    		using HeapBase<SizeType, alignmentBits>::Block::nextFieldIdx;
-    		/**
-    	     * Static block header size.
-    	     * @see	Heap for the details.
-    	     */
-            static constexpr unsigned int headerSize = (useChecksum ? 3 : 2) * sizeof(SizeType);
-
-        	/**
-             * The offset of the previous field from the start of the payload.
-             * @see	Heap for the details.
-             */
-            static constexpr int prevFieldIdx = -2;
-
-        	/**
-             * The offset of the field used for storing checksum of
-             * the other fields, if checksumming is enabled.
-             * @see	Heap for the details.
-             */
-            static constexpr int checksumFieldIdx = -3;
-
-    		/**
-    	     * Fall-through create from payload pointer.
-    	     * @see	Heap for the details.
-    	     */
-            inline Block(void* address);
-
-            /**
-			 * Fall-through copy constructor
-			 * @see	Heap for the details.
-			 */
-            inline Block(const typename HeapBase<SizeType, alignmentBits>::Block &other);
-
-    		/**
-    	     * Has (physically) previous block? (Or is it the first one?)
-    	     * @see	Heap for the details.
-    	     */
-            inline bool hasPrev() const;
-
-    		/**
-    	     * Get (physically) previous block.
-    	     * @see	Heap for the details.
-    	     */
-            inline Block getPrev() const;
-
-    		/**
-    	     * Set (physically) previous block.
-    	     * @see	Heap for the details.
-    	     */
-            inline void setPrev(const Block &prev) const;
-
-    		/**
-    	     * Is this a free block?
-    	     * @see	Heap for the details.
-    	     */
-            inline bool isFree() const;
-
-    		/**
-    	     * Set the block free or used.
-    	     * @see	Heap for the details.
-    	     */
-            inline void setFree(bool free) const;
-
-    		/**
-    	     * Has next (physical) block? (Or is it the last one?)
-    	     * @see	Heap for the details.
-    	     */
-            inline bool hasNext(Block end) const;
-
-            /**
-			 * Set (physically) next block.
-			 * @note Affects the size.
-			 * @see	Heap for the details.
-			 */
-			inline void setNext(const Block &next) const;
-
-			/**
-			 * Get (physically) next block.
-			 * @see	Heap for the details.
-			 */
-			inline Block getNext() const;
-
-			/**
-			 * Set the size of the payload of this block.
-			 * @note Affects the next block property.
-			 * @see	Heap for the details.
-			 */
-            inline void setSize(SizeType size) const;
-
-			/**
-			 * Helper that splits this block in two, returns the leftover.
-			 * @see	Heap for the details.
-			 */
-            inline Block split(unsigned int size);
-
-			/**
-			 * Helper that merges the other block into this.
-			 *
-			 * After the operation this block has a length so that,
-			 * its end is the same as the end of the other.
-			 * @see	Heap for the details.
-			 */
-            inline void merge(Block other);
-
-            /**
-             * Update the prev size field of the next block, if present.
-             * @see	Heap for the details.
-             */
-            inline void updateNext(Block end);
-
-            /**
-             * Helper to update the checksum field.
-             * @see	Heap for the details.
-             */
-            inline void updateChecksum();
-
-            /**
-             * Helper to check the validity of the checksum field.
-             * @see	Heap for the details.
-             */
-            inline bool checkChecksum();
-    };
-};
 
 /**
  * Policy based heap.
@@ -315,24 +60,6 @@ protected:
  * depending on whether it is free or used. However the used blocks header is a subset of
  * the free one's. The common metadata to be describes the location of the immediate neighbors
  * of the given block.
- *
- * @dot digraph G {
- * h[shape = plaintext, label = <<table border="0" cellborder="1" cellspacing="1"><tr>
- * 		<td port="n1">next</td><td port="p1" SIDES="TB">prev</td><td bgcolor="#90ee90">Free space</td>
- * 		<td port="n2">next</td><td port="p2" SIDES="TB">prev</td><td bgcolor="#ffc0cb">User data</td>
- * 		<td port="n3">next</td><td port="p3" SIDES="TB">prev</td><td bgcolor="#90ee90">Free space</td>
- * 		<td port="n4">next</td><td port="p4" SIDES="TB">prev</td><td bgcolor="#ffc0cb">User data</td>
- * 		<td port="n5">next</td><td port="p5" SIDES="TB">prev</td><td bgcolor="#ffc0cb">User data</td>
- * </tr></table>>]
- * h:n1:s -> h:n2:s;
- * h:n2:s -> h:n3:s;
- * h:n3:s -> h:n4:s;
- * h:n4:s -> h:n5:s;
- * h:p2:n -> h:n1:n;
- * h:p3:n -> h:n2:n;
- * h:p4:n -> h:n3:n;
- * h:p5:n -> h:n4:n;
- * } @enddot
  *
  * As these blocks cover the heapspace continuously (ie. without gaps) it is sufficient to
  * know the size of the block to get to the next one, also conversely knowing the size of
@@ -390,451 +117,639 @@ protected:
 
 template<class Policy, class SizeType, unsigned int alignmentBits, bool useChecksum = false>
 class Heap:	public Policy,
-			protected HeapHostBase<SizeType, alignmentBits, useChecksum>,
 			protected pet::Trace<AllHeapsTrace>
-
 {
+	static_assert(alignof(SizeType) <= (1 << alignmentBits));
+	using Base = HeapBase<SizeType>;
 	friend HeapInternalsTest;
-	typedef HeapHostBase<SizeType, alignmentBits, useChecksum> Base;
-    using Block = typename Base::Block;
-    using Base::sizeMsb;
-    using Base::alignmentBytes;
-    using Base::align;
-    using Base::encode;
-    using Base::decode;
+
+    /**
+     * Bytes to internal size.
+     *
+     * Converts a size from bytes to the internal representation, while rounding down.
+     *
+     * @param 	x The size (in bytes) to be converted to internal units.
+     * @return	The result of the conversion.
+     */
+    static constexpr uintptr_t encodeRoundDown(uintptr_t x) {
+        return x >> alignmentBits;
+    }
+
+    /**
+     * Bytes to internal size.
+     *
+     * Converts a size from bytes to the internal representation, while rounding up.
+     *
+     * @param 	x The size (in bytes) to be converted to internal units.
+     * @return	The result of the conversion.
+     */
+    static constexpr uintptr_t encodeRoundUp(uintptr_t x) {
+        return (x + (uintptr_t(1) << alignmentBits) - 1) >> alignmentBits;
+    }
+
+    /**
+     * Internal size to bytes.
+     *
+     * Converts a size from the internal representation to bytes.
+     *
+     * @param 	x The size (in internal units) to be converted to bytes.
+     * @return	The result of the conversion.
+     */
+    static constexpr uintptr_t decode(uintptr_t x) {
+        return x << alignmentBits;
+    }
+
+    /**
+     * Heap block handle.
+     *
+     * Enables access to a (free or used) heap block, with added
+     * functionality available only for the HeapHost.
+     *
+     * @see	Heap for the details.
+     */
+    struct Block: Base::Block
+	{
+    	using Base::Block::Block;
+
+    	inline Block(const typename Base::Block& o): Base::Block(o) {}
+
+		/// Static block header size.
+		static constexpr uintptr_t headerSize = (useChecksum ? 3 : 2) * sizeof(SizeType);
+
+		/// The offset of the previous field from the start of the payload.
+		static constexpr int prevFieldIdx = -2;
+
+		/// The offset of the field used for storing checksum of the other fields, if checksumming is enabled.
+		static constexpr int checksumFieldIdx = -3;
+
+		/// Has (physically) previous block? (Or is it the first one?)
+		really_inline bool hasPrev() const {
+		    return this->ptr[prevFieldIdx];
+		}
+
+		/// Get (physically) previous block.
+		really_inline Heap::Block getPrev() const {
+		    return {(char*)this->ptr - decode(this->ptr[prevFieldIdx])};
+		}
+
+		/// Set (physically) previous block.
+		really_inline void setPrev(const Heap::Block &prev) const
+		{
+			const uintptr_t diff = (char*)this->ptr - (char*)prev.ptr;
+			const auto encDiff = encodeRoundDown(diff);
+
+			assertThat(decode(encDiff) == diff, "Heap corruption");
+
+			this->ptr[prevFieldIdx] = encDiff;
+		}
+
+		/// Is this an unused block?
+		really_inline bool isFree() const {
+		    return this->ptr[Base::Block::nextFieldIdx] & Base::sizeMsb;
+		}
+
+		/// Set whether the block is free or used.
+		really_inline void setFree(bool free) const
+		{
+			this->ptr[Base::Block::nextFieldIdx] = free
+				? (this->ptr[Base::Block::nextFieldIdx] | Base::sizeMsb)
+				: (this->ptr[Base::Block::nextFieldIdx] & ~Base::sizeMsb);
+		}
+
+		/// Has next (physical) block? (Or is it the last one?)
+		really_inline bool hasNext(const Heap::Block &end) const {
+		    return this->getNext().ptr != end.ptr;
+		}
+
+		/// Set (physically) next block. NOTE: It affects the size!
+		really_inline void setNext(const Heap::Block &next) const
+		{
+			const uintptr_t diff = (char*)next.ptr - (char*)this->ptr;
+			const auto encDiff = encodeRoundDown(diff);
+
+			assertThat(decode(encDiff) == diff, "Heap corruption");
+
+		    this->setSize(encDiff);
+		}
+
+		/// Get (physically) next block.
+		inline Heap::Block getNext() const {
+		    return {(char*)this->ptr + decode(this->getSize())};
+		}
+
+		/// Set the size of the payload of this block.
+		really_inline void setSize(SizeType size) const
+		{
+			this->ptr[Base::Block::nextFieldIdx] =
+					(this->ptr[Base::Block::nextFieldIdx] & Base::sizeMsb)
+					| (size & ~Base::sizeMsb);
+		}
+
+		/// Helper that shrinks this block and returns the leftover.
+		really_inline Heap::Block split(uintptr_t size, bool isLeftoverFree) const
+		{
+			Heap::Block oldNext = getNext();
+			setSize(size);
+
+			Heap::Block leftover(getNext());
+			leftover.setPrev(*this);
+			leftover.setNext(oldNext);
+			leftover.setFree(isLeftoverFree);
+			return leftover;
+		}
+
+		/**
+		 * Helper that merges the other block into this.
+		 *
+		 * After the operation this block has a length so that,
+		 * its end is the same as the end of the other.
+		 * @see	Heap for the details.
+		 */
+		really_inline void merge(const Heap::Block &other) const
+		{
+			setNext(other.getNext());
+			other.setPrev(*this);
+
+			other.updateChecksum();
+			updateChecksum();
+		}
+
+		/// Update the prev size field of the next block, if present.
+		really_inline void updateNext(const Heap::Block &end) const
+		{
+			if(hasNext(end))
+			{
+				getNext().setPrev(*this);
+				getNext().updateChecksum();
+			}
+		}
+
+		static really_inline SizeType getLow(SizeType v) {
+			return v & ~(SizeType(-1) << (sizeof(SizeType) * 8 / 2));
+		}
+
+		static really_inline SizeType getHigh(SizeType v) {
+			return v >> (sizeof(SizeType) * 8 / 2);
+		}
+
+		static really_inline SizeType hash(SizeType v, SizeType k)
+		{
+			static constexpr auto sizeBits = 8 * sizeof(SizeType);
+			static constexpr auto sizeLog = ilog2(sizeBits);
+
+			const auto f = (v + 5) * (k + 31);
+			const auto top = f >> (sizeBits - sizeLog);
+			const auto rot = (f >> top) | (f << (sizeBits - top));
+
+			return getLow(rot) ^ getHigh(rot);
+		}
+
+		/// Helper that calculates a one (double) round Feistel mix of thr prev field using the next field as key.
+		really_inline SizeType calculateChecksum() const
+		{
+			const auto al = getLow(this->ptr[prevFieldIdx]);
+			const auto ah = getHigh(this->ptr[prevFieldIdx]);
+			const auto bl = getLow(this->ptr[Base::Block::nextFieldIdx]);
+			const auto bh = getHigh(this->ptr[Base::Block::nextFieldIdx]);
+			const auto oh = ah ^ hash(al, bl);
+			const auto ol = al ^ hash(oh, bh);
+			return (oh << (sizeof(SizeType) * 8 / 2)) + ol;
+		}
+
+		/// Helper to update the checksum field.
+		really_inline void updateChecksum() const
+		{
+			if(useChecksum)
+			{
+				this->ptr[checksumFieldIdx] = this->calculateChecksum();
+			}
+		}
+
+		/// Helper to check the validity of the checksum field.
+		really_inline bool checkChecksum() const {
+			return useChecksum ? (this->ptr[checksumFieldIdx] == this->calculateChecksum()) : true;
+		}
+	};
 
 	Block end = 0; //!< Tricky one, points over the end, never dereferenced (ie. no setter or getter methods called on it).
 
-    static constexpr unsigned int maxBlockSize = decode(~sizeMsb);
+    static constexpr uintptr_t maxBlockSize = decode((Base::sizeMsb - 1));
+    static constexpr uintptr_t minEncodedBlockSize = encodeRoundUp(Policy::freeHeaderSize + Block::headerSize);
 
-    bool canSplit(Block, unsigned int size);
+    /**
+	 * Round down to alignment.
+	 *
+	 * Used internally to enforce alignment of various addresses and sizes.
+	 *
+	 * @param	x The address/size to be aligned.
+	 * @return	The largest value that is:
+	 * 				1. Not greater than _x_ and
+	 * 				2. Satisfies the alignment criterion.
+	 */
+    really_inline static constexpr uintptr_t alignDown(uintptr_t x) {
+		return x & (uintptr_t(-1) << alignmentBits);
+	}
 
-	public:
-    	/** @cond */
-    	inline bool dump(void *start)
-    	{
-			bool ok = true;
-			Block block = (char*)start + Block::headerSize;
+    /**
+     * Round up to alignment.
+     *
+     * Used internally to enforce alignment of various addresses and sizes.
+     *
+     * @param	x The address/size to be aligned.
+     * @return	The smallest value that is:
+     * 				1. Not smaller than _x_ and
+     * 				2. Satisfies the alignment criterion.
+     */
+    really_inline static constexpr uintptr_t alignUp(uintptr_t x) {
+		return alignDown(x + (uintptr_t(1) << alignmentBits) - 1);
+    }
 
-        	while(1)
-        	{
-       			info() << (block.isFree() ? 'f' : 'u') << block.ptr << ": " << decode(block.getSize());
+    really_inline  bool canSplit(Block block, uintptr_t size) {
+        return minEncodedBlockSize + size <= block.getSize();
+    }
 
-        		if(!block.hasNext(end))
-        			break;
-        		else
-        			ok = ok && (block.getNext().getPrev().ptr == block.ptr);
+public:
+    struct Stat
+    {
+    	size_t longestFree;
+    	size_t totalFree;
+    	size_t nUsed;
+    	size_t totalUsed;
+    };
 
-        		block = block.getNext();
-        	}
+	/**
+	 * Create an uninitialized heap, must be set up before use with the **init** method.
+	 */
+	inline Heap() = default;
 
-        	return ok;
-		}
-		/** @endcond */
+	/**
+	 * Initialize the heap.
+	 *
+	 * Initializes the internal data structures of the heap on the given block of memory.
+	 *
+	 * @param	space The pointer to the start of the heap space.
+	 * @param	size The size of the heap space.
+	 */
+	inline Heap(void* start, uintptr_t size) {
+		init(start, size);
+	}
 
-    	/** @cond */
-		inline HeapStat getStats(void *start)
+	inline void init(void* start, uintptr_t size)
+	{
+		assertThat(decode(minEncodedBlockSize) < size, "Heap too big for format (SizeType can not represent size of heap space)");
+
+		const auto firstBlockPtr = (char*)alignUp((uintptr_t)((char*)start + Block::headerSize));
+		const auto downAlignedSize = alignDown((uintptr_t)((char*)start + size - firstBlockPtr));
+
+		assertThat(downAlignedSize <= maxBlockSize, "Heap too big for format (SizeType can not represent size of heap space)");
+
+		end.ptr = (SizeType*)(firstBlockPtr + downAlignedSize);
+
+		const Block first(firstBlockPtr);
+		first.setFree(true);
+		first.setNext(end);
+		first.setPrev(first);
+		first.updateChecksum();
+
+		Policy::init(first);
+
+		info() << "Heap created at: " << start << " - " << (void*)(((char*)start) + size) << "\n";
+	}
+
+	/**
+	 * Allocate memory.
+	 *
+	 * Allocates the specified amount of memory.
+	 * The allocated region is aligned to the specified bits (given as alignmentBits template argument).
+	 *
+	 * @param	size The amount (in bytes) to be allocated.
+	 * @return	A pointer to the start of the allocated region or NULL on failure.
+	 */
+	inline void* alloc(uintptr_t sizeParam)
+	{
+		uintptr_t size = sizeParam;
+
+		if(size > maxBlockSize)
 		{
-			HeapStat ret{0, 0, 0, 0};
-			Block block = (char*)start + Block::headerSize;
+			warn() << "alloc(): Too large block requested !\n";
+			return 0;
+		}
 
-			while(true)
+		size = encodeRoundUp(max(size, Policy::freeHeaderSize) + Block::headerSize);
+
+		const Block ret(this->Policy::findAndRemove(size));
+
+		if(ret.ptr == 0)
+		{
+			warn() << "alloc(): Can not allocate " << decode(size) << " bytes\n";
+		}
+		else
+		{
+			assertThat(ret.checkChecksum(), "Heap corruption");
+
+			if(canSplit(ret, size))
 			{
-				const auto len = decode(block.getSize());
-
-				if(block.isFree())
-				{
-					if(ret.longestFree < len)
-					{
-						ret.longestFree = len;
-					}
-
-					ret.totalFree += len;
-				}
-				else
-				{
-					ret.nUsed++;
-					ret.totalUsed += len;
-				}
-
-				if(block.hasNext(end))
-				{
-					block = block.getNext();
-				}
-				else
-				{
-					break;
-				}
+				const auto leftover(ret.split(size, true));
+				leftover.updateNext(end);
+				leftover.updateChecksum();
+				this->Policy::add(leftover);
 			}
 
-			return ret;
+			dbg() << "alloc(" << sizeParam << "): " << ret.ptr << "\n";
+
+			ret.setFree(false);
+			ret.updateChecksum();
+
+			assertThat(ret.getSize() >= size, "Heap corruption");
 		}
-		/** @endcond */
 
-    	/**
-    	 * Initialize the heap.
-    	 *
-    	 * Initializes the internal data structures of the heap on the given block of memory.
-    	 *
-    	 * @param	space The pointer to the start of the heap space.
-    	 * @param	size The size of the heap space.
-    	 */
-		inline void init(void* space, unsigned int size);
-		inline Heap(void* space, unsigned int size);
+		return ret.ptr;
+	}
 
-    	/**
-    	 * Create an uninitialized heap, must be set up before use with the **init** method.
-    	 */
-		inline Heap() = default;
+	/**
+	 * Release used memory.
+	 *
+	 * Places back the given block into the free stores.
+	 *
+	 * @param	r The pointer to the block that is to be freed.
+	 * 			It has to be a pointer returned by the method alloc, without any offset!
+	 */
+	inline void free(void* r)
+	{
+		assertThat(r, "free(): Invalid argument\n");
 
-    	/**
-    	 * Allocate memory.
-    	 *
-    	 * Allocates the specified amount of memory.
-    	 * The allocated region is aligned to the specified bits (given as alignmentBits template argument).
-    	 *
-    	 * @param	size The amount (in bytes) to be allocated.
-    	 * @return	A pointer to the start of the allocated region or NULL on failure.
-    	 */
-		inline void* alloc(unsigned int size);
+		const Block block(r);
+		assertThat(block.checkChecksum(), "Heap corruption");
+		assertThat(!block.isFree(), "Heap corruption (probably double free)");
 
-    	/**
-    	 * Release used memory.
-    	 *
-    	 * Places back the given block into the free stores.
-    	 *
-    	 * @param	ptr	The pointer to the block that is to be freed.
-    	 * 			It has to be a pointer returned by the method alloc, without any offset!
-    	 */
-		inline void free(void* ptr);
+		dbg() << "free(" <<  r << "): " << decode(block.getSize()) << " freed\n";
 
-    	/**
-    	 * Shrinks block.
-    	 *
-    	 * Splits the given block and frees up the end of it.
-    	 * If a higher value is requested than the size of the block the size is not enlarged.
-    	 * This method can **only shrink**, thus the name. It is not the same as stdlibc's
-    	 * _realloc_, as it never moves the data.
-    	 *
-    	 * @param	ptr The pointer to the block that is to be split.
-    	 * 			It has to be a pointer returned by the method alloc, without any offset!
-    	 * @param 	shrunkSize The requested new size of the block.
-    	 * @return	The new size of the block. Note that depending on the actual arguments
-    	 * 			and the configuration of the Heap it can be more or less than to the
-    	 * 			_shrunkSize_ parameter, however it is never smaller than the smaller
-    	 * 			of the current size and the requested size.
-    	 */
-		inline unsigned int shrink(void* ptr, unsigned int shrunkSize);
+		bool prevFree = block.hasPrev() && block.getPrev().isFree();
+		bool nextFree = block.hasNext(end) && block.getNext().isFree();
+
+		if(prevFree)
+		{
+			const auto prev(block.getPrev());
+			assertThat(prev.checkChecksum(), "Heap corruption");
+
+			uintptr_t oldSize = prev.getSize();
+
+			if(nextFree)
+			{
+				const auto next(block.getNext());
+				assertThat(next.checkChecksum(), "Heap corruption");
+
+				this->Policy::remove(next);
+
+				prev.merge(next);
+				prev.updateNext(end);
+			}
+			else
+			{
+				if(block.hasNext(end))
+				{
+					assertThat(block.getNext().checkChecksum(), "Heap corruption");
+				}
+
+				prev.merge(block);
+				prev.updateNext(end);
+			}
+
+			this->Policy::update(oldSize, prev);
+		}
+		else
+		{
+			block.setFree(true);
+
+			if(nextFree)
+			{
+				const Block next(block.getNext());
+				assertThat(next.checkChecksum(), "Heap corruption");
+
+				this->Policy::remove(next);
+
+				block.merge(next);
+				block.updateNext(end);
+			}
+			else
+			{
+				block.updateChecksum();
+			}
+
+			this->Policy::add(block);
+		}
+	}
+
+	/**
+	 * Resizes an allocation block.
+	 *
+	 * If smaller size is requested it splits the given block and frees up the end of it, if
+	 * the resulting block is big enough. If a larger size is requested and if the next block
+	 * is free and big enough then it is split and its first half is merged with the given
+	 * allocation.
+	 *
+	 * NOTE: It is not the same as stdlibc's _realloc_, as it never moves the data.
+	 *
+	 * @param	ptr The pointer to the block whose allocation size is to modified.
+	 * 			It has to be a pointer returned by the method alloc, without any offset!
+	 * @param 	newSizeParam The requested new size of the block.
+	 * @return	The new size of the block. Note that depending on the actual arguments
+	 * 			and the configuration and state of the allocator it can be more or less
+	 * 			than to the _newSizeParam_ parameter, however it is never smaller than
+	 * 			the smaller of the current size and the requested size.
+	 */
+	inline uintptr_t resize(void* ptr, uintptr_t newSizeParam)
+	{
+		assertThat(ptr, "shrink(): Null argument\n");
+
+		const Block block(ptr);
+		assertThat(block.checkChecksum(), "Heap corruption");
+
+		dbg() << "resize(" <<  ptr << "): " << decode(block.getSize()) << " -> " << newSizeParam;
+
+		uintptr_t requestedSize = encodeRoundUp(max(newSizeParam, Policy::freeHeaderSize) + Block::headerSize);
+
+		if(requestedSize < block.getSize())
+		{
+			if(canSplit(block, requestedSize))
+			{
+				const auto leftover(block.split(requestedSize, true));
+				block.updateChecksum();
+
+				if(leftover.hasNext(end))
+				{
+					Block next(leftover.getNext());
+					assertThat(next.checkChecksum(), "Heap corruption");
+
+					if(next.isFree())
+					{
+						this->Policy::remove(next);
+						leftover.merge(next);
+					}
+					else
+					{
+						leftover.updateChecksum();
+					}
+
+					leftover.updateNext(end);
+				}
+				else
+				{
+					leftover.updateChecksum();
+				}
+
+				this->Policy::add(leftover);
+			}
+		}
+		else if(block.getSize() < requestedSize)
+		{
+			if(block.hasNext(end))
+			{
+				const auto next(block.getNext());
+				assertThat(next.checkChecksum(), "Heap corruption");
+
+				if(next.isFree() && requestedSize <= next.getSize() + block.getSize())
+				{
+					const auto newSliceSize = requestedSize - block.getSize();
+
+					this->Policy::remove(next);
+
+					if(canSplit(next, newSliceSize))
+					{
+						const auto oldNextNext(next.getNext());
+						block.setSize(requestedSize);
+						block.updateChecksum();
+
+						const auto newNext(block.getNext());
+						newNext.setNext(oldNextNext);
+						newNext.setFree(true);
+						newNext.setPrev(block);
+						newNext.updateChecksum();
+
+						newNext.updateNext(end);
+
+						this->Policy::add(newNext);
+					}
+					else
+					{
+						block.merge(next);
+						block.updateNext(end);
+					}
+				}
+			}
+		}
+
+		return decode(block.getSize());
+	}
+
+	/**
+	 * Decrease size of a block by moving its starting address higher and leaving the end
+	 * of the allocation range at its current address.
+	 *
+	 * The block modified to start at a higher address, and its size is decreased accordingly.
+	 * The newly created free block is merged with the previous one if it is also free or
+	 * it gets put back into storage if the previous block is used. This also affects the
+	 * minimal size that can be cut off.
+	 *
+	 * @param	ptr The pointer to the block whose allocation size is to modified.
+	 * 			It has to be a pointer returned by the method alloc, without any offset!
+	 * @param 	offset is the request number of bytes to move the block start address.
+	 * @return	The new starting address of the block. Note that depending on the actual
+	 *          arguments and the configuration and state of the allocator it can either
+	 *          be the original starting address or the original address plus the
+	 *          requested offset rounded down to the nearest aligned address.
+	 */
+	inline void* dropFront(void* ptr, uintptr_t offset)
+	{
+		assertThat(ptr, "shrink(): Null argument\n");
+		dbg() << "dropFront(" <<  ptr << ", " << offset << ") ";
+
+		const Block block(ptr);
+		assertThat(block.checkChecksum(), "Heap corruption");
+
+		const auto maxOffset = block.getSize() - minEncodedBlockSize;
+
+		if(uintptr_t splitOffset = min(maxOffset, encodeRoundDown(offset)))
+		{
+			if(block.hasPrev() && block.getPrev().isFree())
+			{
+				const auto next(block.getNext());
+
+				const auto prev(block.getPrev());
+				prev.setSize(prev.getSize() + splitOffset);
+				prev.updateChecksum();
+
+				const auto newBlock(prev.getNext());
+				newBlock.setFree(false);
+				newBlock.setNext(next);
+				newBlock.setPrev(prev);
+				newBlock.updateChecksum();
+				newBlock.updateNext(end);
+
+				return newBlock.ptr;
+			}
+			else if(minEncodedBlockSize <= splitOffset)
+			{
+				const auto newBlock(block.split(splitOffset, false));
+				block.setFree(true);
+				block.updateChecksum();
+				this->Policy::add(block);
+
+				newBlock.updateChecksum();
+				newBlock.updateNext(end);
+				return newBlock.ptr;
+			}
+		}
+
+		return block.ptr;
+	}
+
+	/** @cond */
+	inline Stat getStats(void *start)
+	{
+		Block block((char*)alignUp((uintptr_t)((char*)start + Block::headerSize)));
+		Stat ret{0, 0, 0, 0};
+
+		bool prevFree = false;
+		while(true)
+		{
+			assertThat(block.checkChecksum(), "Heap corruption");
+
+			const auto len = decode(block.getSize()) - Block::headerSize;
+
+			if(block.isFree())
+			{
+				if(ret.longestFree < len)
+				{
+					ret.longestFree = len;
+				}
+
+				ret.totalFree += len;
+				assertThat(!prevFree, "Heap corruption");
+				prevFree = true;
+			}
+			else
+			{
+				ret.nUsed++;
+				ret.totalUsed += len;
+				prevFree = false;
+			}
+
+			if(block.hasNext(end))
+			{
+				block = block.getNext();
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		return ret;
+	}
+	/** @endcond */
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-template<class Policy, class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline Heap<Policy, SizeType, alignmentBits, useChecksum>::Heap(void* start, unsigned int size)  {
-	init(start, size);
-}
-
-template<class Policy, class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline void Heap<Policy, SizeType, alignmentBits, useChecksum>::init(void* start, unsigned int size){
-	end.ptr = (SizeType*)((char*)start + size + Block::headerSize);
-	unsigned int initialIndent = align(Block::headerSize);
-	Block first((char*)start + initialIndent);
-	first.setFree(true);
-	first.setNext(end);
-	first.setPrev(first);
-	first.updateChecksum();
-	Policy::init(first);
-	info() << "Heap created at: " << start << " - " << (void*)(((char*)start) + size) << "\n";
-}
-
-
-template<class Policy, class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline void* Heap<Policy, SizeType, alignmentBits, useChecksum>::alloc(unsigned int sizeParam)
-{
-    unsigned int size = sizeParam;
-
-	if(size > maxBlockSize) {
-		warn() << "Heap::alloc(): Too large block requested !\n";
-        return 0;
-    }
-
-    if(size < Policy::freeHeaderSize)
-        size = Policy::freeHeaderSize;
-
-    size = encode(align(size));
-
-    Block ret(Policy::findAndRemove(size));
-
-    if(ret.ptr == 0) {
-    	warn() << "Heap::alloc(): Can not allocate " << decode(size) << " bytes\n";
-    	return 0;
-    }
-
-	assertThat(ret.checkChecksum(), "Heap corruption");
-
-	if(canSplit(ret, size)) {
-	    Block leftover(ret.split(size));
-       	leftover.updateNext(end);
-       	leftover.updateChecksum();
-    	Policy::add(leftover);
-	}
-
-	dbg() << "Heap::alloc(" << sizeParam << "): " << ret.ptr << "\n";
-
-	ret.setFree(false);
-	ret.updateChecksum();
-
-    assertThat(ret.getSize() >= size, "Heap corruption");
-    return ret.ptr;
-}
-
-template<class Policy, class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline void Heap<Policy, SizeType, alignmentBits, useChecksum>::free(void* r) {
-	assertThat(r, "Heap::free(): Invalid argument\n");
-
-    Block block(r);
-	assertThat(block.checkChecksum(), "Heap corruption");
-	assertThat(!block.isFree(), "Heap corruption (probably double free)");
-
-	dbg() << "Heap::free(" <<  r << "): " << decode(block.getSize()) << " freed\n";
-
-    bool prevFree = block.hasPrev() && block.getPrev().isFree();
-    bool nextFree = block.hasNext(end) && block.getNext().isFree();
-
-    if(prevFree) {
-        Block prev(block.getPrev());
-        assertThat(prev.checkChecksum(), "Heap corruption");
-        unsigned int oldSize = prev.getSize();
-
-        if(nextFree) {
-        	Block next(block.getNext());
-
-        	assertThat(next.checkChecksum(), "Heap corruption");
-
-            Policy::remove(next);
-
-        	prev.merge(next);
-        	prev.updateNext(end);
-        } else {
-        	if(block.hasNext(end))
-        		assertThat(block.getNext().checkChecksum(), "Heap corruption");
-
-        	prev.merge(block);
-        	prev.updateNext(end);
-        }
-
-        Policy::update(oldSize, prev);
-    } else {
-        block.setFree(true);
-
-        if(nextFree) {
-        	Block next(block.getNext());
-        	assertThat(next.checkChecksum(), "Heap corruption");
-            Policy::remove(next);
-
-        	block.merge(next);
-        	block.updateNext(end);
-        } else
-        	block.updateChecksum();
-
-        Policy::add(block);
-    }
-}
-
-template<class Policy, class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline unsigned int Heap<Policy, SizeType, alignmentBits, useChecksum>::shrink(void* ptr, unsigned int shrunkSizeParam)
-{
-	assertThat(ptr, "Heap::shrink(): Null argument\n");
-	dbg() << "Heap::shrink(" <<  ptr << "): ";
-
-    Block block(ptr);
-    assertThat(block.checkChecksum(), "Heap corruption");
-
-	unsigned int oldSize = decode(block.getSize());
-
-    dbg() << oldSize << " -> " << shrunkSizeParam;
-
-    unsigned int shrunkSize = encode(align((shrunkSizeParam < Policy::freeHeaderSize) ?
-    		Policy::freeHeaderSize :
-    		shrunkSizeParam));
-
-    if(block.getSize() < shrunkSize) {
-    	warn() << " (enlargement requested)\n";
-    	warn() << "Heap::shrink(" <<  ptr << "): " << oldSize << " -> " << shrunkSizeParam;
-    	warn() << " (enlargement requested)\n";
-    	return decode(block.getSize());
-    }
-
-	if(canSplit(block, shrunkSize)) {
-	    Block leftover = block.split(shrunkSize);
-	    block.updateChecksum();
-
-	    if(leftover.hasNext(end)) {
-        	Block next(leftover.getNext());
-        	assertThat(next.checkChecksum(), "Heap corruption");
-
-	    	if(next.isFree()) {
-				Policy::remove(next);
-				leftover.merge(next);
-	    	} else {
-		    	leftover.updateChecksum();
-	    	}
-
-    		leftover.updateNext(end);
-	    } else
-	    	leftover.updateChecksum();
-
-    	Policy::add(leftover);
-	}
-
-    unsigned int newSize = decode(block.getSize());
-
-    if(oldSize == newSize)
-    	dbg() << " (not changed)\n";
-    else
-    	dbg() << " (shrunk to: " << newSize << ")\n";
-
-    return newSize;
-}
-
-template<class Policy, class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline bool Heap<Policy, SizeType, alignmentBits, useChecksum>::canSplit(Block block, unsigned int size) {
-    constexpr static unsigned int minEncodedFullBlockSize = encode(align(Block::headerSize + Policy::freeHeaderSize));
-    unsigned int leftoverSize = block.getSize() - size;
-    return leftoverSize >= minEncodedFullBlockSize;
-}
-
-template<class SizeType, unsigned int alignmentBits>
-inline HeapBase<SizeType, alignmentBits>::Block::Block(void* address): ptr((SizeType*)address) {}
-
-template<class SizeType, unsigned int alignmentBits>
-inline unsigned int HeapBase<SizeType, alignmentBits>::Block::getSize() const  {
-    return ptr[nextFieldIdx] & ~sizeMsb;
-}
-
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline HeapHostBase<SizeType, alignmentBits, useChecksum>::Block::
-Block(const typename HeapBase<SizeType, alignmentBits>::Block &other):
- 		HeapBase<SizeType, alignmentBits>::Block(other) {}
-
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline HeapHostBase<SizeType, alignmentBits, useChecksum>::Block::Block(void* address):
-	HeapBase<SizeType, alignmentBits>::Block((SizeType*)address) {}
-
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-constexpr unsigned int HeapHostBase<SizeType, alignmentBits, useChecksum>::align(unsigned int x) {
-        return (alignmentBytes > 1) ?
-                (x + (alignmentBytes - 1)) & -alignmentBytes:
-                x;
-}
-
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline void HeapHostBase<SizeType, alignmentBits, useChecksum>::Block::merge(Block other)
-{
-	setNext(other.getNext());
-	other.setPrev(*this);
-
-	other.updateChecksum();
-	updateChecksum();
-}
-
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline void HeapHostBase<SizeType, alignmentBits, useChecksum>::Block::updateNext(Block end)
-{
-	if(hasNext(end)) {
-		getNext().setPrev(*this);
-		getNext().updateChecksum();
-	}
-}
-
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline typename HeapHostBase<SizeType, alignmentBits, useChecksum>::Block
-HeapHostBase<SizeType, alignmentBits, useChecksum>::Block::split(unsigned int size)
-{
-	Block oldNext = getNext();
-	setSize(size);
-
-	Block leftover(getNext());
-	leftover.setPrev(*this);
-	leftover.setNext(oldNext);
-	leftover.setFree(true);
-	return leftover;
-}
-
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-constexpr unsigned int HeapHostBase<SizeType, alignmentBits, useChecksum>::encode(unsigned int x) {
-    return x >> alignmentBits;
-}
-
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-constexpr unsigned int HeapHostBase<SizeType, alignmentBits, useChecksum>::decode(unsigned int x) {
-    return x << alignmentBits;
-}
-
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline void HeapHostBase<SizeType, alignmentBits, useChecksum>::Block::setFree(bool free) const {
-    if(free)
-        ptr[nextFieldIdx] |= sizeMsb;
-    else
-    	ptr[nextFieldIdx] &= ~sizeMsb;
-}
-
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline bool HeapHostBase<SizeType, alignmentBits, useChecksum>::Block::isFree() const {
-    return ptr[nextFieldIdx] & sizeMsb;
-}
-
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline bool HeapHostBase<SizeType, alignmentBits, useChecksum>::Block::hasNext(Block end) const {
-    return getNext().ptr != end.ptr;
-}
-
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline typename HeapHostBase<SizeType, alignmentBits, useChecksum>::Block
-HeapHostBase<SizeType, alignmentBits, useChecksum>::Block::getNext() const {
-    return Block((char*)ptr + decode(getSize()) + headerSize);
-}
-
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline void HeapHostBase<SizeType, alignmentBits, useChecksum>::Block::setNext(const Block &next) const  {
-    setSize(encode(((char*)next.ptr - (char*)ptr) - headerSize));
-}
-
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline void HeapHostBase<SizeType, alignmentBits, useChecksum>::Block::setSize(SizeType size) const {
-	ptr[nextFieldIdx] &= sizeMsb;
-	ptr[nextFieldIdx] |= size & ~sizeMsb;
-}
-
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline bool HeapHostBase<SizeType, alignmentBits, useChecksum>::Block::hasPrev() const {
-    return ptr[prevFieldIdx];
-}
-
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline typename HeapHostBase<SizeType, alignmentBits, useChecksum>::Block
-HeapHostBase<SizeType, alignmentBits, useChecksum>::Block::getPrev() const {
-    return Block((char*)ptr - ptr[prevFieldIdx]);
-}
-
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline void HeapHostBase<SizeType, alignmentBits, useChecksum>::Block::setPrev(const Block &prev) const {
-	ptr[prevFieldIdx] = (char*)ptr - (char*)prev.ptr;
-}
-
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline void HeapHostBase<SizeType, alignmentBits, useChecksum>::Block::updateChecksum() {
-	if(useChecksum)
-		ptr[checksumFieldIdx] = ptr[prevFieldIdx] + ptr[nextFieldIdx];
-}
-
-template<class SizeType, unsigned int alignmentBits, bool useChecksum>
-inline bool HeapHostBase<SizeType, alignmentBits, useChecksum>::Block::checkChecksum() {
-	if(useChecksum)
-		return ptr[checksumFieldIdx] == ptr[prevFieldIdx] + ptr[nextFieldIdx];
-	else
-	    return true;
-}
 }
 
 #endif /* HEAP_H_ */
