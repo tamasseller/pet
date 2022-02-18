@@ -22,26 +22,26 @@
 
 namespace pet {
 namespace detail {
-	template<template <unsigned int> class F, unsigned int Min>
-	struct Range {
-		template<unsigned int N, unsigned int... theRest>
-		struct Runner{
-			static constexpr auto &value = Runner<N-1, N, theRest...>::value;
-		};
+    template<template <unsigned int> class F, unsigned int Min>
+    struct Range {
+        template<unsigned int N, unsigned int... theRest>
+        struct Runner{
+            static constexpr auto &value = Runner<N-1, N, theRest...>::value;
+        };
 
-		template<unsigned int... theRest>
-		struct Runner<Min, theRest...>{
-			static constexpr unsigned int value[] = {F<Min>::value, F<theRest>::value...};
-		};
-	};
+        template<unsigned int... theRest>
+        struct Runner<Min, theRest...>{
+            static constexpr unsigned int value[] = {F<Min>::value, F<theRest>::value...};
+        };
+    };
 
-	template<template <unsigned int> class F, unsigned int Min>
-	template<unsigned int... theRest>
-	constexpr unsigned int Range<F, Min>::Runner<Min, theRest...>::value[];
+    template<template <unsigned int> class F, unsigned int Min>
+    template<unsigned int... theRest>
+    constexpr unsigned int Range<F, Min>::Runner<Min, theRest...>::value[];
 
-	template<unsigned int x> struct Identity {
-		static constexpr unsigned int value = x;
-	};
+    template<unsigned int x> struct Identity {
+        static constexpr unsigned int value = x;
+    };
 }
 
 template<unsigned int Min, unsigned int Max>

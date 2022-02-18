@@ -30,7 +30,7 @@ struct Pair {
 template<class T1, class T2>
 template<class N1, class N2>
 struct Pair<T1, T2>::Applier<Pair<N1, N2>> {
-	really_inline static void apply() {
+    really_inline static void apply() {
         T1::template Applier<N1>::apply();
         T2::template Applier<N2>::apply();
     }
@@ -50,7 +50,7 @@ struct Stopper {
 
 template<>
 struct Stopper::Applier<Stopper> {
-	really_inline static void apply() {}
+    really_inline static void apply() {}
 };
 
 template<>
@@ -74,11 +74,11 @@ template<> struct stateVar<value> {                                             
                                                                                     \
 template<> template<>                                                               \
 struct stateVar<value>::Applier<stateVar<value>> {									\
-	really_inline static void apply() {} };        									\
+    really_inline static void apply() {} };        									\
                                                                                     \
 template<> template<class otherValue>                                               \
 struct stateVar<value>::Applier<stateVar<otherValue>> {                             \
-	inline static void apply();                                                     \
+    inline static void apply();                                                     \
 };                                                                                  \
                                                                                     \
 template<> template<class otherValue>                                               \
@@ -92,7 +92,7 @@ template<> struct stateVar<value> {                                             
                                                                                     \
 template<> template<class otherValue>                                               \
 struct stateVar<value>::Applier<stateVar<otherValue>> {                             \
-	inline static void apply();                                                     \
+    inline static void apply();                                                     \
 };                                                                                  \
                                                                                     \
 template<> template<class otherValue>                                               \

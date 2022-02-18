@@ -30,75 +30,75 @@ namespace pet {
 
 class RttBufferDescriptor
 {
-	const char* const name;
-	char* const data;
-	const uint32_t size;
-	volatile uint32_t wIdx = 0, rIdx = 0;
-	uint32_t flag = 0;
+    const char* const name;
+    char* const data;
+    const uint32_t size;
+    volatile uint32_t wIdx = 0, rIdx = 0;
+    uint32_t flag = 0;
 
 public:
-	template<size_t n> RttBufferDescriptor(const char* name, char (&buffer)[n]):
-		name(name), data(buffer), size(n) {}
+    template<size_t n> RttBufferDescriptor(const char* name, char (&buffer)[n]):
+        name(name), data(buffer), size(n) {}
 
-	class Iterator
-	{
-		friend RttBufferDescriptor;
-		uint32_t idx;
+    class Iterator
+    {
+        friend RttBufferDescriptor;
+        uint32_t idx;
 
-		inline Iterator(uint32_t idx): idx(idx) {}
-	};
+        inline Iterator(uint32_t idx): idx(idx) {}
+    };
 
-	inline Iterator startReading() const {
-		return {rIdx};
-	}
+    inline Iterator startReading() const {
+        return {rIdx};
+    }
 
-	inline const char* readAccess(Iterator &it)
-	{
-		if(it.idx != wIdx)
-		{
-			auto ret = data + it.idx;
+    inline const char* readAccess(Iterator &it)
+    {
+        if(it.idx != wIdx)
+        {
+            auto ret = data + it.idx;
 
-			if(++it.idx == size)
-				it.idx = 0;
+            if(++it.idx == size)
+                it.idx = 0;
 
-			return ret;
-		}
+            return ret;
+        }
 
-		return nullptr;
-	}
+        return nullptr;
+    }
 
-	inline void commitRead(const Iterator &it) {
-		rIdx = it.idx;
-	}
+    inline void commitRead(const Iterator &it) {
+        rIdx = it.idx;
+    }
 
-	inline Iterator startWriting() const {
-		return {wIdx};
-	}
+    inline Iterator startWriting() const {
+        return {wIdx};
+    }
 
-	inline char* writeAccess(Iterator &it)
-	{
-		auto newIdx = (it.idx + 1);
+    inline char* writeAccess(Iterator &it)
+    {
+        auto newIdx = (it.idx + 1);
 
-		if(newIdx == size)
-		{
-			newIdx = 0;
-		}
+        if(newIdx == size)
+        {
+            newIdx = 0;
+        }
 
-		if(newIdx != rIdx)
-		{
-			auto ret = data + it.idx;
-			it.idx = newIdx;
-			return ret;
-		}
+        if(newIdx != rIdx)
+        {
+            auto ret = data + it.idx;
+            it.idx = newIdx;
+            return ret;
+        }
 
-		return nullptr;
-	}
+        return nullptr;
+    }
 
-	inline void commitWrite(const Iterator &it) {
-		wIdx = it.idx;
-	}
+    inline void commitWrite(const Iterator &it) {
+        wIdx = it.idx;
+    }
 
-	bool write(const char* data, size_t length);
+    bool write(const char* data, size_t length);
 };
 
 
@@ -108,81 +108,81 @@ template<int... idx>
 class InvertedString<pet::Sequence<idx...>>
 {
 public:
-	static constexpr auto length = sizeof...(idx);
-	constexpr inline InvertedString(const char (&in)[length]): value{(char)~in[idx]...} {}
-	really_inline constexpr char operator[](size_t n) const { return value[n]; }
+    static constexpr auto length = sizeof...(idx);
+    constexpr inline InvertedString(const char (&in)[length]): value{(char)~in[idx]...} {}
+    really_inline constexpr char operator[](size_t n) const { return value[n]; }
 
 private:
-	const char value[length];
+    const char value[length];
 };
 
 struct alignas(256) RttControlBlock
 {
-	static constexpr char nominalId[] = "real-time-xfer";
-	static constexpr inline auto obfuscatedId = InvertedString<pet::sequence<0, sizeof(nominalId)>>(nominalId);
+    static constexpr char nominalId[] = "real-time-xfer";
+    static constexpr inline auto obfuscatedId = InvertedString<pet::sequence<0, sizeof(nominalId)>>(nominalId);
 
-	volatile char id[16];
-	int nUpBuffers = 1;
-	int nDownBuffers = 1;
-	RttBufferDescriptor up, down;
+    volatile char id[16];
+    int nUpBuffers = 1;
+    int nDownBuffers = 1;
+    RttBufferDescriptor up, down;
 
-	template<size_t nUp, size_t nDown>
-	inline RttControlBlock(char (&upBuffer)[nUp], char (&downBuffer)[nDown]):
-		up("up", upBuffer), down("down", downBuffer)
-	{
-		for(auto i = 0u; i < sizeof(id); i++)
-		{
-			id[i] = i < obfuscatedId.length ? ~obfuscatedId[i] : 0;
-		}
-	}
+    template<size_t nUp, size_t nDown>
+    inline RttControlBlock(char (&upBuffer)[nUp], char (&downBuffer)[nDown]):
+        up("up", upBuffer), down("down", downBuffer)
+    {
+        for(auto i = 0u; i < sizeof(id); i++)
+        {
+            id[i] = i < obfuscatedId.length ? ~obfuscatedId[i] : 0;
+        }
+    }
 
-	void setupOpenocdRttSink();
-	~RttControlBlock();
+    void setupOpenocdRttSink();
+    ~RttControlBlock();
 };
 
 template<size_t upBufferSize, size_t downBufferSize>
 class RttIo
 {
-	RttControlBlock controlBlock;
-	char upBuffer[upBufferSize], downBuffer[downBufferSize];
+    RttControlBlock controlBlock;
+    char upBuffer[upBufferSize], downBuffer[downBufferSize];
 
 public:
-	static constexpr auto upBufferLength = upBufferSize;
-	static constexpr auto downBufferLength = downBufferSize;
+    static constexpr auto upBufferLength = upBufferSize;
+    static constexpr auto downBufferLength = downBufferSize;
 
-	inline RttIo(): controlBlock(upBuffer, downBuffer) {}
+    inline RttIo(): controlBlock(upBuffer, downBuffer) {}
 
-	really_inline bool write(const char* data, size_t length) {
-		return controlBlock.up.write(data, length);
-	}
+    really_inline bool write(const char* data, size_t length) {
+        return controlBlock.up.write(data, length);
+    }
 
-	really_inline auto beginUpTransfer() {
-		return controlBlock.up.startWriting();
-	}
+    really_inline auto beginUpTransfer() {
+        return controlBlock.up.startWriting();
+    }
 
-	really_inline auto beginDownTransfer() {
-		return controlBlock.down.startReading();
-	}
+    really_inline auto beginDownTransfer() {
+        return controlBlock.down.startReading();
+    }
 
-	really_inline auto accessUpTransfer(RttBufferDescriptor::Iterator& it) {
-		return controlBlock.up.writeAccess(it);
-	}
+    really_inline auto accessUpTransfer(RttBufferDescriptor::Iterator& it) {
+        return controlBlock.up.writeAccess(it);
+    }
 
-	really_inline auto accessDownTransfer(RttBufferDescriptor::Iterator& it) {
-		return controlBlock.down.readAccess(it);
-	}
+    really_inline auto accessDownTransfer(RttBufferDescriptor::Iterator& it) {
+        return controlBlock.down.readAccess(it);
+    }
 
-	really_inline auto commitUpTransfer(RttBufferDescriptor::Iterator& it) {
-		return controlBlock.up.commitWrite(it);
-	}
+    really_inline auto commitUpTransfer(RttBufferDescriptor::Iterator& it) {
+        return controlBlock.up.commitWrite(it);
+    }
 
-	really_inline auto commitDownTransfer(RttBufferDescriptor::Iterator& it) {
-		return controlBlock.down.commitRead(it);
-	}
+    really_inline auto commitDownTransfer(RttBufferDescriptor::Iterator& it) {
+        return controlBlock.down.commitRead(it);
+    }
 
-	inline void openocdInit() {
-		controlBlock.setupOpenocdRttSink();
-	}
+    inline void openocdInit() {
+        controlBlock.setupOpenocdRttSink();
+    }
 };
 
 }

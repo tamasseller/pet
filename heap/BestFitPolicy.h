@@ -36,61 +36,61 @@ namespace pet {
 template <class SizeType>
 class BestFitPolicy: protected HeapBase<SizeType>
 {
-	using typename HeapBase<SizeType>::Block;
+    using typename HeapBase<SizeType>::Block;
 
-	struct FreeBlock
-	{
-		FreeBlock* next;
-	};
+    struct FreeBlock
+    {
+        FreeBlock* next;
+    };
 
-	pet::LinkedList<FreeBlock> freeStore;
+    pet::LinkedList<FreeBlock> freeStore;
 
 protected:
-	static constexpr auto freeHeaderSize = sizeof(FreeBlock);
+    static constexpr auto freeHeaderSize = sizeof(FreeBlock);
 
-	really_inline void init(Block block)
+    really_inline void init(Block block)
     {
-    	freeStore.clear();
-    	add(block);
+        freeStore.clear();
+        add(block);
     }
 
     really_inline void add(Block block) {
-		freeStore.add((FreeBlock *)block.ptr);
-	}
-
-	really_inline void remove(Block block) {
-    	freeStore.remove((FreeBlock *)block.ptr);
+        freeStore.add((FreeBlock *)block.ptr);
     }
 
-	really_inline void update(unsigned int oldSize, Block block) {}
+    really_inline void remove(Block block) {
+        freeStore.remove((FreeBlock *)block.ptr);
+    }
 
-	really_inline Block findAndRemove(unsigned int size, bool hot)
-	{
-		typename decltype(freeStore)::Iterator best = freeStore.end();
-		unsigned int bestSize = -1u;
+    really_inline void update(unsigned int oldSize, Block block) {}
 
-		for(auto it = freeStore.iterator(); it.current(); it.step())
-		{
-			unsigned int currSize = Block(it.current()).getSize();
+    really_inline Block findAndRemove(unsigned int size, bool hot)
+    {
+        typename decltype(freeStore)::Iterator best = freeStore.end();
+        unsigned int bestSize = -1u;
 
-			if(currSize == size)
-			{
-				return it.remove();
-			}
-			else if (currSize > size && currSize < bestSize)
-			{
-				bestSize = currSize;
-				best = it;
-			}
-		}
+        for(auto it = freeStore.iterator(); it.current(); it.step())
+        {
+            unsigned int currSize = Block(it.current()).getSize();
 
-		if(best != freeStore.end())
-		{
-			return best.remove();
-		}
+            if(currSize == size)
+            {
+                return it.remove();
+            }
+            else if (currSize > size && currSize < bestSize)
+            {
+                bestSize = currSize;
+                best = it;
+            }
+        }
 
-		return {nullptr};
-	}
+        if(best != freeStore.end())
+        {
+            return best.remove();
+        }
+
+        return {nullptr};
+    }
 
 };
 

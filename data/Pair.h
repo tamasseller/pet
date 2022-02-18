@@ -27,13 +27,13 @@ namespace pet {
 template<typename T, typename U>
 struct Pair
 {
-	T first;
-	U second;
+    T first;
+    U second;
 
-	inline Pair() = default;
-	template<typename X, typename Y> Pair(X&& a, Y&& b): first(pet::forward<X>(a)), second(pet::forward<Y>(b)) { }
-	template<typename X, typename Y> Pair(const Pair<X, Y>& p): Pair(p.first, p.second) { }
-	template<typename X, typename Y> Pair(Pair<X, Y>&& p): Pair(pet::move(p.first), pet::move(p.second)) { }
+    inline Pair() = default;
+    template<typename X, typename Y> Pair(X&& a, Y&& b): first(pet::forward<X>(a)), second(pet::forward<Y>(b)) { }
+    template<typename X, typename Y> Pair(const Pair<X, Y>& p): Pair(p.first, p.second) { }
+    template<typename X, typename Y> Pair(Pair<X, Y>&& p): Pair(pet::move(p.first), pet::move(p.second)) { }
 };
 
 template<typename T, typename U> inline static constexpr bool operator==(const Pair<T, U>& x, const Pair<T, U>& y) { return x.first == y.first && x.second == y.second; }

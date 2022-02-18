@@ -54,7 +54,7 @@ struct SharedState: TestOutput
             write(STDOUT_FILENO, ".", 1);
     }
 
-	inline virtual void reportTestFailure(uint32_t rerunIdx, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text)
+    inline virtual void reportTestFailure(uint32_t rerunIdx, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text)
     {
         std::stringstream ss;
 
@@ -62,11 +62,11 @@ struct SharedState: TestOutput
 
         if(rerunIdx)
         {
-        	ss << "Synthetic #" << rerunIdx << " test based on '";
+            ss << "Synthetic #" << rerunIdx << " test based on '";
         }
         else
         {
-        	ss << "Test '";
+            ss << "Test '";
         }
 
 
@@ -77,7 +77,7 @@ struct SharedState: TestOutput
         write(STDOUT_FILENO, str.c_str(), str.length());
     }
 
-	inline virtual void reportFinal(uint32_t normal, uint32_t failure, uint32_t synthetic) 
+    inline virtual void reportFinal(uint32_t normal, uint32_t failure, uint32_t synthetic) 
     {
         std::stringstream ss;
         ss << std::endl;
@@ -113,7 +113,7 @@ struct SharedState: TestOutput
         write(STDOUT_FILENO, str.c_str(), str.length());
     }
 
-	virtual inline ~SharedState() {}
+    virtual inline ~SharedState() {}
 };
 
 void TestRunner::Experimental::timerHandler(int signum)
@@ -146,7 +146,7 @@ inline int TestRunner::Experimental::runTestSubset(const char* filter, int timeL
     timer.it_value.tv_sec = timeLimitSec;
 
     while(true)
-	{
+    {
         if(idx < reqIdx)
         {
             it.step();
@@ -161,35 +161,35 @@ inline int TestRunner::Experimental::runTestSubset(const char* filter, int timeL
 
             if(!filter || it.current()->matches(filter))
             {
-				setitimer(ITIMER_VIRTUAL, &timer, NULL);
-				clock_t begin = clock();
-				auto ret = runTest(it.current());
-				double time_spent = (double)(clock() - begin) / CLOCKS_PER_SEC;
+                setitimer(ITIMER_VIRTUAL, &timer, NULL);
+                clock_t begin = clock();
+                auto ret = runTest(it.current());
+                double time_spent = (double)(clock() - begin) / CLOCKS_PER_SEC;
 
-				SharedState::instance->failed += ret.failed;
-				SharedState::instance->synthetic += ret.synthetic;
-				SharedState::instance->run++;
+                SharedState::instance->failed += ret.failed;
+                SharedState::instance->synthetic += ret.synthetic;
+                SharedState::instance->run++;
 
-				if(time_spent > timeLimitSec)
-				{
-					char buffer[1024];
-					auto l = sprintf(buffer, "\n!!! Test took %.1fs: '%s' at: %s !!!\n",
-						time_spent,
-						TestRunner::getCurrentTest()->getName(),
-						TestRunner::getCurrentTest()->getSourceInfo());
+                if(time_spent > timeLimitSec)
+                {
+                    char buffer[1024];
+                    auto l = sprintf(buffer, "\n!!! Test took %.1fs: '%s' at: %s !!!\n",
+                        time_spent,
+                        TestRunner::getCurrentTest()->getName(),
+                        TestRunner::getCurrentTest()->getSourceInfo());
 
-					char* p = buffer + l;
+                    char* p = buffer + l;
 
-					for(auto i = 0; i < SharedState::instance->dot % 64; i++)
-						*p++ = ' ';
+                    for(auto i = 0; i < SharedState::instance->dot % 64; i++)
+                        *p++ = ' ';
 
-					write(STDOUT_FILENO, buffer, p - buffer);
-				}
+                    write(STDOUT_FILENO, buffer, p - buffer);
+                }
             }
 
             reqIdx = SharedState::instance->next++;
         }
-	}
+    }
 
     return 0;
 }
@@ -198,7 +198,7 @@ int TestRunner::Experimental::runTestsInParallel(int timeLimitSec, const char* f
 {
     auto ptr = mmap(NULL, sizeof(SharedState), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
     SharedState::instance = new(ptr) SharedState;
-	TestRunner::output = SharedState::instance;
+    TestRunner::output = SharedState::instance;
 
     auto nprocs = get_nprocs();
     assert(nprocs > 0);
@@ -227,15 +227,15 @@ int TestRunner::Experimental::runTestsInParallel(int timeLimitSec, const char* f
 
         if(!WIFEXITED(status) || WEXITSTATUS(status) != 0)
         {
-        	std::cerr << std::endl << "Child " << pid << " exited abnormally!" << std::endl << std::endl;
+            std::cerr << std::endl << "Child " << pid << " exited abnormally!" << std::endl << std::endl;
 
-        	for(auto ch: children)
-        	{
-        		kill(ch, SIGTERM);
-        	}
+            for(auto ch: children)
+            {
+                kill(ch, SIGTERM);
+            }
 
-        	ret = -4;
-        	break;
+            ret = -4;
+            break;
         }
 
         if(children.erase(pid) != 1)
@@ -255,47 +255,47 @@ int TestRunner::Experimental::runTestsInParallel(int timeLimitSec, const char* f
 
 int TestRunner::Experimental::main(int argc, const char* argv[], TestOutput* output)
 {
-	const std::vector<std::string> args{argv, argv + argc};
+    const std::vector<std::string> args{argv, argv + argc};
 
-	std::optional<bool> doParallel;
-	std::optional<std::string> filter;
+    std::optional<bool> doParallel;
+    std::optional<std::string> filter;
 
-	for(auto it = args.cbegin(); it != args.cend();)
-	{
-		const auto name = *it++;
+    for(auto it = args.cbegin(); it != args.cend();)
+    {
+        const auto name = *it++;
 
-		if(name == "--no-parallel" || name == "-n")
-		{
-			doParallel = false;
-		}
-		else if(name == "--parallel" || name == "-p")
-		{
-			doParallel = true;
-		}
-		else if(name == "--filter" || name == "-f")
-		{
-			if(it == args.cend())
-			{
-				std::cerr << "Filter expression expected after '-f' option" << std::endl;
-				return -1;
-			}
-			else
-			{
-				filter = *it++;
-			}
-		}
-	}
+        if(name == "--no-parallel" || name == "-n")
+        {
+            doParallel = false;
+        }
+        else if(name == "--parallel" || name == "-p")
+        {
+            doParallel = true;
+        }
+        else if(name == "--filter" || name == "-f")
+        {
+            if(it == args.cend())
+            {
+                std::cerr << "Filter expression expected after '-f' option" << std::endl;
+                return -1;
+            }
+            else
+            {
+                filter = *it++;
+            }
+        }
+    }
 
-	const char* const f = filter.has_value() ? filter->c_str() : nullptr;
+    const char* const f = filter.has_value() ? filter->c_str() : nullptr;
 
-	if(doParallel.value_or(pet::TestRunner::getTestCount(f) > 50))
-	{
-		return pet::TestRunner::Experimental::runTestsInParallel(30, f);
-	}
-	else
-	{
-		return pet::TestRunner::runAllTests(output, f);
-	}
+    if(doParallel.value_or(pet::TestRunner::getTestCount(f) > 50))
+    {
+        return pet::TestRunner::Experimental::runTestsInParallel(30, f);
+    }
+    else
+    {
+        return pet::TestRunner::runAllTests(output, f);
+    }
 }
 
 }

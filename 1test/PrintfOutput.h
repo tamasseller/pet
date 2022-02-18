@@ -27,13 +27,13 @@ namespace pet {
 class PrintfOutput: public TestOutput {
 protected:
     int nDots = 0;
-	virtual void reportProgress() override;
-	virtual void reportTestFailure(uint32_t rerunIdx, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text) override;
-	virtual void reportFinal(uint32_t normal, uint32_t failure, uint32_t synthetic) override;
-	virtual inline ~PrintfOutput() {}
+    virtual void reportProgress() override;
+    virtual void reportTestFailure(uint32_t rerunIdx, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text) override;
+    virtual void reportFinal(uint32_t normal, uint32_t failure, uint32_t synthetic) override;
+    virtual inline ~PrintfOutput() {}
 
 public:
-	static PrintfOutput instance;
+    static PrintfOutput instance;
 };
 
 }

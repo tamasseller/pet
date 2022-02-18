@@ -47,252 +47,252 @@ namespace pet {
 template<class Ptr>
 class LinkedPtrList
 {
-	Ptr first = nullptr;
+    Ptr first = nullptr;
 
 public:
-	/**
-	 * Take over the content of another list.
-	 *
-	 * Drops the current content and takes over the other lists
-	 * content, also sets the other list to be empty.
-	 */
-	really_inline LinkedPtrList(LinkedPtrList&& other);
+    /**
+     * Take over the content of another list.
+     *
+     * Drops the current content and takes over the other lists
+     * content, also sets the other list to be empty.
+     */
+    really_inline LinkedPtrList(LinkedPtrList&& other);
 
-	really_inline LinkedPtrList() = default;
-	really_inline LinkedPtrList(const LinkedPtrList&) = delete;
+    really_inline LinkedPtrList() = default;
+    really_inline LinkedPtrList(const LinkedPtrList&) = delete;
 
-	/**
-	 * Forward iterator.
-	 *
-	 * Represents a state of the iteration over the elements.
-	 * That means it has a current element that is either valid or not.
-	 * An iterator over an empty list has no element to address.
-	 * Also iterating over the end yields the same state.
-	 *
-	 * @warning	Modifying the list while iterating through it with an iterator results in undefined behavior.
-	 * 			This condition is not checked, because there is no zero-overhead way to do it, so avoiding
-	 * 			this usage is entirely up to the user.
-	 */
-	class Iterator
-	{
-		friend LinkedPtrList;
-		Ptr* prevsNext = nullptr;
+    /**
+     * Forward iterator.
+     *
+     * Represents a state of the iteration over the elements.
+     * That means it has a current element that is either valid or not.
+     * An iterator over an empty list has no element to address.
+     * Also iterating over the end yields the same state.
+     *
+     * @warning	Modifying the list while iterating through it with an iterator results in undefined behavior.
+     * 			This condition is not checked, because there is no zero-overhead way to do it, so avoiding
+     * 			this usage is entirely up to the user.
+     */
+    class Iterator
+    {
+        friend LinkedPtrList;
+        Ptr* prevsNext = nullptr;
 
-		really_inline Iterator(Ptr* prevsNext);
+        really_inline Iterator(Ptr* prevsNext);
 
-	public:
-		really_inline Iterator() = default;
-		really_inline Iterator(const Iterator&) = default;
-		really_inline Iterator(Iterator&&) = default;
-		really_inline Iterator& operator=(const Iterator&) = default;
-		really_inline Iterator& operator=(Iterator&&) = default;
+    public:
+        really_inline Iterator() = default;
+        really_inline Iterator(const Iterator&) = default;
+        really_inline Iterator(Iterator&&) = default;
+        really_inline Iterator& operator=(const Iterator&) = default;
+        really_inline Iterator& operator=(Iterator&&) = default;
 
-		/**
-		 * Current element or NULL.
-		 *
-		 * @return The current element or NULL if over the end of the list.
-		 */
-		really_inline const Ptr &current() const;
+        /**
+         * Current element or NULL.
+         *
+         * @return The current element or NULL if over the end of the list.
+         */
+        really_inline const Ptr &current() const;
 
-		/**
-		 * Take a step.
-		 *
-		 * Moves the iterator forward over the list or does nothing if already of the end.
-		 */
-		really_inline void step();
+        /**
+         * Take a step.
+         *
+         * Moves the iterator forward over the list or does nothing if already of the end.
+         */
+        really_inline void step();
 
-		/**
-		 * Insert before current element.
-		 *
-		 * Adds an element **that is not already in the list** before the current elements.
-		 * The iterator will stand at the added element after the operation.
-		 * If called on an over-the-end iterator, appends to the end.
-		 *
-		 * @warning	The behavior is undefined (and probably wrong) if called with an element
-		 * 			that is already in the list and **in this method it is not checked**.
-		 */
-		really_inline void insert(Ptr elem) const;
+        /**
+         * Insert before current element.
+         *
+         * Adds an element **that is not already in the list** before the current elements.
+         * The iterator will stand at the added element after the operation.
+         * If called on an over-the-end iterator, appends to the end.
+         *
+         * @warning	The behavior is undefined (and probably wrong) if called with an element
+         * 			that is already in the list and **in this method it is not checked**.
+         */
+        really_inline void insert(Ptr elem) const;
 
-		/**
-		 * Remove current element.
-		 *
-		 * Removes the current element.
-		 * The iterator will stand at the next element after the operation.
-		 * Does nothing on an over-the-end iterator.
-		 */
-		really_inline Ptr remove() const;
+        /**
+         * Remove current element.
+         *
+         * Removes the current element.
+         * The iterator will stand at the next element after the operation.
+         * Does nothing on an over-the-end iterator.
+         */
+        really_inline Ptr remove() const;
 
-		/**
-		 * Operators for STL style iterator usage.
-		 */
-		inline const Ptr& operator*() const;
-		inline const Ptr& operator->() const;
-		inline bool operator==(const Iterator& o) const;
-		inline bool operator!=(const Iterator& o) const;
-		inline Iterator& operator++();
-	};
+        /**
+         * Operators for STL style iterator usage.
+         */
+        inline const Ptr& operator*() const;
+        inline const Ptr& operator->() const;
+        inline bool operator==(const Iterator& o) const;
+        inline bool operator!=(const Iterator& o) const;
+        inline Iterator& operator++();
+    };
 
-	/**
-	 * Fast, unchecked add to front.
-	 *
-	 * Adds an element at the first position.
-	 * It is not check whether the supplied element is member of the container.
-	 *
-	 * @warning The behavior is unspecified if the has already been element added.
-	 *
-	 * @param	elem Is a pointer to the element to be added.
-	 */
-	inline void fastAdd(Ptr elem);
+    /**
+     * Fast, unchecked add to front.
+     *
+     * Adds an element at the first position.
+     * It is not check whether the supplied element is member of the container.
+     *
+     * @warning The behavior is unspecified if the has already been element added.
+     *
+     * @param	elem Is a pointer to the element to be added.
+     */
+    inline void fastAdd(Ptr elem);
 
-	/**
-	 * Add to front.
-	 *
-	 * Adds an element at the first position.
-	 * The list is searched to check that it is not already added.
-	 *
-	 * @param	elem is a pointer to the element to add.
-	 * @return 	True if successful.
-	 */
-	inline bool add(Ptr elem);
+    /**
+     * Add to front.
+     *
+     * Adds an element at the first position.
+     * The list is searched to check that it is not already added.
+     *
+     * @param	elem is a pointer to the element to add.
+     * @return 	True if successful.
+     */
+    inline bool add(Ptr elem);
 
-	/**
-	 * Add to back.
-	 *
-	 * Adds an element at the last position.
-	 * The list is searched to check that it is not already contained.
-	 *
-	 * @param	elem is a pointer to the element to add.
-	 * @return 	True if successful.
-	 */
-	inline bool addBack(Ptr elem);
+    /**
+     * Add to back.
+     *
+     * Adds an element at the last position.
+     * The list is searched to check that it is not already contained.
+     *
+     * @param	elem is a pointer to the element to add.
+     * @return 	True if successful.
+     */
+    inline bool addBack(Ptr elem);
 
-	/**
-	 * Remove an element.
-	 *
-	 * Look for an element by reference and if found removes it from the list.
-	 *
-	 * @param	elem is a pointer to the element to remove.
-	 * @return 	The pointer to the removed element.
-	 */
-	inline Ptr remove(const Ptr &elem);
+    /**
+     * Remove an element.
+     *
+     * Look for an element by reference and if found removes it from the list.
+     *
+     * @param	elem is a pointer to the element to remove.
+     * @return 	The pointer to the removed element.
+     */
+    inline Ptr remove(const Ptr &elem);
 
-	/**
-	 * Remove all elements.
-	 */
-	inline void clear();
+    /**
+     * Remove all elements.
+     */
+    inline void clear();
 
-	/**
-	 * Remove all elements.
-	 */
-	inline bool isEmpty() const volatile;
-	inline bool isEmpty() const;
+    /**
+     * Remove all elements.
+     */
+    inline bool isEmpty() const volatile;
+    inline bool isEmpty() const;
 
-	/**
-	 * Get an all through iterator.
-	 *
-	 * @return 	An iterator that is at the foremost possible location
-	 * 			(ie.: the first element if there is any).
-	 */
-	really_inline Iterator iterator();
+    /**
+     * Get an all through iterator.
+     *
+     * @return 	An iterator that is at the foremost possible location
+     * 			(ie.: the first element if there is any).
+     */
+    really_inline Iterator iterator();
 
-	/**
-	 * STL style iterator getter for the beginning of the list.
-	 */
-	really_inline Iterator begin();
+    /**
+     * STL style iterator getter for the beginning of the list.
+     */
+    really_inline Iterator begin();
 
-	/**
-	 * STL style iterator getter for the beginning of the list.
-	 */
-	really_inline Iterator end();
+    /**
+     * STL style iterator getter for the beginning of the list.
+     */
+    really_inline Iterator end();
 };
 
 template<class Ptr>
 really_inline LinkedPtrList<Ptr>::LinkedPtrList(LinkedPtrList&& other): first(pet::move(other.first)) {
-	other.clear();
+    other.clear();
 }
 
 template<class Ptr>
 inline void LinkedPtrList<Ptr>::fastAdd(Ptr elem) {
-	iterator().insert(pet::move(elem));
+    iterator().insert(pet::move(elem));
 }
 
 template<class Ptr>
 inline bool LinkedPtrList<Ptr>::add(Ptr elem)
 {
-	for(Iterator it = iterator(); !(it.current() == nullptr); it.step())
-	{
-		if(it.current() == elem)
-		{
-			return false;
-		}
-	}
+    for(Iterator it = iterator(); !(it.current() == nullptr); it.step())
+    {
+        if(it.current() == elem)
+        {
+            return false;
+        }
+    }
 
-	iterator().insert(pet::move(elem));
-	return true;
+    iterator().insert(pet::move(elem));
+    return true;
 }
 
 template<class Ptr>
 inline bool LinkedPtrList<Ptr>::addBack(Ptr elem)
 {
-	Iterator it = iterator();
+    Iterator it = iterator();
 
-	for(; !(it.current() == nullptr); it.step())
-	{
-		if(it.current() == elem)
-		{
-			return false;
-		}
-	}
+    for(; !(it.current() == nullptr); it.step())
+    {
+        if(it.current() == elem)
+        {
+            return false;
+        }
+    }
 
-	it.insert(pet::move(elem));
-	return true;
+    it.insert(pet::move(elem));
+    return true;
 }
 
 template<class Ptr>
 inline Ptr LinkedPtrList<Ptr>::remove(const Ptr &elem)
 {
-	for(Iterator it = iterator(); !(it.current() == nullptr); it.step())
-	{
-		if(it.current() == elem)
-		{
-			return it.remove();
-		}
-	}
+    for(Iterator it = iterator(); !(it.current() == nullptr); it.step())
+    {
+        if(it.current() == elem)
+        {
+            return it.remove();
+        }
+    }
 
-	return Ptr{nullptr};
+    return Ptr{nullptr};
 }
 
 template<class Ptr>
 inline void LinkedPtrList<Ptr>::clear() {
-	first = nullptr;
+    first = nullptr;
 }
 
 template<class Ptr>
 inline bool LinkedPtrList<Ptr>::isEmpty() const volatile {
-	return first == nullptr;
+    return first == nullptr;
 }
 
 template<class Ptr>
 inline bool LinkedPtrList<Ptr>::isEmpty() const {
-	return first == nullptr;
+    return first == nullptr;
 }
 
 template<class Ptr>
 really_inline typename LinkedPtrList<Ptr>::Iterator
 LinkedPtrList<Ptr>::iterator() {
-	return {&first};
+    return {&first};
 }
 
 template<class Ptr>
 really_inline typename LinkedPtrList<Ptr>::Iterator
 LinkedPtrList<Ptr>::begin() {
-	return {&first};
+    return {&first};
 }
 
 template<class Ptr>
 really_inline typename LinkedPtrList<Ptr>::Iterator
 LinkedPtrList<Ptr>::end() {
-	return {nullptr};
+    return {nullptr};
 }
 
 template<class Ptr>
@@ -300,85 +300,85 @@ really_inline LinkedPtrList<Ptr>::Iterator::Iterator(Ptr* prevsNext):prevsNext(p
 
 template<class Ptr>
 really_inline const Ptr &LinkedPtrList<Ptr>::Iterator::current() const {
-	return *this->prevsNext;
+    return *this->prevsNext;
 }
 
 template<class Ptr>
 really_inline void LinkedPtrList<Ptr>::Iterator::step()
 {
-	if(!(*this->prevsNext == nullptr))
-	{
-		this->prevsNext = &((*this->prevsNext)->next);
-	}
+    if(!(*this->prevsNext == nullptr))
+    {
+        this->prevsNext = &((*this->prevsNext)->next);
+    }
 }
 
 template<class Ptr>
 inline const Ptr &LinkedPtrList<Ptr>::Iterator::operator*() const {
-	return *this->prevsNext;
+    return *this->prevsNext;
 }
 
 template<class Ptr>
 inline const Ptr &LinkedPtrList<Ptr>::Iterator::operator->() const {
-	return *this->prevsNext;
+    return *this->prevsNext;
 }
 
 template<class Ptr>
 inline bool LinkedPtrList<Ptr>::Iterator::operator==(const Iterator& o) const
 {
-	if(this->prevsNext)
-	{
-		if(o.prevsNext)
-		{
-			return *this->prevsNext == *o.prevsNext;
-		}
-		else
-		{
-			return *this->prevsNext == nullptr;
-		}
-	}
-	else
-	{
-		if(o.prevsNext)
-		{
-			return *o.prevsNext == nullptr;
-		}
-		else
-		{
-			return true;
-		}
-	}
+    if(this->prevsNext)
+    {
+        if(o.prevsNext)
+        {
+            return *this->prevsNext == *o.prevsNext;
+        }
+        else
+        {
+            return *this->prevsNext == nullptr;
+        }
+    }
+    else
+    {
+        if(o.prevsNext)
+        {
+            return *o.prevsNext == nullptr;
+        }
+        else
+        {
+            return true;
+        }
+    }
 }
 
 template<class Ptr>
 inline bool LinkedPtrList<Ptr>::Iterator::operator!=(const Iterator& o) const {
-	return !(*this == o);
+    return !(*this == o);
 }
 
 template<class Ptr>
 inline typename LinkedPtrList<Ptr>::Iterator& LinkedPtrList<Ptr>::Iterator::operator++()
 {
-	this->prevsNext = &((*this->prevsNext)->next);
-	return *this;
+    this->prevsNext = &((*this->prevsNext)->next);
+    return *this;
 }
 
 template<class Ptr>
 really_inline void LinkedPtrList<Ptr>::Iterator::insert(Ptr elem) const
 {
-	elem->next = pet::move(*this->prevsNext);
-	*this->prevsNext = pet::move(elem);
+    elem->next = pet::move(*this->prevsNext);
+    *this->prevsNext = pet::move(elem);
 }
 
 template<class Ptr>
 really_inline Ptr LinkedPtrList<Ptr>::Iterator::remove() const
 {
-	auto ret(pet::move(*this->prevsNext));
+    auto ret(pet::move(*this->prevsNext));
 
-	if(!(ret == nullptr))
-	{
-		*this->prevsNext = pet::move(ret->next);
-	}
+    if(!(ret == nullptr))
+    {
+        *this->prevsNext = pet::move(ret->next);
+    }
 
-	return ret;
+    return ret;
 }
 
 template<class Element> using LinkedList = LinkedPtrList<decltype(Element::next)>;

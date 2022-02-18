@@ -39,61 +39,61 @@ namespace pet {
  */
 
 class SemihostingWriter {
-	static constexpr auto bufferSize = 4 * 1024u;
-	static char buffer[bufferSize];
+    static constexpr auto bufferSize = 4 * 1024u;
+    static char buffer[bufferSize];
 
-	/** Index of the next byte to be written in the buffer */
-	static uint32_t idx;
+    /** Index of the next byte to be written in the buffer */
+    static uint32_t idx;
 
 public:
-	/** Method that flushes the semihosting output buffer if not empty already. */
-	static void flush();
+    /** Method that flushes the semihosting output buffer if not empty already. */
+    static void flush();
 
-	/** Writes a zero terminated string to the output */
-	SemihostingWriter& operator<<(const char* val);
+    /** Writes a zero terminated string to the output */
+    SemihostingWriter& operator<<(const char* val);
 
-	/** Writes a character value to the output */
-	SemihostingWriter& operator<<(char val);
-	SemihostingWriter& operator<<(signed char val);
-	SemihostingWriter& operator<<(unsigned char val);
+    /** Writes a character value to the output */
+    SemihostingWriter& operator<<(char val);
+    SemihostingWriter& operator<<(signed char val);
+    SemihostingWriter& operator<<(unsigned char val);
 
-	/** Writes a short value to the output */
-	SemihostingWriter& operator<<(short val);
-	
-	/** Writes an unsigned short value to the output */
-	SemihostingWriter& operator<<(unsigned short val);
-	
-	/** Writes an int value to the output */
-	SemihostingWriter& operator<<(int val);
-	
-	/** Writes an unsigned int value to the output */
-	SemihostingWriter& operator<<(unsigned int val);
-	
-	/** Writes a long value to the output */
-	SemihostingWriter& operator<<(long val);
-	
-	/** Writes an unsigned long value to the output */
-	SemihostingWriter& operator<<(unsigned long val);
-	
-	/** Writes a float value to the output */
-	SemihostingWriter& operator<<(float val);
-	
-	/** Writes a double value to the output */
-	SemihostingWriter& operator<<(double val);
-	
-	/** Writes a long value to the output */
-	SemihostingWriter& operator<<(long double val);
-	
-	/** Writes a pointer value to the output */
-	SemihostingWriter& operator<<(const void* val);
+    /** Writes a short value to the output */
+    SemihostingWriter& operator<<(short val);
+    
+    /** Writes an unsigned short value to the output */
+    SemihostingWriter& operator<<(unsigned short val);
+    
+    /** Writes an int value to the output */
+    SemihostingWriter& operator<<(int val);
+    
+    /** Writes an unsigned int value to the output */
+    SemihostingWriter& operator<<(unsigned int val);
+    
+    /** Writes a long value to the output */
+    SemihostingWriter& operator<<(long val);
+    
+    /** Writes an unsigned long value to the output */
+    SemihostingWriter& operator<<(unsigned long val);
+    
+    /** Writes a float value to the output */
+    SemihostingWriter& operator<<(float val);
+    
+    /** Writes a double value to the output */
+    SemihostingWriter& operator<<(double val);
+    
+    /** Writes a long value to the output */
+    SemihostingWriter& operator<<(long double val);
+    
+    /** Writes a pointer value to the output */
+    SemihostingWriter& operator<<(const void* val);
 
-	inline SemihostingWriter(pet::LogLevel, const char* name) { if(name) *this << name << ' '; }
-	inline ~SemihostingWriter() { *this << '\n'; flush();}
+    inline SemihostingWriter(pet::LogLevel, const char* name) { if(name) *this << name << ' '; }
+    inline ~SemihostingWriter() { *this << '\n'; flush();}
 
-	SemihostingWriter(SemihostingWriter&&) = default;
-	SemihostingWriter(const SemihostingWriter&) = default;
-	SemihostingWriter& operator =(SemihostingWriter&&) = default;
-	SemihostingWriter& operator =(const SemihostingWriter&) = default;
+    SemihostingWriter(SemihostingWriter&&) = default;
+    SemihostingWriter(const SemihostingWriter&) = default;
+    SemihostingWriter& operator =(SemihostingWriter&&) = default;
+    SemihostingWriter& operator =(const SemihostingWriter&) = default;
 };
 
 }

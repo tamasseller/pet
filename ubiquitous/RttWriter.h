@@ -38,99 +38,99 @@ namespace pet {
 template<auto &rtt>
 class RttWriter
 {
-	static constexpr bool disableInterruptsForCompleteLine = false;
+    static constexpr bool disableInterruptsForCompleteLine = false;
 
 public:
-	inline RttWriter(pet::LogLevel, const char* name)
-	{
-		if constexpr(disableInterruptsForCompleteLine) { asm volatile ("cpsid i"); }
-		if(name) { *this << name << ' '; }
-	}
+    inline RttWriter(pet::LogLevel, const char* name)
+    {
+        if constexpr(disableInterruptsForCompleteLine) { asm volatile ("cpsid i"); }
+        if(name) { *this << name << ' '; }
+    }
 
-	inline ~RttWriter()
-	{
-		*this << '\n';
-		if constexpr(disableInterruptsForCompleteLine) { asm volatile ("cpsie i"); }
-	}
+    inline ~RttWriter()
+    {
+        *this << '\n';
+        if constexpr(disableInterruptsForCompleteLine) { asm volatile ("cpsie i"); }
+    }
 
-	/** Writes a character value to the output */
-	inline RttWriter& operator<<(char val)
-	{
-		if constexpr(!disableInterruptsForCompleteLine) { asm volatile("cpsid i" ::: "memory"); }
+    /** Writes a character value to the output */
+    inline RttWriter& operator<<(char val)
+    {
+        if constexpr(!disableInterruptsForCompleteLine) { asm volatile("cpsid i" ::: "memory"); }
 
-		if(!rtt.write(&val, 1))
-		{
-			asm volatile("bkpt 42" ::: "memory");
-		}
+        if(!rtt.write(&val, 1))
+        {
+            asm volatile("bkpt 42" ::: "memory");
+        }
 
-		if constexpr(!disableInterruptsForCompleteLine) { asm volatile("cpsie i" ::: "memory"); }
-		return *this;
-	}
+        if constexpr(!disableInterruptsForCompleteLine) { asm volatile("cpsie i" ::: "memory"); }
+        return *this;
+    }
 
-	/** Writes a zero terminated string to the output */
-	inline RttWriter& operator<<(const char* val)
-	{
-		if constexpr(!disableInterruptsForCompleteLine) { asm volatile("cpsid i" ::: "memory"); }
+    /** Writes a zero terminated string to the output */
+    inline RttWriter& operator<<(const char* val)
+    {
+        if constexpr(!disableInterruptsForCompleteLine) { asm volatile("cpsid i" ::: "memory"); }
 
-		if(!rtt.write(val, pet::Str::nLength(val, rtt.upBufferLength)))
-		{
-			asm volatile("bkpt 42" ::: "memory");
-		}
+        if(!rtt.write(val, pet::Str::nLength(val, rtt.upBufferLength)))
+        {
+            asm volatile("bkpt 42" ::: "memory");
+        }
 
-		if constexpr(!disableInterruptsForCompleteLine) { asm volatile("cpsie i" ::: "memory"); }
-		return *this;
-	}
+        if constexpr(!disableInterruptsForCompleteLine) { asm volatile("cpsie i" ::: "memory"); }
+        return *this;
+    }
 
-	/** Writes a character value to the output */
-	really_inline RttWriter& operator<<(signed char val) { return *this << (char)val; }
+    /** Writes a character value to the output */
+    really_inline RttWriter& operator<<(signed char val) { return *this << (char)val; }
 
-	/** Writes a character value to the output */
-	really_inline RttWriter& operator<<(unsigned char val) { return *this << (char)val; }
+    /** Writes a character value to the output */
+    really_inline RttWriter& operator<<(unsigned char val) { return *this << (char)val; }
 
-	/** Writes a long value to the output in decimal */
-	really_inline RttWriter& operator<<(long val) { return *this << ((int)val); }
+    /** Writes a long value to the output in decimal */
+    really_inline RttWriter& operator<<(long val) { return *this << ((int)val); }
 
-	/** Writes an unsigned long value to the output in decimal */
-	really_inline RttWriter& operator<<(unsigned long val) { return *this << ((unsigned int)val); }
+    /** Writes an unsigned long value to the output in decimal */
+    really_inline RttWriter& operator<<(unsigned long val) { return *this << ((unsigned int)val); }
 
-	/** Writes an int value to the output in decimal */
-	inline RttWriter& operator<<(int val)
-	{
-		char temp[16];
-		pet::Str::itoa<10>(val, temp, sizeof(temp));
-		return *this << (temp);
-	}
+    /** Writes an int value to the output in decimal */
+    inline RttWriter& operator<<(int val)
+    {
+        char temp[16];
+        pet::Str::itoa<10>(val, temp, sizeof(temp));
+        return *this << (temp);
+    }
 
-	/** Writes an unsigned int value to the output in decimal */
-	inline RttWriter& operator<<(unsigned int val)
-	{
-		char temp[16];
-		pet::Str::utoa<10>(val, temp, sizeof(temp));
-		return *this << (temp);
-	}
+    /** Writes an unsigned int value to the output in decimal */
+    inline RttWriter& operator<<(unsigned int val)
+    {
+        char temp[16];
+        pet::Str::utoa<10>(val, temp, sizeof(temp));
+        return *this << (temp);
+    }
 
-	/** Writes a short value to the output in decimal */
-	really_inline RttWriter& operator<<(short val) { return *this << ((int)val); }
+    /** Writes a short value to the output in decimal */
+    really_inline RttWriter& operator<<(short val) { return *this << ((int)val); }
 
-	/** Writes an unsigned short value to the output in decimal */
-	really_inline RttWriter& operator<<(unsigned short val) { return *this << ((unsigned int)val); }
+    /** Writes an unsigned short value to the output in decimal */
+    really_inline RttWriter& operator<<(unsigned short val) { return *this << ((unsigned int)val); }
 
-	/** Writes a pointer value to the output in hexadecimal*/
-	inline RttWriter& operator<<(const void* val)
-	{
-		char temp[16];
-		pet::Str::utoa<16>((uintptr_t)val, temp, sizeof(temp));
-		return *this << (temp);
-	}
+    /** Writes a pointer value to the output in hexadecimal*/
+    inline RttWriter& operator<<(const void* val)
+    {
+        char temp[16];
+        pet::Str::utoa<16>((uintptr_t)val, temp, sizeof(temp));
+        return *this << (temp);
+    }
 
-	inline RttWriter(RttWriter&&) = default;
-	inline RttWriter(const RttWriter&) = default;
-	inline RttWriter& operator =(RttWriter&&) = default;
-	inline RttWriter& operator =(const RttWriter&) = default;
+    inline RttWriter(RttWriter&&) = default;
+    inline RttWriter(const RttWriter&) = default;
+    inline RttWriter& operator =(RttWriter&&) = default;
+    inline RttWriter& operator =(const RttWriter&) = default;
 
-	static inline void setup() {
-		rtt.openocdInit();
-	}
+    static inline void setup() {
+        rtt.openocdInit();
+    }
 };
 
 }

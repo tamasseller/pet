@@ -23,51 +23,51 @@
 namespace pet {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 namespace detail {
-	/**
-	 * First type parameter of the pack.
-	 *
-	 * This is rather trivial, splits the first element from the pack and returns that.
-	 */
-	template <class T, class... Ts>
-	struct FirstArgumentPublisher {
-		typedef T type;
-	};
+    /**
+     * First type parameter of the pack.
+     *
+     * This is rather trivial, splits the first element from the pack and returns that.
+     */
+    template <class T, class... Ts>
+    struct FirstArgumentPublisher {
+        typedef T type;
+    };
 
-	/**
-	 * Recursive iteration for the last element.
-	 *
-	 * Works its way down to the last element by spliting the first parameter in each step.
-	 */
-	template <class T, class... Ts>
-	class LastArgumentWorker: protected LastArgumentWorker<Ts...> {
-		protected:
-			typedef typename LastArgumentWorker<Ts...>::type type;
-	};
+    /**
+     * Recursive iteration for the last element.
+     *
+     * Works its way down to the last element by spliting the first parameter in each step.
+     */
+    template <class T, class... Ts>
+    class LastArgumentWorker: protected LastArgumentWorker<Ts...> {
+        protected:
+            typedef typename LastArgumentWorker<Ts...>::type type;
+    };
 
-	/**
-	 * Recursion stopper.
-	 *
-	 * When the recursive references consume all the inputs but the last,
-	 * this one simply returns the last parameter, thus stopping the recursion.
-	 */
-	template <class T>
-	class LastArgumentWorker<T> {
-		protected:
-			typedef T type;
-	};
+    /**
+     * Recursion stopper.
+     *
+     * When the recursive references consume all the inputs but the last,
+     * this one simply returns the last parameter, thus stopping the recursion.
+     */
+    template <class T>
+    class LastArgumentWorker<T> {
+        protected:
+            typedef T type;
+    };
 
-	/**
-	 * Visibility control.
-	 *
-	 * This is last layer would not be strictly necessary, it is used for hiding
-	 * the intermediate stages of the recursion.
-	 */
-	template<class... Types>
-	class LastArgumentPublisher: protected LastArgumentWorker<Types...>
-	{
-		public:
-			typedef typename LastArgumentWorker<Types...>::type type;
-	};
+    /**
+     * Visibility control.
+     *
+     * This is last layer would not be strictly necessary, it is used for hiding
+     * the intermediate stages of the recursion.
+     */
+    template<class... Types>
+    class LastArgumentPublisher: protected LastArgumentWorker<Types...>
+    {
+        public:
+            typedef typename LastArgumentWorker<Types...>::type type;
+    };
 }
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 

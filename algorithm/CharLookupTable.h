@@ -31,67 +31,67 @@ namespace pet
 
 namespace detail
 {
-	template<char...> struct FindMax
-	{
-		static constexpr char value = 0;
-	};
+    template<char...> struct FindMax
+    {
+        static constexpr char value = 0;
+    };
 
-	template<char c, char... cs> struct FindMax<c, cs...>
-	{
-		static constexpr auto value = pet::max(c, FindMax<cs...>::value);
-	};
+    template<char c, char... cs> struct FindMax<c, cs...>
+    {
+        static constexpr auto value = pet::max(c, FindMax<cs...>::value);
+    };
 
-	template<char... c> struct IsOneOf
-	{
-		static inline constexpr bool check(...) { return false; }
-	};
+    template<char... c> struct IsOneOf
+    {
+        static inline constexpr bool check(...) { return false; }
+    };
 
-	template<char c, char... cs> struct IsOneOf<c, cs...>
-	{
-		static inline constexpr bool check(char d)
-		{
-			return c == d || IsOneOf<cs...>::check(d);
-		}
-	};
+    template<char c, char... cs> struct IsOneOf<c, cs...>
+    {
+        static inline constexpr bool check(char d)
+        {
+            return c == d || IsOneOf<cs...>::check(d);
+        }
+    };
 
-	template<class Seq, size_t, char... cs> class MakeWord;
-	template<int... is, size_t base, char... cs> class MakeWord<pet::Sequence<is...>, base, cs...>
-	{
-		using Set = IsOneOf<cs...>;
-		static constexpr bool bits[] = {Set::check(base + is)...};
+    template<class Seq, size_t, char... cs> class MakeWord;
+    template<int... is, size_t base, char... cs> class MakeWord<pet::Sequence<is...>, base, cs...>
+    {
+        using Set = IsOneOf<cs...>;
+        static constexpr bool bits[] = {Set::check(base + is)...};
 
-	public:
-		static constexpr inline uint32_t flatten(int idx = 31)
-		{
-			return (idx >= 0) ? (((bits[idx] ? 1 : 0) << idx) | flatten(idx - 1)) : 0;
-		}
-	};
+    public:
+        static constexpr inline uint32_t flatten(int idx = 31)
+        {
+            return (idx >= 0) ? (((bits[idx] ? 1 : 0) << idx) | flatten(idx - 1)) : 0;
+        }
+    };
 
-	template<class Seq, char... cs> class MakeTable;
-	template<int... is, char... cs> class MakeTable<pet::Sequence<is...>, cs...>
-	{
-	public:
-		static inline constexpr uint32_t data[] = {MakeWord<pet::sequence<0, 32>, is * 32, cs...>::flatten()...};
-	};
+    template<class Seq, char... cs> class MakeTable;
+    template<int... is, char... cs> class MakeTable<pet::Sequence<is...>, cs...>
+    {
+    public:
+        static inline constexpr uint32_t data[] = {MakeWord<pet::sequence<0, 32>, is * 32, cs...>::flatten()...};
+    };
 }
 
 template<char... cs>
 class CharLookupTable
 {
-	static constexpr auto limit = detail::FindMax<cs...>::value + 1;
-	static constexpr auto nWords = (limit + 31u) / 32u;
-	using Table = detail::MakeTable<pet::sequence<0, nWords>, cs...>;
+    static constexpr auto limit = detail::FindMax<cs...>::value + 1;
+    static constexpr auto nWords = (limit + 31u) / 32u;
+    using Table = detail::MakeTable<pet::sequence<0, nWords>, cs...>;
 
 public:
-	static constexpr inline bool contains(char c)
-	{
-		uint8_t v = c;
+    static constexpr inline bool contains(char c)
+    {
+        uint8_t v = c;
 
-		if(v >= limit)
-			return false;
+        if(v >= limit)
+            return false;
 
-		return Table::data[v >> 5u] & 1u << (v & 31u);
-	}
+        return Table::data[v >> 5u] & 1u << (v & 31u);
+    }
 };
 
 }

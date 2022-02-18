@@ -25,82 +25,82 @@ namespace pet {
 
 PrintfWriter& PrintfWriter::operator<<(const char* val)
 {
-	printf("%s", val);
-	return *this;
+    printf("%s", val);
+    return *this;
 }
 
 PrintfWriter& PrintfWriter::operator<<(const void* val)
 {
-	printf("%p", val);
-	return *this;
+    printf("%p", val);
+    return *this;
 }
 
 PrintfWriter& PrintfWriter::operator<<(short val)
 {
-	printf("%hd", val);
-	return *this;
+    printf("%hd", val);
+    return *this;
 }
 
 PrintfWriter& PrintfWriter::operator<<(unsigned short val)
 {
-	printf("%hu", val);
-	return *this;
+    printf("%hu", val);
+    return *this;
 }
 
 PrintfWriter& PrintfWriter::operator<<(int val)
 {
-	printf("%d", val);
-	return *this;
+    printf("%d", val);
+    return *this;
 }
 
 PrintfWriter& PrintfWriter::operator<<(unsigned int val)
 {
-	printf("%u", val);
-	return *this;
+    printf("%u", val);
+    return *this;
 }
 
 PrintfWriter& PrintfWriter::operator<<(long val)
 {
-	printf("%ld", val);
-	return *this;
+    printf("%ld", val);
+    return *this;
 }
 
 PrintfWriter& PrintfWriter::operator<<(unsigned long val)
 {
-	printf("%ld", val);
-	return *this;
+    printf("%ld", val);
+    return *this;
 }
 
 PrintfWriter& PrintfWriter::operator<<(float val)
 {
-	printf("%f", val);
-	return *this;
+    printf("%f", val);
+    return *this;
 }
 
 PrintfWriter& PrintfWriter::operator<<(double val)
 {
-	printf("%f", val);
-	return *this;
+    printf("%f", val);
+    return *this;
 }
 
 PrintfWriter& PrintfWriter::operator<<(long double val)
 {
-	printf("%Lf", val);
-	return *this;
+    printf("%Lf", val);
+    return *this;
 }
 
 PrintfWriter::PrintfWriter(pet::LogLevel, const char* name)
 {
-	if(name)
-	{
-		printf("%s ", name);
-	}
+    if(name)
+    {
+        printf("%s ", name);
+    }
 }
 
 PrintfWriter::~PrintfWriter()
 {
-	printf("\n");
-	fflush(stdout);
+    printf("\n");
+    fflush(stdout);
 }
 
 }

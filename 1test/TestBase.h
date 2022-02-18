@@ -30,18 +30,18 @@ namespace pet {
 
 template<class Child>
 class TestBase: public Registry<TestInterface>::StaticElement<Child> {
-	/**
-	 * Evil, evil, evil hack!
-	 *
-	 * @See Apology in the body of the _reset_ method.
-	 */
-	template<class T> struct CtorDtorWrapperHax: T {
-		static void* operator new(size_t, CtorDtorWrapperHax* r) {
-			return r;
-		}
+    /**
+     * Evil, evil, evil hack!
+     *
+     * @See Apology in the body of the _reset_ method.
+     */
+    template<class T> struct CtorDtorWrapperHax: T {
+        static void* operator new(size_t, CtorDtorWrapperHax* r) {
+            return r;
+        }
 
         void operator delete(void*, CtorDtorWrapperHax*) { } // MSVC compat
-	};
+    };
 
 protected:
     inline void run();
@@ -78,41 +78,41 @@ class TestGroupBase {
 template<class Child>
 inline void pet::TestBase<Child>::reset()
 {
-	/**
-	 * The actual group type, the one requiring re-initialization.
-	 */
-	using RealGroup = typename Child::Group;
+    /**
+     * The actual group type, the one requiring re-initialization.
+     */
+    using RealGroup = typename Child::Group;
 
-	/**
-	 * Empty wrapper type that is used to implicitly access constructor
-	 * and destructor of the actual type.
-	 */
-	using GroupHandle = CtorDtorWrapperHax<RealGroup>;
+    /**
+     * Empty wrapper type that is used to implicitly access constructor
+     * and destructor of the actual type.
+     */
+    using GroupHandle = CtorDtorWrapperHax<RealGroup>;
 
-	// Navigate down to the child that this TestBase belongs to.
-	Child* child = static_cast<Child*>(this);
+    // Navigate down to the child that this TestBase belongs to.
+    Child* child = static_cast<Child*>(this);
 
-	// Then find the group data part of the object.
-	RealGroup* realGroup = static_cast<RealGroup*>(child);
+    // Then find the group data part of the object.
+    RealGroup* realGroup = static_cast<RealGroup*>(child);
 
-	/*
-	 * This part of the plan is (IMHO) not quite standard compliant, but
-	 * in any sensible implementation of an empty wrapper should actually
-	 * be the same thing as the original wrapper type, memory-wise.
-	 */
-	GroupHandle* group = reinterpret_cast<GroupHandle*>(realGroup);
+    /*
+     * This part of the plan is (IMHO) not quite standard compliant, but
+     * in any sensible implementation of an empty wrapper should actually
+     * be the same thing as the original wrapper type, memory-wise.
+     */
+    GroupHandle* group = reinterpret_cast<GroupHandle*>(realGroup);
 
-	/*
-	 * Call the group destructor implicitly through the wrapper's one.
-	 */
-	group->~CtorDtorWrapperHax<RealGroup>();
+    /*
+     * Call the group destructor implicitly through the wrapper's one.
+     */
+    group->~CtorDtorWrapperHax<RealGroup>();
 
-	/*
-	 * Call the group default constructor implicitly through the
-	 * wrapper's one, which is called by the placement new operator,
-	 * that is defined in the wrapper to do nothing else.
-	 */
-	new(group) GroupHandle;
+    /*
+     * Call the group default constructor implicitly through the
+     * wrapper's one, which is called by the placement new operator,
+     * that is defined in the wrapper to do nothing else.
+     */
+    new(group) GroupHandle;
 }
 
 template<class Child>

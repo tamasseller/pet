@@ -39,69 +39,69 @@ namespace pet {
 template<class Child>
 struct CobsEncoder
 {
-	bool encodeBlock()
-	{
-		uint8_t code = 1;
-		char* codeLocation = static_cast<Child*>(this)->writeAccess();
+    bool encodeBlock()
+    {
+        uint8_t code = 1;
+        char* codeLocation = static_cast<Child*>(this)->writeAccess();
 
-		if(!codeLocation)
-		{
-			return false;
-		}
+        if(!codeLocation)
+        {
+            return false;
+        }
 
-		bool skip = false;
+        bool skip = false;
 
-		for(char c; static_cast<Child*>(this)->readInput(c);)
-		{
-			if(c)
-			{
-				if(auto ptr = static_cast<Child*>(this)->writeAccess())
-				{
-					*ptr = c;
-				}
-				else
-				{
-					return false;
-				}
+        for(char c; static_cast<Child*>(this)->readInput(c);)
+        {
+            if(c)
+            {
+                if(auto ptr = static_cast<Child*>(this)->writeAccess())
+                {
+                    *ptr = c;
+                }
+                else
+                {
+                    return false;
+                }
 
-				code++;
-			}
+                code++;
+            }
 
-			if(c == 0 || code == 0xff)
-			{
-				*codeLocation = code;
-				skip = (code == 0xff);
-				codeLocation = static_cast<Child*>(this)->writeAccess();
+            if(c == 0 || code == 0xff)
+            {
+                *codeLocation = code;
+                skip = (code == 0xff);
+                codeLocation = static_cast<Child*>(this)->writeAccess();
 
-				if(!codeLocation)
-				{
-					return false;
-				}
+                if(!codeLocation)
+                {
+                    return false;
+                }
 
-				code = 1;
-			}
-		}
+                code = 1;
+            }
+        }
 
-		if(skip && code == 1)
-		{
-			*codeLocation = 0;
-		}
-		else
-		{
-			*codeLocation = code;
+        if(skip && code == 1)
+        {
+            *codeLocation = 0;
+        }
+        else
+        {
+            *codeLocation = code;
 
-			if(auto ptr = static_cast<Child*>(this)->writeAccess())
-			{
-				*ptr = 0;
-			}
-			else
-			{
-				return false;
-			}
-		}
+            if(auto ptr = static_cast<Child*>(this)->writeAccess())
+            {
+                *ptr = 0;
+            }
+            else
+            {
+                return false;
+            }
+        }
 
-		return true;
-	}
+        return true;
+    }
 };
 
 
@@ -122,52 +122,52 @@ struct CobsEncoder
 template<class Child>
 struct CobsDecoder
 {
-	bool decodeBlock()
-	{
-		uint8_t ctr = 1;
-		bool skip = true;
+    bool decodeBlock()
+    {
+        uint8_t ctr = 1;
+        bool skip = true;
 
-		char c;
+        char c;
 
-		while(static_cast<Child*>(this)->readInput(c))
-		{
-			if(c == 0)
-			{
-				return true;
-			}
+        while(static_cast<Child*>(this)->readInput(c))
+        {
+            if(c == 0)
+            {
+                return true;
+            }
 
-			if(!--ctr)
-			{
-				if(!skip)
-				{
-					if(auto ptr = static_cast<Child*>(this)->writeAccess())
-					{
-						*ptr = 0;
-					}
-					else
-					{
-						return false;
-					}
-				}
+            if(!--ctr)
+            {
+                if(!skip)
+                {
+                    if(auto ptr = static_cast<Child*>(this)->writeAccess())
+                    {
+                        *ptr = 0;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
 
-				ctr = c;
-				skip = (c == '\xff');
-			}
-			else
-			{
-				if(auto ptr = static_cast<Child*>(this)->writeAccess())
-				{
-					*ptr = c;
-				}
-				else
-				{
-					return false;
-				}
-			}
-		}
+                ctr = c;
+                skip = (c == '\xff');
+            }
+            else
+            {
+                if(auto ptr = static_cast<Child*>(this)->writeAccess())
+                {
+                    *ptr = c;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 };
 
 

@@ -28,47 +28,47 @@ namespace pet {
  * An implementation of the Fowler-Noll-Vo hash function.
  */
 class Fnv {
-	static const unsigned int fnvOffset = 2166136261;
-	static const unsigned int fnvPrime = 16777619;
+    static const unsigned int fnvOffset = 2166136261;
+    static const unsigned int fnvPrime = 16777619;
 public:
-	/**
-	 * Hash of a *null-terminated* string.
-	 *
-	 * Iterates over a zero terminated character string, and calculates the FNV hash value for it.
-	 * Does not include the terminator in the calculation.
-	 *
-	 * @param	str The string to be hashed.
-	 * @return	The hash of the string.
-	 */
-	static inline unsigned int hash(const char* str){
-		unsigned int hashres = fnvOffset;
-		for(const char *idx = str; *idx; idx++){
-			hashres ^= *idx;
-			hashres *= fnvPrime;
-		}
-		return hashres;
-	}
+    /**
+     * Hash of a *null-terminated* string.
+     *
+     * Iterates over a zero terminated character string, and calculates the FNV hash value for it.
+     * Does not include the terminator in the calculation.
+     *
+     * @param	str The string to be hashed.
+     * @return	The hash of the string.
+     */
+    static inline unsigned int hash(const char* str){
+        unsigned int hashres = fnvOffset;
+        for(const char *idx = str; *idx; idx++){
+            hashres ^= *idx;
+            hashres *= fnvPrime;
+        }
+        return hashres;
+    }
 
-	/**
-	 * Hash of a *non null-terminated* string.
-	 *
-	 * Iterates over a character string, until reaches the provided _end_ pointer,
-	 * and calculates the FNV hash value for it.
-	 * Does not include the character at the _end_ location.
-	 *
-	 * @param	str The string to be hashed.
-	 * @param	end The limiting _end_ pointer.
-	 * @return	The hash of the string.
-	 *
-	 */
-	static inline unsigned int hash(const char* str, const char* end){
-		unsigned int hashres = fnvOffset;
-		for(const char *idx = str; idx != end; idx++){
-			hashres ^= *idx;
-			hashres *= fnvPrime;
-		}
-		return hashres;
-	}
+    /**
+     * Hash of a *non null-terminated* string.
+     *
+     * Iterates over a character string, until reaches the provided _end_ pointer,
+     * and calculates the FNV hash value for it.
+     * Does not include the character at the _end_ location.
+     *
+     * @param	str The string to be hashed.
+     * @param	end The limiting _end_ pointer.
+     * @return	The hash of the string.
+     *
+     */
+    static inline unsigned int hash(const char* str, const char* end){
+        unsigned int hashres = fnvOffset;
+        for(const char *idx = str; idx != end; idx++){
+            hashres ^= *idx;
+            hashres *= fnvPrime;
+        }
+        return hashres;
+    }
 };
 
 }

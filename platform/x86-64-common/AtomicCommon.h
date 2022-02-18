@@ -26,33 +26,33 @@ namespace IntelArchCommon {
 
 template<class Value, class CasHolder>
 class Atomic {
-	volatile Value data;
+    volatile Value data;
 public:
-	inline Atomic(): data(0) {}
+    inline Atomic(): data(0) {}
 
-	inline Atomic(Value value) {
-		data = value;
-	}
+    inline Atomic(Value value) {
+        data = value;
+    }
 
-	inline operator Value() {
-		return data;
-	}
+    inline operator Value() {
+        return data;
+    }
 
-	template<class Op, class... Args>
-	really_inline Value operator()(Op&& op, Args... args)
-	{
-		Value old, result;
+    template<class Op, class... Args>
+    really_inline Value operator()(Op&& op, Args... args)
+    {
+        Value old, result;
 
-		do {
-			old = this->data;
+        do {
+            old = this->data;
 
-			if(!op(old, result, args...))
-				break;
+            if(!op(old, result, args...))
+                break;
 
-		} while(!CasHolder::cas(&this->data, old, result));
+        } while(!CasHolder::cas(&this->data, old, result));
 
-		return old;
-	}
+        return old;
+    }
 };
 
 }

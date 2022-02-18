@@ -109,8 +109,8 @@ public:
      */
     inline Delegate(Delegate&& o): f(o.f)
     {
-    	if(f)
-    		f->relocate(&o.data, &data);
+        if(f)
+            f->relocate(&o.data, &data);
 
         o.f = nullptr;
     }
@@ -123,7 +123,7 @@ public:
         f = o.f;
 
         if(f)
-        	f->relocate(&o.data, &data);
+            f->relocate(&o.data, &data);
 
         o.f = nullptr;
         return *this;
@@ -145,19 +145,19 @@ public:
 
     inline void clear()
     {
-    	/*
-    	 * Copy content in order to allow the destructor to free an object that happens to
-    	 * contain the delegate itself without the risk of heap corruption.
-    	 */
+        /*
+         * Copy content in order to allow the destructor to free an object that happens to
+         * contain the delegate itself without the risk of heap corruption.
+         */
         if(auto temp = f)
         {
-        	f = nullptr;
+            f = nullptr;
             (temp->destroy)(&this->data);
         }
     }
 
     inline operator bool() {
-		return f;
+        return f;
     }
 
     /**

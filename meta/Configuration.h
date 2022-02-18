@@ -236,35 +236,35 @@ template<template <template <class...> class> class > struct TemplateTagger;
 /// @see ValueExtractor
 template<class Template, class... Args>
 struct TemplateExtractor {
-	template<class... X>
-	using typeTemplate = typename Template::template typeTemplate<X...>;
+    template<class... X>
+    using typeTemplate = typename Template::template typeTemplate<X...>;
 };
 
 /// @see ValueExtractor
 template<class Template>
 struct TemplateExtractor<Template> {
-	template<class... X>
+    template<class... X>
     using typeTemplate = typename Template::template typeTemplate<X...>;
 };
 
 /// @see ValueTagChecker
 template<class Template, class Expected, class Comparable, class Current, class... Args>
 struct TemplateTagChecker {
-	template<class... X>
+    template<class... X>
     using typeTemplate = typename TemplateExtractor<Template, Args...>::template typeTemplate<X...>;
 };
 
 /// @see ValueTagChecker
 template<class Template, class Expected, class Current, class... Args>
 struct TemplateTagChecker<Template, Expected, Expected, Current, Args...> {
-	template<class... X>
+    template<class... X>
     using typeTemplate = typename Current::template typeTemplate<X...>;
 };
 
 /// @see ValueExtractor
 template<class Template, class I, class... Args>
 struct TemplateExtractor<Template, I, Args...> {
-	template<class... X>
+    template<class... X>
     using typeTemplate = typename TemplateTagChecker<Template, typename Template::Tag, typename I::Tag, I, Args...>::template typeTemplate<X...>;
 };
 
@@ -282,23 +282,23 @@ struct TemplateExtractor<Template, I, Args...> {
  */
 template<class InputType, template<InputType> class InputTag, InputType inputValue>
 struct ConfigValue {
-		template<class, class...> friend struct detail::ValueExtractor;
-		template<class, class, class, class, class...> friend struct detail::ValueTagChecker;
-		template<class, class...> friend struct detail::TypeExtractor;
-		template<class, class, class, class, class...> friend struct detail::TypeTagChecker;
-		template<class, class...> friend struct detail::TemplateExtractor;
-		template<class, class, class, class, class...> friend struct detail::TemplateTagChecker;
+        template<class, class...> friend struct detail::ValueExtractor;
+        template<class, class, class, class, class...> friend struct detail::ValueTagChecker;
+        template<class, class...> friend struct detail::TypeExtractor;
+        template<class, class, class, class, class...> friend struct detail::TypeTagChecker;
+        template<class, class...> friend struct detail::TemplateExtractor;
+        template<class, class, class, class, class...> friend struct detail::TemplateTagChecker;
 
 
-		typedef InputType Type;
-		static constexpr Type value = inputValue;
+        typedef InputType Type;
+        static constexpr Type value = inputValue;
 
-		typedef detail::ValueTagger<InputType, InputTag> Tag;
+        typedef detail::ValueTagger<InputType, InputTag> Tag;
 
 
-	public:
-		template<class... Args>
-		using extract = typename detail::ValueExtractor<ConfigValue, Args...>;
+    public:
+        template<class... Args>
+        using extract = typename detail::ValueExtractor<ConfigValue, Args...>;
 };
 
 /**
@@ -343,7 +343,7 @@ class ConfigTemplate {
         template<class, class...> friend struct detail::TemplateExtractor;
         template<class, class, class, class, class...> friend struct detail::TemplateTagChecker;
 
-		template<class... X>
+        template<class... X>
         using typeTemplate = InputType<X...>;
 
         typedef detail::TemplateTagger<InputTag> Tag;
@@ -357,21 +357,21 @@ class ConfigTemplate {
  * Helper macros
  */
 #define PET_CONFIG_VALUE(name, type) \
-	template<type x> struct name: pet::ConfigValue<type, name, x> {}
+    template<type x> struct name: pet::ConfigValue<type, name, x> {}
 
 #define PET_CONFIG_TYPE(name) \
-	template<class x> struct name: pet::ConfigType<name, x> {}
+    template<class x> struct name: pet::ConfigType<name, x> {}
 
 #define PET_CONFIG_TEMPLATE(name) \
-	template<template<class...> class x> struct name: pet::ConfigTemplate<name, x> {}
+    template<template<class...> class x> struct name: pet::ConfigTemplate<name, x> {}
 
 #define PET_EXTRACT_VALUE(name, config, defaultValue, arguments) \
-	static constexpr auto name = config<defaultValue>::template extract<arguments...>::value
+    static constexpr auto name = config<defaultValue>::template extract<arguments...>::value
 
 #define PET_EXTRACT_TYPE(name, config, defaultValue, arguments) \
-	using name = typename config<defaultValue>::template extract<arguments...>::type
+    using name = typename config<defaultValue>::template extract<arguments...>::type
 
 #define PET_EXTRACT_TEMPLATE(name, config, defaultValue, arguments) \
-	template<class... X> using name = typename config<defaultValue>::template extract<arguments...>::template typeTemplate<X...>
+    template<class... X> using name = typename config<defaultValue>::template extract<arguments...>::template typeTemplate<X...>
 
 #endif /* CONFIGURATION_H_ */

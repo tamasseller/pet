@@ -43,63 +43,63 @@ namespace pet {
  */
 template<class Element>
 class DoubleList {
-	Element* first = nullptr;
-	Element* last = nullptr;
+    Element* first = nullptr;
+    Element* last = nullptr;
 public:
-	/** @copydoc LinkedList::Iterator */
-	class Iterator {
-		friend DoubleList;
-		Element* element;
+    /** @copydoc LinkedList::Iterator */
+    class Iterator {
+        friend DoubleList;
+        Element* element;
 
-		really_inline Iterator(Element* element);
-	public:
-		/** @copydoc LinkedList::Iterator::current */
-		really_inline Element* current() const;
+        really_inline Iterator(Element* element);
+    public:
+        /** @copydoc LinkedList::Iterator::current */
+        really_inline Element* current() const;
 
-		/** @copydoc LinkedList::Iterator::step */
-		really_inline void step();
-	};
+        /** @copydoc LinkedList::Iterator::step */
+        really_inline void step();
+    };
 
-	really_inline bool contains(Element* elem) const;
+    really_inline bool contains(Element* elem) const;
 
-	/** @copydoc LinkedList::iterator */
-	really_inline Iterator iterator() const;
+    /** @copydoc LinkedList::iterator */
+    really_inline Iterator iterator() const;
 
-	/** @copydoc LinkedList::add */
-	inline bool addFront(Element* elem);
+    /** @copydoc LinkedList::add */
+    inline bool addFront(Element* elem);
 
-	/** @copydoc LinkedList::fastAdd */
-	really_inline void fastAddFront(Element* elem);
+    /** @copydoc LinkedList::fastAdd */
+    really_inline void fastAddFront(Element* elem);
 
-	/** @copydoc LinkedList::addBack */
-	inline bool addBack(Element* elem);
+    /** @copydoc LinkedList::addBack */
+    inline bool addBack(Element* elem);
 
     really_inline void fastAddBack(Element* elem);
 
-	/** @copydoc LinkedList::remove */
-	inline bool remove(Element* elem);
+    /** @copydoc LinkedList::remove */
+    inline bool remove(Element* elem);
 
-	inline void insertBefore(Element* elem, Iterator at);
+    inline void insertBefore(Element* elem, Iterator at);
 
-	inline Element* front() const;
-	inline Element* back() const;
+    inline Element* front() const;
+    inline Element* back() const;
 
-	inline Element* popFront();
-	inline Element* popBack();
+    inline Element* popFront();
+    inline Element* popBack();
 
-	really_inline void clear();
+    really_inline void clear();
 
-	/**
-	 * Fast, unchecked remove element.
-	 *
-	 * Removes an element of the list.
-	 * It is not check whether the supplied element is a member of the container.
-	 *
-	 * @warning The behavior is unspecified if the element is not contained.
-	 *
-	 * @param	elem Is a pointer to the element to be removed.
-	 */
-	really_inline void fastRemove(Element* elem);
+    /**
+     * Fast, unchecked remove element.
+     *
+     * Removes an element of the list.
+     * It is not check whether the supplied element is a member of the container.
+     *
+     * @warning The behavior is unspecified if the element is not contained.
+     *
+     * @param	elem Is a pointer to the element to be removed.
+     */
+    really_inline void fastRemove(Element* elem);
 
 };
 
@@ -117,11 +117,11 @@ really_inline bool DoubleList<Element>::contains(Element* elem) const
 template<class Element>
 inline bool DoubleList<Element>::addFront(Element* elem)
 {
-	if(contains(elem))
-		return false;
+    if(contains(elem))
+        return false;
 
-	fastAddFront(elem);
-	return true;
+    fastAddFront(elem);
+    return true;
 }
 
 template<class Element>
@@ -165,7 +165,7 @@ really_inline void DoubleList<Element>::fastAddBack(Element* elem)
 
 template<class Element>
 really_inline void DoubleList<Element>::clear() {
-	first = last = nullptr;
+    first = last = nullptr;
 }
 
 template<class Element>
@@ -181,35 +181,35 @@ really_inline void DoubleList<Element>::fastRemove(Element* elem)
 template<class Element>
 inline bool DoubleList<Element>::remove(Element* elem)
 {
-	for(Iterator it = iterator(); it.current(); it.step()) {
-		if(it.current() == elem) {
-			fastRemove(elem);
-			return true;
-		}
-	}
+    for(Iterator it = iterator(); it.current(); it.step()) {
+        if(it.current() == elem) {
+            fastRemove(elem);
+            return true;
+        }
+    }
 
-	return false;
+    return false;
 }
 
 template<class Element>
 inline void DoubleList<Element>::insertBefore(Element* elem, Iterator at) {
-	if(at.current()) {
-		auto& prevsNext = (at.current()->prev) ? at.current()->prev->next : first;
-		auto prev = (at.current()->prev) ? at.current()->prev : nullptr;
+    if(at.current()) {
+        auto& prevsNext = (at.current()->prev) ? at.current()->prev->next : first;
+        auto prev = (at.current()->prev) ? at.current()->prev : nullptr;
 
-		prevsNext = elem;
-		at.current()->prev = elem;
+        prevsNext = elem;
+        at.current()->prev = elem;
 
-		elem->prev = prev;
-		elem->next = at.current();
-	} else
-		this->fastAddBack(elem);
+        elem->prev = prev;
+        elem->next = at.current();
+    } else
+        this->fastAddBack(elem);
 }
 
 template<class Element>
 really_inline typename DoubleList<Element>::Iterator
 DoubleList<Element>::iterator() const {
-	return Iterator(first);
+    return Iterator(first);
 }
 
 template<class Element>
@@ -218,62 +218,62 @@ really_inline DoubleList<Element>::Iterator::Iterator(Element* element):element(
 template<class Element>
 really_inline Element* DoubleList<Element>::Iterator::current() const
 {
-	return element;
+    return element;
 }
 
 template<class Element>
 really_inline void DoubleList<Element>::Iterator::step()
 {
-	if(element)
-		element = element->next;
+    if(element)
+        element = element->next;
 }
 
 template<class Element>
 inline Element* DoubleList<Element>::front() const
 {
-	return first;
+    return first;
 }
 
 template<class Element>
 inline Element* DoubleList<Element>::back() const
 {
-	return last;
+    return last;
 }
 
 template<class Element>
 inline Element* DoubleList<Element>::popFront()
 {
-	Element* ret = first;
+    Element* ret = first;
 
-	if(first)
-		first = first->next;
-	else
-		return ret;
+    if(first)
+        first = first->next;
+    else
+        return ret;
 
-	if(first)
-		first->prev = nullptr;
-	else
-		last = nullptr;
+    if(first)
+        first->prev = nullptr;
+    else
+        last = nullptr;
 
-	return ret;
+    return ret;
 }
 
 template<class Element>
 inline Element* DoubleList<Element>::popBack()
 {
-	Element* ret = last;
+    Element* ret = last;
 
-	if(last)
-		last = last->prev;
-	else
-		return ret;
+    if(last)
+        last = last->prev;
+    else
+        return ret;
 
-	if(last)
-		last->next = nullptr;
-	else
-		first = nullptr;
+    if(last)
+        last->next = nullptr;
+    else
+        first = nullptr;
 
-	return ret;
+    return ret;
 }
 
 }

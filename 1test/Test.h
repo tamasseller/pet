@@ -147,12 +147,12 @@ INTERNAL_TEST_CLASS_HEADER(name, group, parent) {                               
 /***************************************************************************************/
 
 #define INTERNAL_IGNORE_TEST(name, group, parent)										\
-																						\
+                                                                                        \
 struct INTERNAL_TEST_CLASS_NAME(name, group):                                           \
     public INTERNAL_TEST_GROUP_NAME(parent) {           	                            \
-	void testBody();																	\
+    void testBody();																	\
 };																						\
-																						\
+                                                                                        \
 void INTERNAL_TEST_CLASS_NAME(name, group)::testBody() 								    \
 
 

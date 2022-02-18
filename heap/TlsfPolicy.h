@@ -65,386 +65,386 @@ namespace pet {
 template <class SizeType>
 class TlsfPolicy: private HeapBase<SizeType>
 {
-	friend ::TlsfPolicyInternalsTest;
+    friend ::TlsfPolicyInternalsTest;
 
-	/** The Block of HeapBase is used here as the common representation with the Heap host */
-	using Block = typename HeapBase<SizeType>::Block;
+    /** The Block of HeapBase is used here as the common representation with the Heap host */
+    using Block = typename HeapBase<SizeType>::Block;
 
-	class FreeBlock;
+    class FreeBlock;
 
-	/**
-	 * List of free blocks.
-	 *
-	 * This class represents a bucket, that contains
-	 * the blocks of the associated size range.
-	 */
-	class FreeList: protected pet::DoubleList<FreeBlock>
-	{
-	public:
-		/**
-		 * Add front.
-		 *
-		 * Adds an element to the front of the list.
-		 *
-		 * @param	block The free block to be added.
-		 */
-		really_inline void add(FreeBlock* block) {
-			this->fastAddFront(block);
-		}
+    /**
+     * List of free blocks.
+     *
+     * This class represents a bucket, that contains
+     * the blocks of the associated size range.
+     */
+    class FreeList: protected pet::DoubleList<FreeBlock>
+    {
+    public:
+        /**
+         * Add front.
+         *
+         * Adds an element to the front of the list.
+         *
+         * @param	block The free block to be added.
+         */
+        really_inline void add(FreeBlock* block) {
+            this->fastAddFront(block);
+        }
 
-		/**
-		 * Remove arbitrary element.
-		 *
-		 * Removes the specified element from the list.
-		 *
-		 * @param	block The free block to be removed.
-		 */
-		really_inline void remove(FreeBlock* block) {
-			this->fastRemove(block);
-		}
+        /**
+         * Remove arbitrary element.
+         *
+         * Removes the specified element from the list.
+         *
+         * @param	block The free block to be removed.
+         */
+        really_inline void remove(FreeBlock* block) {
+            this->fastRemove(block);
+        }
 
-		/**
-		 * Remove first.
-		 *
-		 * Removes the first element of the list.
-		 *
-		 * @return	The element that used to be the first.
-		 */
-		really_inline FreeBlock* removeHead()
-		{
-			FreeBlock* ret = this->iterator().current();
-			this->fastRemove(ret);
-			return ret;
-		}
+        /**
+         * Remove first.
+         *
+         * Removes the first element of the list.
+         *
+         * @return	The element that used to be the first.
+         */
+        really_inline FreeBlock* removeHead()
+        {
+            FreeBlock* ret = this->iterator().current();
+            this->fastRemove(ret);
+            return ret;
+        }
 
-		/**
-		 * Is empty?
-		 *
-		 * Tells whether the list has any elements in it.
-		 *
-		 * @return	True if there is no stored element, false otherwise.
-		 */
-		really_inline bool isEmpty() {
-			return !this->iterator().current();
-		}
-	};
+        /**
+         * Is empty?
+         *
+         * Tells whether the list has any elements in it.
+         *
+         * @return	True if there is no stored element, false otherwise.
+         */
+        really_inline bool isEmpty() {
+            return !this->iterator().current();
+        }
+    };
 
-	/**
-	 * Free block header.
-	 *
-	 * This lives in the payload section of a freed up block.
-	 */
-	class FreeBlock
-	{
-		friend pet::DoubleList<FreeBlock>;
-		FreeBlock *next, *prev;
-	};
+    /**
+     * Free block header.
+     *
+     * This lives in the payload section of a freed up block.
+     */
+    class FreeBlock
+    {
+        friend pet::DoubleList<FreeBlock>;
+        FreeBlock *next, *prev;
+    };
 
-	/**
-	 * Free block database.
-	 *
-	 * Contains the lists for each block size category
-	 * and also a two layered bitmap cache.
-	 */
-	class Index: Resettable<Index>
-	{
-		unsigned short flMap = 0;
-		unsigned short slMap[16] = {0,};
-		FreeList blocks[256];
+    /**
+     * Free block database.
+     *
+     * Contains the lists for each block size category
+     * and also a two layered bitmap cache.
+     */
+    class Index: Resettable<Index>
+    {
+        unsigned short flMap = 0;
+        unsigned short slMap[16] = {0,};
+        FreeList blocks[256];
 
-		static inline unsigned int getLogMap(unsigned int size)
-		{
-			if(!size)
-			{
-				return 0;
-			}
+        static inline unsigned int getLogMap(unsigned int size)
+        {
+            if(!size)
+            {
+                return 0;
+            }
 
-			if(unsigned int lz = __builtin_clz(size); lz > 28)
-			{
-				return 0;
-			}
-			else
-			{
-				return 28-lz;
-			}
-		}
+            if(unsigned int lz = __builtin_clz(size); lz > 28)
+            {
+                return 0;
+            }
+            else
+            {
+                return 28-lz;
+            }
+        }
 
-		friend class Index::Resettable;
+        friend class Index::Resettable;
 
-	public:
-		using Index::Resettable::reset;
+    public:
+        using Index::Resettable::reset;
 
-		/**
-		 * Hash value.
-		 *
-		 * Bucket identifier, as structured hash value, contains
-		 * the logarithmic and the linear part separately.
-		 */
-		class Entry
-		{
-			friend ::TlsfPolicyInternalsTest;
-			friend Index;
+        /**
+         * Hash value.
+         *
+         * Bucket identifier, as structured hash value, contains
+         * the logarithmic and the linear part separately.
+         */
+        class Entry
+        {
+            friend ::TlsfPolicyInternalsTest;
+            friend Index;
 
-			unsigned short fl, sl;
-		public:
-			/**
-			 * Is this a valid entry?
-			 *
-			 * Check if this object represents a valid entry in the table of free lists.
-			 *
-			 * @return	True if it can be used as an argument to getListFor (ie it is valid), false otherwise.
-			 */
-			really_inline bool isValid() {
-				return fl == ((unsigned short)-1u);
-			}
+            unsigned short fl, sl;
+        public:
+            /**
+             * Is this a valid entry?
+             *
+             * Check if this object represents a valid entry in the table of free lists.
+             *
+             * @return	True if it can be used as an argument to getListFor (ie it is valid), false otherwise.
+             */
+            really_inline bool isValid() {
+                return fl == ((unsigned short)-1u);
+            }
 
-			/**
-			 * Different slot?
-			 *
-			 * Check if the other object signifies a different entry in the table of free lists.
-			 *
-			 * @return	True if it belongs to another list.
-			 */
-			really_inline bool operator !=(const Entry& other) const {
-				return (fl != other.fl) || (sl != other.sl);
-			}
-		};
+            /**
+             * Different slot?
+             *
+             * Check if the other object signifies a different entry in the table of free lists.
+             *
+             * @return	True if it belongs to another list.
+             */
+            really_inline bool operator !=(const Entry& other) const {
+                return (fl != other.fl) || (sl != other.sl);
+            }
+        };
 
-		/**
-		 * Record block presence.
-		 *
-		 * Sets the bits in the lookup cache associated with the size category.
-		 *
-		 * @param sizeCategory The hash value identifying the bucket in question.
-		 */
-		inline void setBits(const Entry& index)
-		{
-			flMap |= 1 << index.fl;
-			slMap[index.fl] |= 1 << index.sl;
-		}
+        /**
+         * Record block presence.
+         *
+         * Sets the bits in the lookup cache associated with the size category.
+         *
+         * @param sizeCategory The hash value identifying the bucket in question.
+         */
+        inline void setBits(const Entry& index)
+        {
+            flMap |= 1 << index.fl;
+            slMap[index.fl] |= 1 << index.sl;
+        }
 
-		/**
-		 * Record block absence.
-		 *
-		 * Clears the bits in the lookup cache associated with the size category.
-		 *
-		 * @param sizeCategory The hash value identifying the bucket in question.
-		 */
-		inline void resetBits(const Entry& index)
-		{
-			slMap[index.fl] &= ~(1 << index.sl);
+        /**
+         * Record block absence.
+         *
+         * Clears the bits in the lookup cache associated with the size category.
+         *
+         * @param sizeCategory The hash value identifying the bucket in question.
+         */
+        inline void resetBits(const Entry& index)
+        {
+            slMap[index.fl] &= ~(1 << index.sl);
 
-			if(!slMap[index.fl])
-			{
-				flMap &= ~(1 << index.fl);
-			}
-		}
+            if(!slMap[index.fl])
+            {
+                flMap &= ~(1 << index.fl);
+            }
+        }
 
-		/**
-		 * Get free list for size.
-		 *
-		 * Obtains the list containing the blocks for the given size.
-		 *
-		 * @param 	sizeCategory The hash value identifying the bucket in question.
-		 * @return	The free list for the bucket of the specified size.
-		 */
-		inline FreeList& getListFor(const Entry &index)
-		{
-			AllHeapsTrace::assertThat(index.sl < 16 && index.fl < 16);
-			return blocks[index.sl + index.fl*16];
-		}
+        /**
+         * Get free list for size.
+         *
+         * Obtains the list containing the blocks for the given size.
+         *
+         * @param 	sizeCategory The hash value identifying the bucket in question.
+         * @return	The free list for the bucket of the specified size.
+         */
+        inline FreeList& getListFor(const Entry &index)
+        {
+            AllHeapsTrace::assertThat(index.sl < 16 && index.fl < 16);
+            return blocks[index.sl + index.fl*16];
+        }
 
-		/**
-		 * Direct hash mapping.
-		 *
-		 * Hashes the specified size resulting in the bucket identifier for that size.
-		 *
-		 * @param	size The size for wich the hash is to be calculated.
-		 * @return	The generated hash.
-		 */
-		static inline Entry getInsertionEntry(unsigned int size)
-		{
-			Entry ret;
+        /**
+         * Direct hash mapping.
+         *
+         * Hashes the specified size resulting in the bucket identifier for that size.
+         *
+         * @param	size The size for wich the hash is to be calculated.
+         * @return	The generated hash.
+         */
+        static inline Entry getInsertionEntry(unsigned int size)
+        {
+            Entry ret;
 
-			ret.fl = getLogMap(size);
+            ret.fl = getLogMap(size);
 
-			if(ret.fl)
-			{
-				size >>= ret.fl - 1;
-			}
+            if(ret.fl)
+            {
+                size >>= ret.fl - 1;
+            }
 
-			ret.sl = size & 0xf;
+            ret.sl = size & 0xf;
 
-			return ret;
-		}
+            return ret;
+        }
 
-		/**
-		 * Get a greater or equal bucket.
-		 *
-		 * Finds the right bucket (by direct mapping *and cache lookup*) out of
-		 * which a block with the specified size can be allocated.
-		 *
-		 * @return	The bucket identifier for the list or an invalid one if none found.
-		 */
-		inline Entry getGreaterEqualEntry(unsigned int size)
-		{
-			int logMap = getLogMap(size);
+        /**
+         * Get a greater or equal bucket.
+         *
+         * Finds the right bucket (by direct mapping *and cache lookup*) out of
+         * which a block with the specified size can be allocated.
+         *
+         * @return	The bucket identifier for the list or an invalid one if none found.
+         */
+        inline Entry getGreaterEqualEntry(unsigned int size)
+        {
+            int logMap = getLogMap(size);
 
-			if(logMap > 1)  // round up
-			{
-				size += (1 << (logMap - 1)) - 1;
-			}
+            if(logMap > 1)  // round up
+            {
+                size += (1 << (logMap - 1)) - 1;
+            }
 
-			Entry entry = getInsertionEntry(size);
+            Entry entry = getInsertionEntry(size);
 
-			unsigned int newMask = slMap[entry.fl] & ~((1 << (entry.sl))-1);
-			if(newMask)
-			{
-				entry.sl = __builtin_ctz(newMask);
-			}
-			else
-			{
-				newMask = flMap & ~((1 << (entry.fl+1))-1);
+            unsigned int newMask = slMap[entry.fl] & ~((1 << (entry.sl))-1);
+            if(newMask)
+            {
+                entry.sl = __builtin_ctz(newMask);
+            }
+            else
+            {
+                newMask = flMap & ~((1 << (entry.fl+1))-1);
 
-				if(!newMask)
-				{
-					entry.sl = entry.fl = ((unsigned short)-1u);
-				}
-				else
-				{
-					entry.fl = __builtin_ctz(newMask);
-					entry.sl = __builtin_ctz(slMap[entry.fl]);
-				}
-			}
+                if(!newMask)
+                {
+                    entry.sl = entry.fl = ((unsigned short)-1u);
+                }
+                else
+                {
+                    entry.fl = __builtin_ctz(newMask);
+                    entry.sl = __builtin_ctz(slMap[entry.fl]);
+                }
+            }
 
-			return entry;
-		}
+            return entry;
+        }
 
-	};
+    };
 
-	/** Free block database instance */
-	Index index;
+    /** Free block database instance */
+    Index index;
 
 protected:
-	/**
-	 * Minimal required block size.
-	 *
-	 * No blocks with payload area smaller than this can be
-	 * handled, because when freed the payload area needs to
-	 * host the FreeBlock header.
-	 */
-	static constexpr uintptr_t freeHeaderSize = sizeof(FreeBlock);
+    /**
+     * Minimal required block size.
+     *
+     * No blocks with payload area smaller than this can be
+     * handled, because when freed the payload area needs to
+     * host the FreeBlock header.
+     */
+    static constexpr uintptr_t freeHeaderSize = sizeof(FreeBlock);
 
-	/**
-	 * Add a block to the free store.
-	 *
-	 * Adds a free block into the right place in the accelerated allocation database.
-	 *
-	 * @note This method is part of the implicit Policy interface of the Heap host.
-	 *
-	 * @param 	block The block to be added.
-	 */
-	inline void add(Block b)
-	{
-		const unsigned int size = b.getSize();
-		FreeBlock *block = (FreeBlock *)b.ptr;
+    /**
+     * Add a block to the free store.
+     *
+     * Adds a free block into the right place in the accelerated allocation database.
+     *
+     * @note This method is part of the implicit Policy interface of the Heap host.
+     *
+     * @param 	block The block to be added.
+     */
+    inline void add(Block b)
+    {
+        const unsigned int size = b.getSize();
+        FreeBlock *block = (FreeBlock *)b.ptr;
 
-		typename Index::Entry insEntry = Index::getInsertionEntry(size);
-		index.getListFor(insEntry).add(block);
-		index.setBits(insEntry);
-	}
+        typename Index::Entry insEntry = Index::getInsertionEntry(size);
+        index.getListFor(insEntry).add(block);
+        index.setBits(insEntry);
+    }
 
-	inline void init(Block block)
-	{
-		index.reset();
-		add(block);
-	}
+    inline void init(Block block)
+    {
+        index.reset();
+        add(block);
+    }
 
-	/**
-	 * Remove a block from the free store.
-	 *
-	 * Removes a free block and updates all the necessary registries of the allocation database.
-	 *
-	 * @note This method is part of the implicit Policy interface of the Heap host.
-	 *
-	 * @param 	block The block to be remove.
-	 */
-	inline void remove(Block b)
-	{
-		const unsigned int size = b.getSize();
-		FreeBlock *block = (FreeBlock *)b.ptr;
+    /**
+     * Remove a block from the free store.
+     *
+     * Removes a free block and updates all the necessary registries of the allocation database.
+     *
+     * @note This method is part of the implicit Policy interface of the Heap host.
+     *
+     * @param 	block The block to be remove.
+     */
+    inline void remove(Block b)
+    {
+        const unsigned int size = b.getSize();
+        FreeBlock *block = (FreeBlock *)b.ptr;
 
-		typename Index::Entry remEntry = Index::getInsertionEntry(size);
-		FreeList &list = index.getListFor(remEntry);
-		list.remove(block);
+        typename Index::Entry remEntry = Index::getInsertionEntry(size);
+        FreeList &list = index.getListFor(remEntry);
+        list.remove(block);
 
-		if(list.isEmpty())
-		{
-			index.resetBits(remEntry);
-		}
-	}
+        if(list.isEmpty())
+        {
+            index.resetBits(remEntry);
+        }
+    }
 
-	/**
-	 * Block size change update.
-	 *
-	 * Updates free block size in the allocation database.
-	 *
-	 * @note This method is part of the implicit Policy interface of the Heap host.
-	 *
-	 * @param 	block The block whose size is to be updated.
-	 * @param	oldSize The size prior to the update.
-	 */
-	inline void update(unsigned int oldSize, Block b)
-	{
-		const unsigned int size = b.getSize();
-		FreeBlock *block = (FreeBlock *)b.ptr;
+    /**
+     * Block size change update.
+     *
+     * Updates free block size in the allocation database.
+     *
+     * @note This method is part of the implicit Policy interface of the Heap host.
+     *
+     * @param 	block The block whose size is to be updated.
+     * @param	oldSize The size prior to the update.
+     */
+    inline void update(unsigned int oldSize, Block b)
+    {
+        const unsigned int size = b.getSize();
+        FreeBlock *block = (FreeBlock *)b.ptr;
 
-		typename Index::Entry oldEntry = Index::getInsertionEntry(oldSize);
-		typename Index::Entry insEntry = Index::getInsertionEntry(size);
+        typename Index::Entry oldEntry = Index::getInsertionEntry(oldSize);
+        typename Index::Entry insEntry = Index::getInsertionEntry(size);
 
-		if(oldEntry != insEntry)
-		{
-			FreeList &list = index.getListFor(oldEntry);
-			list.remove(block);
+        if(oldEntry != insEntry)
+        {
+            FreeList &list = index.getListFor(oldEntry);
+            list.remove(block);
 
-			if(list.isEmpty())
-				index.resetBits(oldEntry);
+            if(list.isEmpty())
+                index.resetBits(oldEntry);
 
-			index.getListFor(insEntry).add(block);
-			index.setBits(insEntry);
-		}
-	}
+            index.getListFor(insEntry).add(block);
+            index.setBits(insEntry);
+        }
+    }
 
-	/**
-	 * Allocate.
-	 *
-	 * Finds a suitable block and removes it, updating all the necessary internal state variables.
-	 *
-	 * @note This method is part of the implicit Policy interface of the Heap host.
-	 *
-	 * @param 	size The size of the block to be found.
-	 * @return	The block or NULL if none found.
-	 */
-	inline Block findAndRemove(unsigned int size, bool hot)
-	{
-		typename Index::Entry findEntry = index.getGreaterEqualEntry(size);
+    /**
+     * Allocate.
+     *
+     * Finds a suitable block and removes it, updating all the necessary internal state variables.
+     *
+     * @note This method is part of the implicit Policy interface of the Heap host.
+     *
+     * @param 	size The size of the block to be found.
+     * @return	The block or NULL if none found.
+     */
+    inline Block findAndRemove(unsigned int size, bool hot)
+    {
+        typename Index::Entry findEntry = index.getGreaterEqualEntry(size);
 
-		if(findEntry.isValid())
-		{
-			return 0;
-		}
+        if(findEntry.isValid())
+        {
+            return 0;
+        }
 
-		FreeList &list = index.getListFor(findEntry);
+        FreeList &list = index.getListFor(findEntry);
 
-		Block ret(list.removeHead());
+        Block ret(list.removeHead());
 
-		if(list.isEmpty())
-		{
-			index.resetBits(findEntry);
-		}
+        if(list.isEmpty())
+        {
+            index.resetBits(findEntry);
+        }
 
-		return ret;
-	}
+        return ret;
+    }
 
 };
 

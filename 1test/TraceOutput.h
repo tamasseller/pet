@@ -30,13 +30,13 @@ class TraceOutput: public TestOutput
 {
 protected:
     int testCounter = 0;
-	virtual void reportProgress(const char* testName, bool isSynthetic) override;
-	virtual void reportTestFailure(uint32_t rerunIdx, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text) override;
-	virtual void reportFinal(uint32_t normal, uint32_t failure, uint32_t synthetic) override;
-	virtual inline ~TraceOutput() {}
+    virtual void reportProgress(const char* testName, bool isSynthetic) override;
+    virtual void reportTestFailure(uint32_t rerunIdx, const char* testName, const char* sourceInfo, const char *failureSourceInfo, const char *text) override;
+    virtual void reportFinal(uint32_t normal, uint32_t failure, uint32_t synthetic) override;
+    virtual inline ~TraceOutput() {}
 
 public:
-	static TraceOutput instance;
+    static TraceOutput instance;
 };
 
 }

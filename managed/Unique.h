@@ -161,14 +161,14 @@ public:
         template<class U>
         really_inline Ptr &operator=(Ptr<U>&& other)
         {
-        	PtrBase::operator =(pet::move(other));
-        	return *this;
+            PtrBase::operator =(pet::move(other));
+            return *this;
         }
 
         really_inline Ptr &operator=(nullptr_t)
         {
-        	PtrBase::operator =(nullptr);
-        	return *this;
+            PtrBase::operator =(nullptr);
+            return *this;
         }
 
         really_inline T* operator ->() const {
@@ -192,14 +192,14 @@ public:
     template<class T = Target, class... Args>
     really_inline static Ptr<T> make(Args&&... args)
     {
-    	if(const auto ptr = Allocator::template allocFor<T>())
-    	{
-    		return Ptr<T>(typename Ptr<T>::Disambiguator{}, new (ptr, NewOperatorDisambiguator()) T(pet::forward<Args>(args)...));
-    	}
-    	else
-    	{
-    		return {};
-    	}
+        if(const auto ptr = Allocator::template allocFor<T>())
+        {
+            return Ptr<T>(typename Ptr<T>::Disambiguator{}, new (ptr, NewOperatorDisambiguator()) T(pet::forward<Args>(args)...));
+        }
+        else
+        {
+            return {};
+        }
     }
 };
 

@@ -31,13 +31,13 @@ namespace pet {
  * tracing information for filtering.
  */
 enum class LogLevel: int {
-	All,			//!< Use for filters to enable all levels.
-	Debug, 			//!< Normally disabled level for debugging.
-	Information,	//!< Generic information level, with no intention to report any kind of error.
-	Warning,		//!< Possibly erroneous level.
-	Failure,		//!< Definitely erroneous but not fatal level.
-	Critical,		//!< Fatal error level.
-	None,			//!< Use for filters to disable all levels.
+    All,			//!< Use for filters to enable all levels.
+    Debug, 			//!< Normally disabled level for debugging.
+    Information,	//!< Generic information level, with no intention to report any kind of error.
+    Warning,		//!< Possibly erroneous level.
+    Failure,		//!< Definitely erroneous but not fatal level.
+    Critical,		//!< Fatal error level.
+    None,			//!< Use for filters to disable all levels.
 };
 
 template<class = void> class TracePolicy;
@@ -45,59 +45,59 @@ template<class = void> class DefaultTracePolicy;
 template<class = void> class TraceWriter;
 
 struct LineEnding {
-	operator const char*() const {
-		return "\n";
-	}
+    operator const char*() const {
+        return "\n";
+    }
 };
 
 static constexpr inline auto endl = LineEnding();
 
 struct CollectionStart {
-	operator const char*() const {
-		return "\t[";
-	}
+    operator const char*() const {
+        return "\t[";
+    }
 };
 
 static constexpr inline auto coll = CollectionStart();
 
 struct CollectionEnd {
-	operator const char*() const {
-		return "]";
-	}
+    operator const char*() const {
+        return "]";
+    }
 };
 
 static constexpr inline auto endc = CollectionEnd();
 
 struct ElementSeparator {
-	operator const char*() const {
-		return ",\t";
-	}
+    operator const char*() const {
+        return ",\t";
+    }
 };
 
 static constexpr inline auto sep = ElementSeparator();
 
 struct KeyValueSeparator {
-	operator const char*() const {
-		return ": ";
-	}
+    operator const char*() const {
+        return ": ";
+    }
 };
 
 static constexpr inline auto val = KeyValueSeparator();
 
 #define TRACE_WRITER(X) 							\
 namespace pet {										\
-	template<> struct TraceWriter<void> {			\
-		using Writer = X;							\
-	};												\
+    template<> struct TraceWriter<void> {			\
+        using Writer = X;							\
+    };												\
 }
 
 #define __TRACE_POLICY(X, Y, Z)						\
 namespace pet {										\
-	template<>										\
-	struct Z<X> {									\
-		constexpr static LogLevel level				\
-			= LogLevel::Y;							\
-	};												\
+    template<>										\
+    struct Z<X> {									\
+        constexpr static LogLevel level				\
+            = LogLevel::Y;							\
+    };												\
 }
 
 }

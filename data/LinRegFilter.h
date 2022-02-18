@@ -26,48 +26,48 @@
 template<size_t n, size_t shift>
 struct LinRegFilter
 {
-	struct Data {
-		int32_t x = 0, y = 0;
-	} data[n];
+    struct Data {
+        int32_t x = 0, y = 0;
+    } data[n];
 
-	int32_t sumX = 0;
-	int32_t sumY = 0;
-	int32_t sumXsq = 0;
-	int32_t sumXy = 0;
-	size_t idx = 0;
+    int32_t sumX = 0;
+    int32_t sumY = 0;
+    int32_t sumXsq = 0;
+    int32_t sumXy = 0;
+    size_t idx = 0;
 
-	static inline int32_t mult(int32_t x, int32_t y) {
-		return (x >> shift) * (y >> shift);
-	}
+    static inline int32_t mult(int32_t x, int32_t y) {
+        return (x >> shift) * (y >> shift);
+    }
 
-	static inline int32_t sq(int32_t x) {
-		return mult(x, x);
-	}
+    static inline int32_t sq(int32_t x) {
+        return mult(x, x);
+    }
 
-	void update(int32_t x, int32_t y, int32_t &numA, int32_t &numB, int32_t &denom)
-	{
-		const int32_t oldX = data[idx].x;
-		const int32_t oldY = data[idx].y;
-		data[idx].x = x;
-		data[idx].y = y;
+    void update(int32_t x, int32_t y, int32_t &numA, int32_t &numB, int32_t &denom)
+    {
+        const int32_t oldX = data[idx].x;
+        const int32_t oldY = data[idx].y;
+        data[idx].x = x;
+        data[idx].y = y;
 
-		if(++idx >= n)
-			idx = 0;
+        if(++idx >= n)
+            idx = 0;
 
-		sumX -= oldX;
-		sumY -= oldY;
-		sumXsq -= sq(oldX);
-		sumXy -= mult(oldX, oldY);
+        sumX -= oldX;
+        sumY -= oldY;
+        sumXsq -= sq(oldX);
+        sumXy -= mult(oldX, oldY);
 
-		sumX += x;
-		sumY += y;
-		sumXsq += sq(x);
-		sumXy += mult(x, y);
+        sumX += x;
+        sumY += y;
+        sumXsq += sq(x);
+        sumXy += mult(x, y);
 
-		denom = sq(sumX) - n * sumXsq;
-		numA = mult(sumX, sumY) - n * sumXy;
-		numB = mult(sumX, sumXy) - mult(sumXsq, sumY);
-	}
+        denom = sq(sumX) - n * sumXsq;
+        numA = mult(sumX, sumY) - n * sumXy;
+        numB = mult(sumX, sumXy) - mult(sumXsq, sumY);
+    }
 };
 
 #endif /* LINREGFILTER_H_ */

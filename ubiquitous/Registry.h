@@ -27,36 +27,36 @@ namespace pet {
 template<class Interface>
 class Registry {
 public:
-	class ElementBase: public Interface {
-		friend LinkedPtrList<ElementBase*>;
-		ElementBase *next;
-	protected:
-		ElementBase() {
-			Registry::add(this);
-		}
-	};
+    class ElementBase: public Interface {
+        friend LinkedPtrList<ElementBase*>;
+        ElementBase *next;
+    protected:
+        ElementBase() {
+            Registry::add(this);
+        }
+    };
 
 private:
-	typedef LinkedPtrList<ElementBase*> List;
+    typedef LinkedPtrList<ElementBase*> List;
     static List list;
 public:
-	template <class Child>
-	class StaticElement: public ElementBase {
-	protected:
-		static Child instance;
-	};
+    template <class Child>
+    class StaticElement: public ElementBase {
+    protected:
+        static Child instance;
+    };
 
-	static void add(ElementBase* item) {
-	    list.add(item);
-	}
+    static void add(ElementBase* item) {
+        list.add(item);
+    }
 
-	static void clear() {
-	    list.clear();
-	}
+    static void clear() {
+        list.clear();
+    }
 
-	static typename LinkedPtrList<ElementBase*>::Iterator iterator() {
-		return list.iterator();
-	}
+    static typename LinkedPtrList<ElementBase*>::Iterator iterator() {
+        return list.iterator();
+    }
 };
 
 template<class Interface>

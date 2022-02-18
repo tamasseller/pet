@@ -29,13 +29,13 @@ namespace pet {
  */
 struct HeapNode {
         /// Pointer to the parent of the node or null for the root.
-		HeapNode *parent;
+        HeapNode *parent;
 
-		/// Pointer to the children of the node or null if not exists.
-		HeapNode *children[2];
+        /// Pointer to the children of the node or null if not exists.
+        HeapNode *children[2];
 
-		/// Create a disconnected node.
-		inline HeapNode(): parent(nullptr), children{nullptr, nullptr} {}
+        /// Create a disconnected node.
+        inline HeapNode(): parent(nullptr), children{nullptr, nullptr} {}
 };
 
 /**
@@ -48,33 +48,33 @@ struct HeapNode {
  */
 template<bool (*compare)(const HeapNode*, const HeapNode*)>
 class BinaryHeap: PrioQueueBase<BinaryHeap<compare>, HeapNode*> {
-	friend class PrioQueueBase<BinaryHeap<compare>, HeapNode*>;
-	using Node = HeapNode;
+    friend class PrioQueueBase<BinaryHeap<compare>, HeapNode*>;
+    using Node = HeapNode;
 
     /// Swap operations do not change the target of ids (PrioQueueBase requirement).
     static constexpr bool areIdsStable = true;
 
     /// Helper to find the parent (PrioQueueBase requirement).
-	static constexpr inline Node* parent(Node* n) {
-    	return n->parent;
+    static constexpr inline Node* parent(Node* n) {
+        return n->parent;
     }
 
     /// Helper to find one child (PrioQueueBase requirement).
     static constexpr inline Node* leftChild(Node* n) {
-    	return n->children[0];
+        return n->children[0];
     }
 
     /// Helper to find the other child (PrioQueueBase requirement).
     static constexpr inline Node* rightChild(Node* n) {
-    	return n->children[1];
+        return n->children[1];
     }
 
     /// Helper to determine element reference validity (PrioQueueBase requirement).
-	static constexpr inline bool isValid(Node* n) {
-    	return n != nullptr;
+    static constexpr inline bool isValid(Node* n) {
+        return n != nullptr;
     }
 
-	/// Element comparator, 'less' type (PrioQueueBase requirement).
+    /// Element comparator, 'less' type (PrioQueueBase requirement).
     static constexpr inline bool compareElement(Node* a, Node* b) {
          return compare(a, b);
     }
@@ -97,26 +97,26 @@ class BinaryHeap: PrioQueueBase<BinaryHeap<compare>, HeapNode*> {
         /*
          * Update parent backlinks to the swapped state.
          */
-    	*(a->parent ? (a->parent->children + (a->parent->children[0] == a ? 0 : 1)) : &root) = b;
-    	*(b->parent ? (b->parent->children + (b->parent->children[0] == b ? 0 : 1)) : &root) = a;
+        *(a->parent ? (a->parent->children + (a->parent->children[0] == a ? 0 : 1)) : &root) = b;
+        *(b->parent ? (b->parent->children + (b->parent->children[0] == b ? 0 : 1)) : &root) = a;
 
-    	/*
-    	 * Swap the nodes parent pointers.
-    	 */
-    	swapPointers(a->parent, b->parent);
+        /*
+         * Swap the nodes parent pointers.
+         */
+        swapPointers(a->parent, b->parent);
 
-    	/*
-    	 * Swap the children and update their parent pointers.
-    	 */
-    	for(int i=0; i<2; i++) {
-        	swapPointers(a->children[i], b->children[i]);
+        /*
+         * Swap the children and update their parent pointers.
+         */
+        for(int i=0; i<2; i++) {
+            swapPointers(a->children[i], b->children[i]);
 
-        	if(a->children[i])
-        		a->children[i]->parent = a;
+            if(a->children[i])
+                a->children[i]->parent = a;
 
-        	if(b->children[i])
-				b->children[i]->parent = b;
-    	}
+            if(b->children[i])
+                b->children[i]->parent = b;
+        }
     }
 
 
@@ -134,8 +134,8 @@ class BinaryHeap: PrioQueueBase<BinaryHeap<compare>, HeapNode*> {
      *  - and a pointer to the pointer that is to be pointed at the node.
      */
     struct Position {
-    	Node* parent;
-    	Node** backLink;
+        Node* parent;
+        Node** backLink;
     };
 
     /**
@@ -143,34 +143,34 @@ class BinaryHeap: PrioQueueBase<BinaryHeap<compare>, HeapNode*> {
      */
     Position findLastPlace()
     {
-		size_t path = nElements, low = 0, high = 31;
-    	Position ret{nullptr, &root};
+        size_t path = nElements, low = 0, high = 31;
+        Position ret{nullptr, &root};
 
-    	/*
-    	 * Halving search for the bit position of the most significant one bit.
-    	 */
-		while(low != high){
-			size_t mid = (low + high + 1) >> 1;
-			if(~((1 << mid) - 1) & path)
-				low = mid;
-			else
-				high = mid - 1;
-		}
+        /*
+         * Halving search for the bit position of the most significant one bit.
+         */
+        while(low != high){
+            size_t mid = (low + high + 1) >> 1;
+            if(~((1 << mid) - 1) & path)
+                low = mid;
+            else
+                high = mid - 1;
+        }
 
-		// ^^^ TODO replace with clz based approach ^^^
+        // ^^^ TODO replace with clz based approach ^^^
 
-		/*
-		 * Follow the path defined by the number of elements to reach the
-		 * parent of the last element. At every bit position, zero bits mean
-		 * 'left' turn one bits mean 'right'.
-		 */
-		while(low) {
-			const size_t currentBit = 1 << (low-- - 1);
-			ret.parent = *ret.backLink;
-			ret.backLink = ret.parent->children + ((path & currentBit) ? 1 : 0);
-		}
+        /*
+         * Follow the path defined by the number of elements to reach the
+         * parent of the last element. At every bit position, zero bits mean
+         * 'left' turn one bits mean 'right'.
+         */
+        while(low) {
+            const size_t currentBit = 1 << (low-- - 1);
+            ret.parent = *ret.backLink;
+            ret.backLink = ret.parent->children + ((path & currentBit) ? 1 : 0);
+        }
 
-    	return ret;
+        return ret;
     }
 
 public:
@@ -186,12 +186,12 @@ public:
      * comparison of elements.
      */
     void insert(Node* n) {
-    	nElements++;
-    	Position pos = findLastPlace();
-    	n->children[0] = n->children[1] = nullptr;
-    	*pos.backLink = n;
-    	n->parent = pos.parent;
-    	this->heapUp(n);
+        nElements++;
+        Position pos = findLastPlace();
+        n->children[0] = n->children[1] = nullptr;
+        *pos.backLink = n;
+        n->parent = pos.parent;
+        this->heapUp(n);
     }
 
     /**
@@ -203,26 +203,26 @@ public:
      *       is no zero-overhead way of doing it.
      */
     void remove(Node* n) {
-    	Position pos = findLastPlace();
-    	nElements--;
+        Position pos = findLastPlace();
+        nElements--;
 
-    	Node* subst = *pos.backLink;
-    	*pos.backLink = nullptr;
+        Node* subst = *pos.backLink;
+        *pos.backLink = nullptr;
 
-    	if(n == subst)
-    		return;
+        if(n == subst)
+            return;
 
-    	subst->parent = n->parent;
-		*(n->parent ? (n->parent->children + (n->parent->children[0] == n ? 0 : 1)) : &root) = subst;
+        subst->parent = n->parent;
+        *(n->parent ? (n->parent->children + (n->parent->children[0] == n ? 0 : 1)) : &root) = subst;
 
-    	for(int i=0; i<2; i++) {
-			subst->children[i] = n->children[i];
+        for(int i=0; i<2; i++) {
+            subst->children[i] = n->children[i];
 
-			if(subst->children[i])
-				subst->children[i]->parent = subst;
-    	}
+            if(subst->children[i])
+                subst->children[i]->parent = subst;
+        }
 
-    	this->heapDown(subst);
+        this->heapDown(subst);
     }
 
     /**
@@ -232,10 +232,10 @@ public:
      */
     void pop()
     {
-    	if(!root)
-    		return;
+        if(!root)
+            return;
 
-    	remove(root);
+        remove(root);
     }
 
     /**

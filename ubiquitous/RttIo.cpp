@@ -35,9 +35,9 @@ $_TARGETNAME configure -event gdb-flash-write-start {
 }
 
 $_TARGETNAME configure -event semihosting-user-cmd-0x100 {
-	set command {rtt }
-	set params [arm semihosting_read_user_param]
-	eval "$command $params" 
+    set command {rtt }
+    set params [arm semihosting_read_user_param]
+    eval "$command $params" 
 }
 
 init
@@ -49,58 +49,58 @@ using namespace pet;
 
 bool RttBufferDescriptor::write(const char* str, size_t length)
 {
-	auto wIt = startWriting();
+    auto wIt = startWriting();
 
-	const char* const end = str + length;
+    const char* const end = str + length;
 
-	for(auto rIt = str; rIt != end; rIt++)
-	{
-		if(auto ptr = writeAccess(wIt))
-		{
-			*ptr = *rIt;
-		}
-		else
-		{
-			return false;
-		}
-	}
+    for(auto rIt = str; rIt != end; rIt++)
+    {
+        if(auto ptr = writeAccess(wIt))
+        {
+            *ptr = *rIt;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
-	commitWrite(wIt);
-	return true;
+    commitWrite(wIt);
+    return true;
 }
 
 
 static void sendTclCommand(const char* const command, const uint32_t len)
 {
-	uint32_t msg[2];
-	msg[0] = (uint32_t)command;
-	msg[1] = len;
+    uint32_t msg[2];
+    msg[0] = (uint32_t)command;
+    msg[1] = len;
 
-	asm
-	(
-		"ldr r0, =0x100;"
-		"mov r1, %[msg];"
-		"bkpt #0xab"
-		: // no output
-		: [msg] "r" (msg)
-		: "r0", "r1", "memory"
-	);
+    asm
+    (
+        "ldr r0, =0x100;"
+        "mov r1, %[msg];"
+        "bkpt #0xab"
+        : // no output
+        : [msg] "r" (msg)
+        : "r0", "r1", "memory"
+    );
 }
 
 template<size_t n>
 static inline void sendTclCommand(const char (&command)[n]) {
-	sendTclCommand(command, n);
+    sendTclCommand(command, n);
 }
 
 static inline void writeHex(unsigned int x, char* output)
 {
-	static constexpr const char digits[] = "0123456789abcdef";
+    static constexpr const char digits[] = "0123456789abcdef";
 
-	for(unsigned int i = 0; i < 32; i += 4)
-	{
-		const auto nibble = (x << i) >> 28;
-		*output++ = digits[nibble];
-	}
+    for(unsigned int i = 0; i < 32; i += 4)
+    {
+        const auto nibble = (x << i) >> 28;
+        *output++ = digits[nibble];
+    }
 }
 
 void RttControlBlock::setupOpenocdRttSink()
@@ -119,8 +119,8 @@ void RttControlBlock::setupOpenocdRttSink()
 
 RttControlBlock::~RttControlBlock()
 {
-	for(auto &c: id)
-	{
-		c = 0;
-	}
+    for(auto &c: id)
+    {
+        c = 0;
+    }
 }

@@ -31,9 +31,9 @@ template<class T, size_t N, class Child>
 class ArrayBackedPrioQueueBase: public IndexedPrioQueueBase<Child>
 {
     protected:
-		friend PrioQueueBase<Child>;
-		friend IndexedPrioQueueBase<Child>;
-		typedef size_t ElementId;
+        friend PrioQueueBase<Child>;
+        friend IndexedPrioQueueBase<Child>;
+        typedef size_t ElementId;
 
 
         /// The backing-store array.

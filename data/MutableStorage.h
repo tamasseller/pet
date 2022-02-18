@@ -27,12 +27,12 @@ namespace pet {
 
 template<class... HeldTypes>
 class MutableStorage {
-	static constexpr auto size = (TypePackInfo<HeldTypes...>::size + sizeof(char) - 1) / sizeof(char);
-	char data[size] alignas(TypePackInfo<HeldTypes...>::alignment);
+    static constexpr auto size = (TypePackInfo<HeldTypes...>::size + sizeof(char) - 1) / sizeof(char);
+    char data[size] alignas(TypePackInfo<HeldTypes...>::alignment);
 
-	template<class Type>
+    template<class Type>
     struct Hax {
-		Type data;
+        Type data;
 
         static void* operator new(size_t, void* r) {
             return r;
@@ -44,28 +44,28 @@ class MutableStorage {
 public:
     template<class Type, class... C>
     inline Type* construct(C... c) {
-    	static_assert(TypePackInfo<HeldTypes...>::template Position<Type>::value != -1, "Unfamiliar type requested");
-    	auto obj = new(data) Hax<Type>(pet::forward<C>(c)...);
-    	return &obj->data;
+        static_assert(TypePackInfo<HeldTypes...>::template Position<Type>::value != -1, "Unfamiliar type requested");
+        auto obj = new(data) Hax<Type>(pet::forward<C>(c)...);
+        return &obj->data;
     }
 
     template<class Type>
     inline Type* as() {
-    	static_assert(TypePackInfo<HeldTypes...>::template Position<Type>::value != -1, "Unfamiliar type requested");
-    	auto obj = reinterpret_cast<Hax<Type>*>(data);
-		return &obj->data;
+        static_assert(TypePackInfo<HeldTypes...>::template Position<Type>::value != -1, "Unfamiliar type requested");
+        auto obj = reinterpret_cast<Hax<Type>*>(data);
+        return &obj->data;
     }
 
     template<class Type>
     inline void destroy() {
-    	static_assert(TypePackInfo<HeldTypes...>::template Position<Type>::value != -1, "Unfamiliar type requested");
-    	reinterpret_cast<Hax<Type>*>(data)->~Hax<Type>();
+        static_assert(TypePackInfo<HeldTypes...>::template Position<Type>::value != -1, "Unfamiliar type requested");
+        reinterpret_cast<Hax<Type>*>(data)->~Hax<Type>();
     }
 
     template<class Type>
     static inline MutableStorage *self(Type* object) {
-    	static_assert(TypePackInfo<HeldTypes...>::template Position<Type>::value != -1, "Unfamiliar type requested");
-    	return reinterpret_cast<MutableStorage*>(object);
+        static_assert(TypePackInfo<HeldTypes...>::template Position<Type>::value != -1, "Unfamiliar type requested");
+        return reinterpret_cast<MutableStorage*>(object);
     }
 };
 

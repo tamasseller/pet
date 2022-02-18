@@ -29,36 +29,36 @@ namespace pet {
 template<class> class LinkedPtrList;
 
 class TestRunner {
-	template<class> friend class TestBase;
-	template<class> friend class LinkedPtrList;
+    template<class> friend class TestBase;
+    template<class> friend class LinkedPtrList;
 
-	static TestInterface* currentTest;
-	static TestOutput* output;
-	static bool synthetic;
-	static bool failing;
-	static LinkedPtrList<TestPlugin*> plugins;
+    static TestInterface* currentTest;
+    static TestOutput* output;
+    static bool synthetic;
+    static bool failing;
+    static LinkedPtrList<TestPlugin*> plugins;
 
-	struct Result {
-		int synthetic = 0, failed = 0;
-	};
+    struct Result {
+        int synthetic = 0, failed = 0;
+    };
 
-	static Result runTest(TestInterface*);
+    static Result runTest(TestInterface*);
 
 public:
-	static bool installPlugin(TestPlugin*);
+    static bool installPlugin(TestPlugin*);
 
-	static int getTestCount(const char* filter = nullptr);
-	static int runAllTests(TestOutput* output = &TraceOutput::instance, const char* filter = nullptr);
-	static inline TestInterface* getCurrentTest();
+    static int getTestCount(const char* filter = nullptr);
+    static int runAllTests(TestOutput* output = &TraceOutput::instance, const char* filter = nullptr);
+    static inline TestInterface* getCurrentTest();
 
-	static inline bool isFailing() { return failing; }
-	static inline bool isSynthetic() { return synthetic; }
+    static inline bool isFailing() { return failing; }
+    static inline bool isSynthetic() { return synthetic; }
     static void failTest(const char* sourceInfo, const char* text);
     static void failTestAlways(const char* sourceInfo, const char* text);
     static void checkExpectation(bool condition, const char* sourceInfo, const char* text);
     static void checkExpectationAlways(bool condition, const char* sourceInfo, const char* text);
 
-	class Experimental;
+    class Experimental;
 };
 
 ////////////////////////////////////////////////////////////////

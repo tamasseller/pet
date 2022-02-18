@@ -41,142 +41,142 @@ namespace pet {
 template <class KeyType, class ValueType>
 class ImmutableTreeMap: protected AvlTree {
 protected:
-	/**
-	 * Subtraction backed comparator.
-	 *
-	 * This is the comparator that is provided by the ImmutableTreeMap to
-	 * the Avl tree as the definition of the ordering over the set of Nodes.
-	 *
-	 * @param	node The node to be compared.
-	 * @param	key The key to be compared.
-	 */
-	static int comparator(BinaryTree::Node* node, const KeyType &key) {
-		return ((Node*)node)->key - key;
-	}
+    /**
+     * Subtraction backed comparator.
+     *
+     * This is the comparator that is provided by the ImmutableTreeMap to
+     * the Avl tree as the definition of the ordering over the set of Nodes.
+     *
+     * @param	node The node to be compared.
+     * @param	key The key to be compared.
+     */
+    static int comparator(BinaryTree::Node* node, const KeyType &key) {
+        return ((Node*)node)->key - key;
+    }
 
 public:
-	/**
-	 * Base of the contained nodes.
-	 *
-	 * This is the container for the user data.
-	 *
-	 * @note 	The user key and value data is embedded (copied in).
-	 */
-	class Node: public AvlTree::Node {
-		friend ImmutableTreeMap;
-		ValueType value;
-		const KeyType key;
-	public:
-		/**
-		 * Create a disconnected node.
-		 *
-		 * Create a disconnected node with specified key and value.
-		 *
-		 * @param	k The key.
-		 * @param	v The value.
-		 */
-		Node(const KeyType &k, const ValueType &v): value(v), key(k) {}
+    /**
+     * Base of the contained nodes.
+     *
+     * This is the container for the user data.
+     *
+     * @note 	The user key and value data is embedded (copied in).
+     */
+    class Node: public AvlTree::Node {
+        friend ImmutableTreeMap;
+        ValueType value;
+        const KeyType key;
+    public:
+        /**
+         * Create a disconnected node.
+         *
+         * Create a disconnected node with specified key and value.
+         *
+         * @param	k The key.
+         * @param	v The value.
+         */
+        Node(const KeyType &k, const ValueType &v): value(v), key(k) {}
 
-		/** Placement new operator */
-	    inline void* operator new( size_t sz, void* here ) {return here;}
+        /** Placement new operator */
+        inline void* operator new( size_t sz, void* here ) {return here;}
 
-		/**
-		 * Set the value of a node.
-		 *
-		 * @param	v The value.
-		 */
-		inline void setValue(const ValueType &v) {
-			value = v;
-		}
-	};
+        /**
+         * Set the value of a node.
+         *
+         * @param	v The value.
+         */
+        inline void setValue(const ValueType &v) {
+            value = v;
+        }
+    };
 
-	/**
-	 * KV map iterator facade.
-	 *
-	 * Provides KV map specific access to the iteration state.
-	 *
-	 * @warning	Modifying the list while iterating through it with an iterator results in undefined behavior.
-	 * 			This condition is not checked, because there is no zero-overhead way to do it, so avoiding
-	 * 			this usage is entirely up to the user.
-	 */
-	class Iterator: protected AvlTree::Iterator {
-		friend ImmutableTreeMap;
-		inline Iterator(const AvlTree::Iterator &it): AvlTree::Iterator(it) {}
-	public:
-		/**
-		 * Take a step.
-		 *
-		 * Steps the iterator towards the next greater key or does nothing if already reached the end.
-		 */
-		inline void step() {
-			AvlTree::Iterator::step();
-		}
+    /**
+     * KV map iterator facade.
+     *
+     * Provides KV map specific access to the iteration state.
+     *
+     * @warning	Modifying the list while iterating through it with an iterator results in undefined behavior.
+     * 			This condition is not checked, because there is no zero-overhead way to do it, so avoiding
+     * 			this usage is entirely up to the user.
+     */
+    class Iterator: protected AvlTree::Iterator {
+        friend ImmutableTreeMap;
+        inline Iterator(const AvlTree::Iterator &it): AvlTree::Iterator(it) {}
+    public:
+        /**
+         * Take a step.
+         *
+         * Steps the iterator towards the next greater key or does nothing if already reached the end.
+         */
+        inline void step() {
+            AvlTree::Iterator::step();
+        }
 
-		/**
-		 * Current _key_ or NULL.
-		 *
-		 * @return The current _key_ which the iterator is at or NULL if over the end.
-		 */
-		inline const KeyType* currentKey() {
-			Node* current = (Node*)AvlTree::Iterator::current();
+        /**
+         * Current _key_ or NULL.
+         *
+         * @return The current _key_ which the iterator is at or NULL if over the end.
+         */
+        inline const KeyType* currentKey() {
+            Node* current = (Node*)AvlTree::Iterator::current();
 
-			if(!current)
-				return NULL;
+            if(!current)
+                return NULL;
 
-			return (KeyType*)&current->key;
-		}
+            return (KeyType*)&current->key;
+        }
 
-		/**
-		 * Current _value_ or NULL.
-		 *
-		 * @return The current _value_ which the iterator is at or NULL if over the end.
-		 */
-		inline ValueType* currentValue() {
-			Node* current = (Node*)AvlTree::Iterator::current();
+        /**
+         * Current _value_ or NULL.
+         *
+         * @return The current _value_ which the iterator is at or NULL if over the end.
+         */
+        inline ValueType* currentValue() {
+            Node* current = (Node*)AvlTree::Iterator::current();
 
-			if(!current)
-				return NULL;
+            if(!current)
+                return NULL;
 
-			return (KeyType*)&current->value;
-		}
-	};
+            return (KeyType*)&current->value;
+        }
+    };
 
-	/**
-	 * Initial in-order iterator.
-	 *
-	 * @return An iterator that points to the foremost possible location.
-	 */
-	inline Iterator iterator() {
-		return Iterator(BinaryTree::iterator());
-	}
+    /**
+     * Initial in-order iterator.
+     *
+     * @return An iterator that points to the foremost possible location.
+     */
+    inline Iterator iterator() {
+        return Iterator(BinaryTree::iterator());
+    }
 
-	/**
-	 * Get value for a key.
-	 *
-	 * Convenience method for looking up a key in the store.
-	 *
-	 * @param	key	The key to be looked up.
-	 * @return	Pointer to the mutable value inside the node or NULL if not found.
-	 */
-	ValueType* get(const KeyType key) const
-	{
-		BinaryTree::Position pos = BinaryTree::seek<KeyType, &ImmutableTreeMap<KeyType, ValueType>::comparator>(key);
-		if(pos.getNode())
-			return &((Node*)pos.getNode())->value;
+    /**
+     * Get value for a key.
+     *
+     * Convenience method for looking up a key in the store.
+     *
+     * @param	key	The key to be looked up.
+     * @return	Pointer to the mutable value inside the node or NULL if not found.
+     */
+    ValueType* get(const KeyType key) const
+    {
+        BinaryTree::Position pos = BinaryTree::seek<KeyType, &ImmutableTreeMap<KeyType, ValueType>::comparator>(key);
+        if(pos.getNode())
+            return &((Node*)pos.getNode())->value;
 
-		return 0;
-	}
+        return 0;
+    }
 
-	/**
-	 * Check whether a key exists.
-	 *
-	 * Convenience method for checking the existence of a key in the store.
-	 *
-	 * @param	key	The whose existence is to be checked.
-	 */
-	bool contains(const KeyType &key) const{
-		return BinaryTree::seek<KeyType, comparator>(key).getNode() != NULL;
-	}
+    /**
+     * Check whether a key exists.
+     *
+     * Convenience method for checking the existence of a key in the store.
+     *
+     * @param	key	The whose existence is to be checked.
+     */
+    bool contains(const KeyType &key) const{
+        return BinaryTree::seek<KeyType, comparator>(key).getNode() != NULL;
+    }
 };
 
 
@@ -196,96 +196,96 @@ template <class KeyType, class ValueType, class Allocator>
 class TreeMap: public ImmutableTreeMap<KeyType, ValueType>, Allocator
 {
 public:
-	/** The node is simply inherited from ImmutableTreeMap */
-	typedef typename ImmutableTreeMap<KeyType, ValueType>::Node Node;
+    /** The node is simply inherited from ImmutableTreeMap */
+    typedef typename ImmutableTreeMap<KeyType, ValueType>::Node Node;
 
-	/**
-	 * Set mapping for key.
-	 *
-	 * Associates the specified value with the specified key in this map.
-	 * If the map previously contained a mapping for the key, the old value is replaced.
-	 *
-	 * @param	key with which the specified value is to be associated
-	 * @param 	value to be associated with the specified key
-	 */
-	bool put(const KeyType &key, const ValueType &value)
-	{
-		BinaryTree::Position pos = BinaryTree::seek<KeyType, ImmutableTreeMap<KeyType, ValueType>::comparator>(key);
+    /**
+     * Set mapping for key.
+     *
+     * Associates the specified value with the specified key in this map.
+     * If the map previously contained a mapping for the key, the old value is replaced.
+     *
+     * @param	key with which the specified value is to be associated
+     * @param 	value to be associated with the specified key
+     */
+    bool put(const KeyType &key, const ValueType &value)
+    {
+        BinaryTree::Position pos = BinaryTree::seek<KeyType, ImmutableTreeMap<KeyType, ValueType>::comparator>(key);
 
-		if(pos.getNode())
-		{
-			((Node*)pos.getNode())->setValue(value);
-		}
-		else
-		{
-			if(auto ptr = this->Allocator::template allocFor<Node>())
-			{
-				auto nnode = new(ptr) Node(key, value);
-				AvlTree::insert(pos, nnode);
-			}
-			else
-			{
-				return false;
-			}
-		}
-		
-		return true;
-	}
+        if(pos.getNode())
+        {
+            ((Node*)pos.getNode())->setValue(value);
+        }
+        else
+        {
+            if(auto ptr = this->Allocator::template allocFor<Node>())
+            {
+                auto nnode = new(ptr) Node(key, value);
+                AvlTree::insert(pos, nnode);
+            }
+            else
+            {
+                return false;
+            }
+        }
+        
+        return true;
+    }
 
-	/**
-	 * Remove key.
-	 *
-	 * Removes the mapping for the specified key from this map if present.
-	 *
-	 * @param 	key key whose mapping is to be removed from the map
-	 * @return	True on success, false if not found.
-	 */
-	bool remove(const KeyType &key)
-	{
-		BinaryTree::Position pos = BinaryTree::seek<KeyType, ImmutableTreeMap<KeyType, ValueType>::comparator>(key);
+    /**
+     * Remove key.
+     *
+     * Removes the mapping for the specified key from this map if present.
+     *
+     * @param 	key key whose mapping is to be removed from the map
+     * @return	True on success, false if not found.
+     */
+    bool remove(const KeyType &key)
+    {
+        BinaryTree::Position pos = BinaryTree::seek<KeyType, ImmutableTreeMap<KeyType, ValueType>::comparator>(key);
 
-		if(pos.getNode())
-		{
-			Node* node = (Node*)pos.getNode();
-			AvlTree::remove(pos);
+        if(pos.getNode())
+        {
+            Node* node = (Node*)pos.getNode();
+            AvlTree::remove(pos);
 
-			this->Allocator::free(node);
-			return true;
-		}
+            this->Allocator::free(node);
+            return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	/**
-	 * Frees up the elements one by one.
-	 *
-	 * Calls the Pool::relase() method on each element.
-	 *
-	 * @note	If an arena type policy is used the compiler can easily collapse
-	 * 			the iterative part of this to nothing, because then the release
-	 * 			method has to be empty.
-	 */
-	~TreeMap() {
-		BinaryTree::Node* node = BinaryTree::root;
+    /**
+     * Frees up the elements one by one.
+     *
+     * Calls the Pool::relase() method on each element.
+     *
+     * @note	If an arena type policy is used the compiler can easily collapse
+     * 			the iterative part of this to nothing, because then the release
+     * 			method has to be empty.
+     */
+    ~TreeMap() {
+        BinaryTree::Node* node = BinaryTree::root;
 
-		while(node) {
-			if(node->small){
-				BinaryTree::Node* small = node->small;
-				node->small = 0;
-				node = small;
-			} else if(node->big) {
-				BinaryTree::Node* big = node->big;
-				node->big = 0;
-				node = big;
-			} else {
-				BinaryTree::Node* parent = node->parent;
-				this->Allocator::free((Node*)node);
-				node = parent;
-			}
-		}
+        while(node) {
+            if(node->small){
+                BinaryTree::Node* small = node->small;
+                node->small = 0;
+                node = small;
+            } else if(node->big) {
+                BinaryTree::Node* big = node->big;
+                node->big = 0;
+                node = big;
+            } else {
+                BinaryTree::Node* parent = node->parent;
+                this->Allocator::free((Node*)node);
+                node = parent;
+            }
+        }
 
-		AvlTree::root = 0;
-	}
+        AvlTree::root = 0;
+    }
 };
 
 }

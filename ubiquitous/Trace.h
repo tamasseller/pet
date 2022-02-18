@@ -29,23 +29,23 @@ namespace pet {
 template<class Dummy>
 class DefaultTracePolicy {
 public:
-	constexpr static LogLevel level = LogLevel::Warning;
+    constexpr static LogLevel level = LogLevel::Warning;
 };
 
 template<class Tag>
 class TracePolicy {
 public:	
-	constexpr static LogLevel level = DefaultTracePolicy<>::level;
+    constexpr static LogLevel level = DefaultTracePolicy<>::level;
 };
 
 struct DummyWriter
 {
-	inline DummyWriter(...) {}
+    inline DummyWriter(...) {}
 
-	template<class C>
-	inline auto &operator<<(C&&) { return *this; }
+    template<class C>
+    inline auto &operator<<(C&&) { return *this; }
 
-	static void setup(...) {}
+    static void setup(...) {}
 };
 
 template<class Dummy> struct TraceWriter { using Writer = DummyWriter; };
@@ -56,12 +56,12 @@ inline constexpr auto getTagText(C&& c) -> decltype(c.name){ return c.name; }
 
 template<class C>
 struct TagTextGetter {
-	static constexpr auto value = getTagText(C{});
+    static constexpr auto value = getTagText(C{});
 };
 
 template<>
 struct TagTextGetter<void> {
-	static constexpr auto value = nullptr;
+    static constexpr auto value = nullptr;
 };
 
 template<class C>
@@ -71,16 +71,16 @@ template<bool, LogLevel, class Tag> struct TraceFilter;
 
 template<LogLevel level, class Tag> struct TraceFilter<true, level, Tag>
 {
-	inline auto operator() () {
-		return typename TraceWriter<>::Writer(level, tagText<Tag>);
-	}
+    inline auto operator() () {
+        return typename TraceWriter<>::Writer(level, tagText<Tag>);
+    }
 };
 
 template<LogLevel level, class Tag> struct TraceFilter<false, level, Tag>
 {
-	inline auto operator() () {
-		return DummyWriter{};
-	}
+    inline auto operator() () {
+        return DummyWriter{};
+    }
 };
 
 template<class Tag, LogLevel level>
@@ -98,63 +98,63 @@ struct TraceSource: TraceFilter<level >= TracePolicy<Tag>::level, level, Tag> {}
  */
 template<class Tag>
 struct Trace {
-	/**
-	 * Output stream for messages intended for debugging.
-	 * 
-	 * Output through this stream can be configured with the LogLevel::Debug level identifier.
-	 */
-	static TraceSource<Tag, LogLevel::Debug> dbg;
+    /**
+     * Output stream for messages intended for debugging.
+     * 
+     * Output through this stream can be configured with the LogLevel::Debug level identifier.
+     */
+    static TraceSource<Tag, LogLevel::Debug> dbg;
 
-	/**
-	 * Output stream for informations.
-	 *
-	 * Output through this stream can be configured with the LogLevel::Information level identifier.
-	 */
-	static TraceSource<Tag, LogLevel::Information> info;
+    /**
+     * Output stream for informations.
+     *
+     * Output through this stream can be configured with the LogLevel::Information level identifier.
+     */
+    static TraceSource<Tag, LogLevel::Information> info;
 
-	/**
-	 * Output stream for possible errors.
-	 * 
-	 * Output through this stream can be configured with the LogLevel::Warning level identifier.
-	 */
-	static TraceSource<Tag, LogLevel::Warning> warn;
-	
-	/**
-	 * Output stream for non-fatal errors.
-	 * 
-	 * Output through this stream can be configured with the LogLevel::Failure level identifier.
-	 */
-	static TraceSource<Tag, LogLevel::Failure> fail;
-	
-	/**
-	 * Output stream for fatal errors.
-	 * 
-	 * Output through this stream can be configured with the LogLevel::Critical level identifier.
-	 */
-	static TraceSource<Tag, LogLevel::Critical> crit;
+    /**
+     * Output stream for possible errors.
+     * 
+     * Output through this stream can be configured with the LogLevel::Warning level identifier.
+     */
+    static TraceSource<Tag, LogLevel::Warning> warn;
+    
+    /**
+     * Output stream for non-fatal errors.
+     * 
+     * Output through this stream can be configured with the LogLevel::Failure level identifier.
+     */
+    static TraceSource<Tag, LogLevel::Failure> fail;
+    
+    /**
+     * Output stream for fatal errors.
+     * 
+     * Output through this stream can be configured with the LogLevel::Critical level identifier.
+     */
+    static TraceSource<Tag, LogLevel::Critical> crit;
 
-	/**
-	 * Output message on unmet condition.
-	 * 
-	 * This can be used instead of the stdlibc assert macro from the header assert.h.
-	 * The level on which the message is to be output can be configured.
-	 * If not specified explicitly the level defaults to Level::Failure.
-	 */
-	template<LogLevel level=LogLevel::Failure>
-	static inline void assertThat(bool cond, const char* msg = "unspecified")
-	{
-		if constexpr(level >= TracePolicy<Tag>::level)
-		{
-			if(!cond)
-			{
-				TraceSource<Tag, level>().operator()() << "Assertation failed: " << msg << endl;
-			}
-		}
-		else
-		{
-			(void)cond, (void)msg;
-		}
-	}
+    /**
+     * Output message on unmet condition.
+     * 
+     * This can be used instead of the stdlibc assert macro from the header assert.h.
+     * The level on which the message is to be output can be configured.
+     * If not specified explicitly the level defaults to Level::Failure.
+     */
+    template<LogLevel level=LogLevel::Failure>
+    static inline void assertThat(bool cond, const char* msg = "unspecified")
+    {
+        if constexpr(level >= TracePolicy<Tag>::level)
+        {
+            if(!cond)
+            {
+                TraceSource<Tag, level>().operator()() << "Assertation failed: " << msg << endl;
+            }
+        }
+        else
+        {
+            (void)cond, (void)msg;
+        }
+    }
 };
 
 ////////////////////////////////////////////////////////////////////////////////////

@@ -36,25 +36,25 @@ class PrngBase
     static constexpr auto truncShift  = outputWidth - rotWidth;			// 12
     static constexpr auto mixShift    = (stateWidth - truncShift) / 2;	// 10
 
-	inline uint32_t step()
-	{
-		const auto ret = state;
-		state = state * multiplier + static_cast<Child*>(this)->getIncrement();
-		return ret;
-	}
+    inline uint32_t step()
+    {
+        const auto ret = state;
+        state = state * multiplier + static_cast<Child*>(this)->getIncrement();
+        return ret;
+    }
 
 protected:
     static inline uint32_t ensureOdd(uint32_t x)
     {
-		const auto foldTop = (x ^ (x >> 1));
-		return (foldTop << 1) + 1;
-	}
+        const auto foldTop = (x ^ (x >> 1));
+        return (foldTop << 1) + 1;
+    }
 
 public:
     inline PrngBase(uint32_t seed): state(ensureOdd(seed))
     {
-		for(int i=0; i<3; i++)
-			step();
+        for(int i=0; i<3; i++)
+            step();
     }
 
     inline uint16_t rand16()
@@ -74,11 +74,11 @@ public:
          *
          * XOR
          *
-		 *  00000000 00pppppp ppqqqqqq qqrrrrrr
-		 *      |      	         |
-		 *      +----------------+
-		 *          truncated
-		 */
+         *  00000000 00pppppp ppqqqqqq qqrrrrrr
+         *      |      	         |
+         *      +----------------+
+         *          truncated
+         */
         const auto mixed        = value ^ (value >> mixShift);
         const auto truncated    = (uint16_t)(mixed >> truncShift);
 
@@ -104,20 +104,20 @@ public:
 
 class Prng: PrngBase<Prng>
 {
-	friend Prng::PrngBase;
+    friend Prng::PrngBase;
 
-	const uint32_t increment;
+    const uint32_t increment;
 
-	inline auto getIncrement() {
-		return increment;
-	}
+    inline auto getIncrement() {
+        return increment;
+    }
 
 public:
     inline Prng(uint32_t seed, uint32_t increment): PrngBase(seed), increment(ensureOdd(increment)) {}
 
-	using Prng::PrngBase::rand8;
-	using Prng::PrngBase::rand16;
-	using Prng::PrngBase::rand32;
+    using Prng::PrngBase::rand8;
+    using Prng::PrngBase::rand16;
+    using Prng::PrngBase::rand32;
 };
 
 }

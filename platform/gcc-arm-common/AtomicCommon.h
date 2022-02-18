@@ -27,34 +27,34 @@ namespace CortexCommon {
 template<class Value, Value (*ldrex)(volatile Value*), bool (*strex)(volatile Value*, Value), void (*clrex)()>
 class AtomicCommon
 {
-	volatile Value data;
+    volatile Value data;
 public:
-	inline AtomicCommon(): data(0) {}
+    inline AtomicCommon(): data(0) {}
 
-	inline AtomicCommon(Value value) {
-		data = value;
-	}
+    inline AtomicCommon(Value value) {
+        data = value;
+    }
 
-	inline operator Value() const {
-		return data;
-	}
+    inline operator Value() const {
+        return data;
+    }
 
-	template<class Op, class... Args>
-	inline Value operator()(Op&& op, Args... args)
-	{
-		Value old, result;
-		do {
-			old = ldrex(&this->data);
+    template<class Op, class... Args>
+    inline Value operator()(Op&& op, Args... args)
+    {
+        Value old, result;
+        do {
+            old = ldrex(&this->data);
 
-			if(!op(old, result, args...)) {
-				clrex();
-				break;
-			}
+            if(!op(old, result, args...)) {
+                clrex();
+                break;
+            }
 
-		} while(!strex(&this->data, result));
+        } while(!strex(&this->data, result));
 
-		return old;
-	}
+        return old;
+    }
 };
 
 }

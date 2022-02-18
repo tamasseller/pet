@@ -109,8 +109,8 @@ class PrioQueueBase {
             auto* self = static_cast<Child*>(this);
 
             while(true) {
-            	ElementId l = self->leftChild(e);
-            	ElementId r = self->rightChild(e);
+                ElementId l = self->leftChild(e);
+                ElementId r = self->rightChild(e);
 
                 if(!self->isValid(r)) {
                     if(self->isValid(l) && self->compareElement(l, e))
@@ -214,13 +214,13 @@ class PrioQueueBase {
  */
 template<class Child>
 class IndexedPrioQueueBase: protected PrioQueueBase<Child, size_t> {
-	friend class PrioQueueBase<Child, size_t>;
+    friend class PrioQueueBase<Child, size_t>;
 
-	/// Swap operations change the meaning of ids.
+    /// Swap operations change the meaning of ids.
     static constexpr bool areIdsStable = false;
 
     /// Helper to find the index of a parent.
-	constexpr static inline size_t parent(size_t n) {
+    constexpr static inline size_t parent(size_t n) {
         return ((n + 1) >> 1) - 1;
     }
 
@@ -236,8 +236,8 @@ class IndexedPrioQueueBase: protected PrioQueueBase<Child, size_t> {
 
 
     inline bool isValid(size_t n) {
-    	auto* self = static_cast<Child*>(this);
-    	return n < self->getIndexLimit();
+        auto* self = static_cast<Child*>(this);
+        return n < self->getIndexLimit();
     }
 };
 

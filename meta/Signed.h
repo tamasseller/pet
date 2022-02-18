@@ -23,13 +23,13 @@
 namespace pet {
 
 namespace detail {
-	template<class T> struct SignedVersionOf { using type = T; };
-	template<> struct SignedVersionOf<char> { using type = signed char; };
-	template<> struct SignedVersionOf<unsigned char> { using type = signed char; };
-	template<> struct SignedVersionOf<unsigned short> { using type = signed short; };
-	template<> struct SignedVersionOf<unsigned int> { using type = signed int; };
-	template<> struct SignedVersionOf<unsigned long> { using type = signed long; };
-	template<> struct SignedVersionOf<unsigned long long> { using type = signed long; };
+    template<class T> struct SignedVersionOf { using type = T; };
+    template<> struct SignedVersionOf<char> { using type = signed char; };
+    template<> struct SignedVersionOf<unsigned char> { using type = signed char; };
+    template<> struct SignedVersionOf<unsigned short> { using type = signed short; };
+    template<> struct SignedVersionOf<unsigned int> { using type = signed int; };
+    template<> struct SignedVersionOf<unsigned long> { using type = signed long; };
+    template<> struct SignedVersionOf<unsigned long long> { using type = signed long; };
 }
 
 template<class T> using Signed = typename detail::SignedVersionOf<T>::type;

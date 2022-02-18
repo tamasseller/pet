@@ -32,46 +32,46 @@ namespace pet {
  */
 struct PrintfWriter
 {
-	/** Writes a zero terminated string to the output */
-	PrintfWriter& operator<<(const char* val);
-	
-	/** Writes a short value to the output */
-	PrintfWriter& operator<<(short val);
-	
-	/** Writes an unsigned short value to the output */
-	PrintfWriter& operator<<(unsigned short val);
-	
-	/** Writes an int value to the output */
-	PrintfWriter& operator<<(int val);
-	
-	/** Writes an unsigned int value to the output */
-	PrintfWriter& operator<<(unsigned int val);
-	
-	/** Writes a long value to the output */
-	PrintfWriter& operator<<(long val);
-	
-	/** Writes an unsigned long value to the output */
-	PrintfWriter& operator<<(unsigned long val);
-	
-	/** Writes a float value to the output */
-	PrintfWriter& operator<<(float val);
-	
-	/** Writes a double value to the output */
-	PrintfWriter& operator<<(double val);
-	
-	/** Writes a long value to the output */
-	PrintfWriter& operator<<(long double val);
-	
-	/** Writes a pointer value to the output */
-	PrintfWriter& operator<<(const void* val);
+    /** Writes a zero terminated string to the output */
+    PrintfWriter& operator<<(const char* val);
+    
+    /** Writes a short value to the output */
+    PrintfWriter& operator<<(short val);
+    
+    /** Writes an unsigned short value to the output */
+    PrintfWriter& operator<<(unsigned short val);
+    
+    /** Writes an int value to the output */
+    PrintfWriter& operator<<(int val);
+    
+    /** Writes an unsigned int value to the output */
+    PrintfWriter& operator<<(unsigned int val);
+    
+    /** Writes a long value to the output */
+    PrintfWriter& operator<<(long val);
+    
+    /** Writes an unsigned long value to the output */
+    PrintfWriter& operator<<(unsigned long val);
+    
+    /** Writes a float value to the output */
+    PrintfWriter& operator<<(float val);
+    
+    /** Writes a double value to the output */
+    PrintfWriter& operator<<(double val);
+    
+    /** Writes a long value to the output */
+    PrintfWriter& operator<<(long double val);
+    
+    /** Writes a pointer value to the output */
+    PrintfWriter& operator<<(const void* val);
 
-	PrintfWriter(pet::LogLevel, const char* name);
-	~PrintfWriter();
+    PrintfWriter(pet::LogLevel, const char* name);
+    ~PrintfWriter();
 
-	PrintfWriter(PrintfWriter&&) = delete;
-	PrintfWriter(const PrintfWriter&) = delete;
-	PrintfWriter& operator =(PrintfWriter&&) = delete;
-	PrintfWriter& operator =(const PrintfWriter&) = delete;
+    PrintfWriter(PrintfWriter&&) = delete;
+    PrintfWriter(const PrintfWriter&) = delete;
+    PrintfWriter& operator =(PrintfWriter&&) = delete;
+    PrintfWriter& operator =(const PrintfWriter&) = delete;
 };
 
 }

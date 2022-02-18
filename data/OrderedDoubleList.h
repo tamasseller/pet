@@ -25,81 +25,81 @@
 namespace pet {
 
 namespace OrderedDoubleListDetail {
-	template<class Element>
-	struct ComparatorHelper {
-		static inline bool compare(const Element& small, const Element& big) {
-			return small < big;
-		}
-	};
+    template<class Element>
+    struct ComparatorHelper {
+        static inline bool compare(const Element& small, const Element& big) {
+            return small < big;
+        }
+    };
 }
 
 template<class Element, bool (*compare)(const Element&, const Element&) =
-		OrderedDoubleListDetail::ComparatorHelper<Element>::compare >
+        OrderedDoubleListDetail::ComparatorHelper<Element>::compare >
 class OrderedDoubleList: protected DoubleList<Element> {
 public:
-	using Iterator = typename DoubleList<Element>::Iterator;
+    using Iterator = typename DoubleList<Element>::Iterator;
 
-	inline Iterator iterator();
-	inline void add(Element* elem);
-	inline void addLowest(Element* elem);
-	inline void addHighest(Element* elem);
-	inline Element* lowest();
-	inline Element* highest();
-	inline Element* popLowest();
-	inline Element* popHighest();
+    inline Iterator iterator();
+    inline void add(Element* elem);
+    inline void addLowest(Element* elem);
+    inline void addHighest(Element* elem);
+    inline Element* lowest();
+    inline Element* highest();
+    inline Element* popLowest();
+    inline Element* popHighest();
 
     using OrderedDoubleList::DoubleList::remove;
-	using DoubleList<Element>::contains;
+    using DoubleList<Element>::contains;
 };
 
 template<class Element, bool (*compare)(const Element&, const Element&)>
 void OrderedDoubleList<Element, compare>::add(Element* elem) {
-	typename DoubleList<Element>::Iterator it = this->iterator();
+    typename DoubleList<Element>::Iterator it = this->iterator();
 
-	if(!highest() || !compare(*elem, *highest()))
-		addHighest(elem);
-	else {
-		while(it.current() && !compare(*elem, *it.current()))
-			it.step();
+    if(!highest() || !compare(*elem, *highest()))
+        addHighest(elem);
+    else {
+        while(it.current() && !compare(*elem, *it.current()))
+            it.step();
 
-		this->insertBefore(elem, it);
-	}
+        this->insertBefore(elem, it);
+    }
 }
 
 template<class Element, bool (*compare)(const Element&, const Element&)>
 void OrderedDoubleList<Element, compare>::addLowest(Element* elem) {
-	this->fastAddFront(elem);
+    this->fastAddFront(elem);
 }
 
 template<class Element, bool (*compare)(const Element&, const Element&)>
 void OrderedDoubleList<Element, compare>::addHighest(Element* elem) {
-	this->fastAddBack(elem);
+    this->fastAddBack(elem);
 }
 
 template<class Element, bool (*compare)(const Element&, const Element&)>
 Element* OrderedDoubleList<Element, compare>::lowest() {
-	return this->front();
+    return this->front();
 }
 
 template<class Element, bool (*compare)(const Element&, const Element&)>
 Element* OrderedDoubleList<Element, compare>::highest() {
-	return this->back();
+    return this->back();
 }
 
 template<class Element, bool (*compare)(const Element&, const Element&)>
 Element* OrderedDoubleList<Element, compare>::popLowest() {
-	return this->popFront();
+    return this->popFront();
 }
 
 template<class Element, bool (*compare)(const Element&, const Element&)>
 Element* OrderedDoubleList<Element, compare>::popHighest() {
-	return this->popBack();
+    return this->popBack();
 }
 
 template<class Element, bool (*compare)(const Element&, const Element&)>
 inline typename OrderedDoubleList<Element, compare>::Iterator
 OrderedDoubleList<Element, compare>::iterator() {
-	return this->DoubleList<Element>::iterator();
+    return this->DoubleList<Element>::iterator();
 }
 
 }

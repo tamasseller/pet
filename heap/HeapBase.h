@@ -47,12 +47,12 @@ class AllHeapsTrace: public pet::Trace<AllHeapsTrace> { static constexpr const c
 template<class SizeType>
 struct HeapBase
 {
-	/**
-	 * SizeType MSB mask.
-	 *
-	 * A mask that has only the most significant bit set for the type used to
-	 * represent block sizes internally. Recklessly assumes that a byte is 8 bits.
-	 */
+    /**
+     * SizeType MSB mask.
+     *
+     * A mask that has only the most significant bit set for the type used to
+     * represent block sizes internally. Recklessly assumes that a byte is 8 bits.
+     */
     static constexpr uintptr_t sizeMsb = uintptr_t (1) << (sizeof(SizeType) * 8 - 1);
 
     /**
@@ -64,31 +64,31 @@ struct HeapBase
      */
     struct Block
     {
-		/**
-		 * The offset of the next field from the start of the payload.
-		 * @see	Heap for the details.
-		 */
-		static constexpr int nextFieldIdx = -1;
+        /**
+         * The offset of the next field from the start of the payload.
+         * @see	Heap for the details.
+         */
+        static constexpr int nextFieldIdx = -1;
 
-		/**
-		 * Pointer to the payload.
-		 * @see	Heap for the details.
-		 */
-		SizeType *ptr;
+        /**
+         * Pointer to the payload.
+         * @see	Heap for the details.
+         */
+        SizeType *ptr;
 
-		/**
-		 * Create from payload pointer.
-		 * @see	Heap for the details.
-		 */
-		inline Block(void* address): ptr((SizeType*)address) {}
+        /**
+         * Create from payload pointer.
+         * @see	Heap for the details.
+         */
+        inline Block(void* address): ptr((SizeType*)address) {}
 
-		/**
-		 * Get the size of the payload of this block.
-		 * @see	Heap for the details.
-		 */
-		inline unsigned int getSize() const  {
-		    return ptr[nextFieldIdx] & ~sizeMsb;
-		}
+        /**
+         * Get the size of the payload of this block.
+         * @see	Heap for the details.
+         */
+        inline unsigned int getSize() const  {
+            return ptr[nextFieldIdx] & ~sizeMsb;
+        }
     };
 };
 

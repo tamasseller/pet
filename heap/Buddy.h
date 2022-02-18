@@ -218,7 +218,7 @@ class BuddyAllocator
 
     inline bool size2level(uint32_t &size, uint32_t &level)
     {
-    	const uint32_t sBits = 32 - clz(size - 1);
+        const uint32_t sBits = 32 - clz(size - 1);
 
         auto invLevel = (sBits <= minBlockSizeLog) ? 0 : sBits - minBlockSizeLog;
 
@@ -234,7 +234,7 @@ class BuddyAllocator
     inline bool initStartAndMaxLevel(void* start, void* end, uint32_t &nNodeWords)
     {
         // Sanity check
-    	auto aligned = align(start, 1 << maxAlignBits);
+        auto aligned = align(start, 1 << maxAlignBits);
         if(start >= end || aligned != start)
             return false;
 
@@ -257,7 +257,7 @@ class BuddyAllocator
 public:
     static inline int minimalTreeSize(size_t size)
     {
-    	const uint32_t sBits = 31 - clz(size);
+        const uint32_t sBits = 31 - clz(size);
 
         if(sBits <= minBlockSizeLog)
             return -1;
@@ -269,17 +269,17 @@ public:
 
     inline bool init(void* start, void* end)
     {
-    	uint32_t nNodeWords;
+        uint32_t nNodeWords;
 
-    	if(!initStartAndMaxLevel(start, end, nNodeWords))
-    		return false;
+        if(!initStartAndMaxLevel(start, end, nNodeWords))
+            return false;
 
-    	auto *e = reinterpret_cast<char*>(end);
-    	this->tree = reinterpret_cast<decltype(tree)>(align(e - nNodeWords * nBytesPerWord, nBytesPerWord));
+        auto *e = reinterpret_cast<char*>(end);
+        this->tree = reinterpret_cast<decltype(tree)>(align(e - nNodeWords * nBytesPerWord, nBytesPerWord));
         this->end = reinterpret_cast<decltype(this->end)>(align(tree, minBlockSize));
 
         for(int i = 0; i < nNodeWords; i++)
-        	this->tree[i] = 0;
+            this->tree[i] = 0;
 
         for(auto p = static_cast<char*>(this->end); p < end; p += minBlockSize)
             indicateUsed(ptr2idx(p));
@@ -289,15 +289,15 @@ public:
 
     inline bool init(void* start, void* end, void* treeStart, size_t treeSize)
     {
-    	uint32_t nNodeWords;
+        uint32_t nNodeWords;
 
-		if(!initStartAndMaxLevel(start, end, nNodeWords))
-			return false;
+        if(!initStartAndMaxLevel(start, end, nNodeWords))
+            return false;
 
-		if(treeSize < nNodeWords * nBytesPerWord)
-			return false;
+        if(treeSize < nNodeWords * nBytesPerWord)
+            return false;
 
-		this->tree = reinterpret_cast<decltype(tree)>(treeStart);
+        this->tree = reinterpret_cast<decltype(tree)>(treeStart);
         this->end = reinterpret_cast<decltype(this->end)>(align(end, minBlockSize));
 
         for(auto i = 0u; i < nNodeWords; i++)
@@ -341,8 +341,8 @@ public:
 
     inline void* allocate(uint32_t requested)
     {
-    	uint32_t _;
-    	return allocate(requested, _);
+        uint32_t _;
+        return allocate(requested, _);
     }
 
     inline bool free(void* ptr)

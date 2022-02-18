@@ -27,91 +27,91 @@ namespace pet
 
 struct CharTraits
 {
-	static inline bool isSpace(char c) {
-		return CharLookupTable<' ', '\t', '\r', '\n'>::contains(c);
-	}
+    static inline bool isSpace(char c) {
+        return CharLookupTable<' ', '\t', '\r', '\n'>::contains(c);
+    }
 
-	static inline bool isOperator(char c) {
-		return CharLookupTable<'+', '-', '*', '/', '%', '<', '>', '=', '|', '&', '^', '~', '!'>::contains(c);
-	}
+    static inline bool isOperator(char c) {
+        return CharLookupTable<'+', '-', '*', '/', '%', '<', '>', '=', '|', '&', '^', '~', '!'>::contains(c);
+    }
 
-	static inline bool isUpper(char c) {
-		return CharLookupTable<'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'>::contains(c);
-	}
+    static inline bool isUpper(char c) {
+        return CharLookupTable<'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'>::contains(c);
+    }
 
-	static inline bool isLower(char c) {
-		return CharLookupTable<'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'>::contains(c);
-	}
+    static inline bool isLower(char c) {
+        return CharLookupTable<'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'>::contains(c);
+    }
 
-	static inline bool isAlpha(char c) {
-		return CharLookupTable<'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-							   'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'>::contains(c);
-	}
+    static inline bool isAlpha(char c) {
+        return CharLookupTable<'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+                               'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'>::contains(c);
+    }
 
-	static inline bool isIdInitial(char c) {
-		return CharLookupTable<'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-							   'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-							   '_'>::contains(c);
-	}
+    static inline bool isIdInitial(char c) {
+        return CharLookupTable<'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+                               'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+                               '_'>::contains(c);
+    }
 
-	static inline bool isDigit(char c) {
-		return CharLookupTable<'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'>::contains(c);
-	}
+    static inline bool isDigit(char c) {
+        return CharLookupTable<'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'>::contains(c);
+    }
 
-	static inline bool isHexDigit(char c) {
-		return CharLookupTable<'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F'>::contains(c);
-	}
+    static inline bool isHexDigit(char c) {
+        return CharLookupTable<'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F'>::contains(c);
+    }
 
-	static inline bool isIdInternal(char c) {
-		return CharLookupTable<'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-							   'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-							   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-							   '_'>::contains(c);
-	}
+    static inline bool isIdInternal(char c) {
+        return CharLookupTable<'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+                               'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+                               '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                               '_'>::contains(c);
+    }
 
-	static inline bool isComma(char c) {
-		return c == ',';
-	}
+    static inline bool isComma(char c) {
+        return c == ',';
+    }
 
-	static inline bool isDot(char c) {
-		return c == '.';
-	}
+    static inline bool isDot(char c) {
+        return c == '.';
+    }
 
-	static inline bool isDoubleQuote(char c) {
-		return c == '"';
-	}
+    static inline bool isDoubleQuote(char c) {
+        return c == '"';
+    }
 
-	static inline bool isSingleQuote(char c) {
-		return c == '\'';
-	}
+    static inline bool isSingleQuote(char c) {
+        return c == '\'';
+    }
 
-	static inline bool isOpenParen(char c) {
-		return c == '(';
-	}
+    static inline bool isOpenParen(char c) {
+        return c == '(';
+    }
 
-	static inline bool isCloseParen(char c) {
-		return c == ')';
-	}
+    static inline bool isCloseParen(char c) {
+        return c == ')';
+    }
 
-	static inline bool isOpenCurly(char c) {
-		return c == '{';
-	}
+    static inline bool isOpenCurly(char c) {
+        return c == '{';
+    }
 
-	static inline bool isCloseCurly(char c) {
-		return c == '}';
-	}
+    static inline bool isCloseCurly(char c) {
+        return c == '}';
+    }
 
-	static inline bool isOpenBox(char c) {
-		return c == '[';
-	}
+    static inline bool isOpenBox(char c) {
+        return c == '[';
+    }
 
-	static inline bool isCloseBox(char c) {
-		return c == ']';
-	}
+    static inline bool isCloseBox(char c) {
+        return c == ']';
+    }
 
-	static inline bool isBackslash(char c) {
-		return c == '\\';
-	}
+    static inline bool isBackslash(char c) {
+        return c == '\\';
+    }
 };
 
 }

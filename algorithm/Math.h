@@ -25,17 +25,17 @@ namespace pet
 
 template<class T>
 static inline constexpr T max(const T& a, const T& b) {
-	return a > b ? a : b;
+    return a > b ? a : b;
 }
 
 template<class T>
 static inline constexpr T min(const T& a, const T& b) {
-	return a < b ? a : b;
+    return a < b ? a : b;
 }
 
 template<class T, class... Ts>
 static inline constexpr T max(const T& a, const Ts&... as) {
-	return max(a, max(as...));
+    return max(a, max(as...));
 }
 
 }

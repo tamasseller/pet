@@ -43,7 +43,7 @@ class listIterator:
 class linkedListPrinter:
     def __init__(self, val):
         self.val = val
-	
+    
     def display_hint(self):
         return 'array'
 
@@ -63,7 +63,7 @@ class linkedListPrinter:
 class unionPrinter:
     def __init__(self, val):
         self.val = val
-	
+    
     def display_hint(self):
         return None
 
@@ -79,7 +79,7 @@ class unionPrinter:
 class smartPtrPrinter:
     def __init__(self, val):
         self.val = val
-	
+    
     def display_hint(self):
         return None
 
@@ -93,7 +93,7 @@ class smartPtrPrinter:
 class listIteratorPrinter:
     def __init__(self, val):
         self.val = val
-	
+    
     def display_hint(self):
         return None
 

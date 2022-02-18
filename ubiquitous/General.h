@@ -23,27 +23,27 @@
 #include "platform/Clz.h"
 
 struct General {
-	constexpr inline static unsigned int log2floorConst(const unsigned int x) {
-		return ((x==0)?
-					(32):
-					((x==1)?
-							0:
-							(log2floorConst(x/2)+1)
-					)
-				);
-	}
+    constexpr inline static unsigned int log2floorConst(const unsigned int x) {
+        return ((x==0)?
+                    (32):
+                    ((x==1)?
+                            0:
+                            (log2floorConst(x/2)+1)
+                    )
+                );
+    }
 
-	__attribute__ ((always_inline))
-	inline static unsigned int log2floor(unsigned int x) {
-		return 31-clz(x);
-	}
+    __attribute__ ((always_inline))
+    inline static unsigned int log2floor(unsigned int x) {
+        return 31-clz(x);
+    }
 };
 
 template<typename T>
 void swap(T& a, T& b){
-	T temp = a;
-	a = b;
-	b = temp;
+    T temp = a;
+    a = b;
+    b = temp;
 }
 
 #endif /* GENERAL_H_ */

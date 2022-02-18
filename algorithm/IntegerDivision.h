@@ -24,75 +24,75 @@
 
 namespace pet {
 
-	/**
-	 *	Slow but small unsigned integer division algorithm.
-	 *
-	 *	This implementation is mainly useful in scenarios where the CPU does not have
-	 *	hardware implementation for integer division and the compiler generated algorithm
-	 *	is not suitable. One possible reason for it is that the compiler has a higher
-	 *	performance but also bigger footprint implementation and the application is code
-	 *	size constrained.
-	 *
-	 * @param	_x_ the divident.
-	 * @param	_y_ the divisor.
-	 * @return	The integer part of quotient _x_/_y_.
-	 */
-	static inline uint32_t uDiv32(uint32_t x, uint32_t y)
-	{
-		uint32_t ret = 0;
+    /**
+     *	Slow but small unsigned integer division algorithm.
+     *
+     *	This implementation is mainly useful in scenarios where the CPU does not have
+     *	hardware implementation for integer division and the compiler generated algorithm
+     *	is not suitable. One possible reason for it is that the compiler has a higher
+     *	performance but also bigger footprint implementation and the application is code
+     *	size constrained.
+     *
+     * @param	_x_ the divident.
+     * @param	_y_ the divisor.
+     * @return	The integer part of quotient _x_/_y_.
+     */
+    static inline uint32_t uDiv32(uint32_t x, uint32_t y)
+    {
+        uint32_t ret = 0;
 
-		while(x >= y) {
-			uint32_t c = 1;
-			uint32_t t = y;
+        while(x >= y) {
+            uint32_t c = 1;
+            uint32_t t = y;
 
-			while(1)
-			{
-				const uint32_t shifted = t << 1;
+            while(1)
+            {
+                const uint32_t shifted = t << 1;
 
-				if((shifted > x) || (shifted < t))
-					break;
+                if((shifted > x) || (shifted < t))
+                    break;
 
-				t = shifted;
-				c <<= 1;
-			}
+                t = shifted;
+                c <<= 1;
+            }
 
-			x -= t;
-			ret |= c;
-		}
+            x -= t;
+            ret |= c;
+        }
 
-		return ret;
-	}
+        return ret;
+    }
 
 
-	/**
-	 *	Slow but small signed integer division algorithm.
-	 *
-	 *	This implementation is mainly useful in scenarios where the CPU does not have
-	 *	hardware implementation for integer division and the compiler generated algorithm
-	 *	is not suitable. One possible reason for it is that the compiler has a higher
-	 *	performance but also bigger footprint implementation and the application is code
-	 *	size constrained.
-	 *
-	 * @param	_x_ the divident.
-	 * @param	_y_ the divisor.
-	 * @return	The integer part of quotient _x_/_y_.
-	 */
-	static inline int32_t iDiv32(int32_t x, int32_t y)
-	{
-		bool inv = false;
+    /**
+     *	Slow but small signed integer division algorithm.
+     *
+     *	This implementation is mainly useful in scenarios where the CPU does not have
+     *	hardware implementation for integer division and the compiler generated algorithm
+     *	is not suitable. One possible reason for it is that the compiler has a higher
+     *	performance but also bigger footprint implementation and the application is code
+     *	size constrained.
+     *
+     * @param	_x_ the divident.
+     * @param	_y_ the divisor.
+     * @return	The integer part of quotient _x_/_y_.
+     */
+    static inline int32_t iDiv32(int32_t x, int32_t y)
+    {
+        bool inv = false;
 
-		if(x < 0) {
-			x = -x;
-			inv = true;
-		}
+        if(x < 0) {
+            x = -x;
+            inv = true;
+        }
 
-		if(y < 0) {
-			y = -y;
-			inv = !inv;
-		}
+        if(y < 0) {
+            y = -y;
+            inv = !inv;
+        }
 
-		return inv ? -(int32_t)uDiv32(x, y) : uDiv32(x, y);
-	}
+        return inv ? -(int32_t)uDiv32(x, y) : uDiv32(x, y);
+    }
 }
 
 #endif /* FW_LIB_PET_ALGORITHM_INTEGERDIVISION_H_ */

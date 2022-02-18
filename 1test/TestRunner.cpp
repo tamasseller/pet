@@ -37,86 +37,86 @@ bool TestRunner::failing;
 
 TestRunner::Result TestRunner::runTest(TestInterface* test)
 {
-	Result ret;
+    Result ret;
 
-	synthetic = false;
-	failing = false;
-	FailureInjector::reset();
-	
-	while(true) 
-	{
-		currentTest = test;
+    synthetic = false;
+    failing = false;
+    FailureInjector::reset();
+    
+    while(true) 
+    {
+        currentTest = test;
 
-		bool failed = false;
-		if(setjmp(jmpBuff))
-		{
-			ret.failed++;
-			failing = false;
-			failed = true;
-		}
-		else
-		{
-			for(auto pluginIt = plugins.iterator(); pluginIt.current(); pluginIt.step())
-			{
-				pluginIt.current()->beforeTest();
-			}
+        bool failed = false;
+        if(setjmp(jmpBuff))
+        {
+            ret.failed++;
+            failing = false;
+            failed = true;
+        }
+        else
+        {
+            for(auto pluginIt = plugins.iterator(); pluginIt.current(); pluginIt.step())
+            {
+                pluginIt.current()->beforeTest();
+            }
 
-			currentTest->runTest();
-		}
+            currentTest->runTest();
+        }
 
-		for(auto pluginIt = plugins.iterator(); pluginIt.current(); pluginIt.step())
-		{
-			pluginIt.current()->afterTest(failed);
-		}
+        for(auto pluginIt = plugins.iterator(); pluginIt.current(); pluginIt.step())
+        {
+            pluginIt.current()->afterTest(failed);
+        }
 
-		output->reportProgress(currentTest->getName(), synthetic);
+        output->reportProgress(currentTest->getName(), synthetic);
 
-		if (!synthetic)
-		{
-			FailureInjector::firstRunDone();
-		}
+        if (!synthetic)
+        {
+            FailureInjector::firstRunDone();
+        }
 
-		if(!FailureInjector::hasMore())
-		{
-			break;
-		}
+        if(!FailureInjector::hasMore())
+        {
+            break;
+        }
 
-		currentTest->reset();
+        currentTest->reset();
 
-		FailureInjector::step();
+        FailureInjector::step();
 
-		if(!synthetic)
-		{
-			if(failed)
-				break;
+        if(!synthetic)
+        {
+            if(failed)
+                break;
 
-			synthetic = true;
-		}
+            synthetic = true;
+        }
 
-		ret.synthetic++;
-	}
+        ret.synthetic++;
+    }
 
-	return ret;
+    return ret;
 }
 
 int TestRunner::runAllTests(TestOutput* output, const char* filter)
 {
-	TestRunner::output = output;
-	volatile unsigned int run = 0, failed = 0, synthetic = 0;
+    TestRunner::output = output;
+    volatile unsigned int run = 0, failed = 0, synthetic = 0;
 
-	for(auto it = Registry<TestInterface>::iterator(); it.current(); it.step())
-	{
-		if(!filter || it.current()->matches(filter))
-		{
-			auto ret = runTest(it.current());
-			failed = failed + ret.failed;
-			synthetic = synthetic + ret.synthetic;
-			run = run + 1;
-		}
-	}
+    for(auto it = Registry<TestInterface>::iterator(); it.current(); it.step())
+    {
+        if(!filter || it.current()->matches(filter))
+        {
+            auto ret = runTest(it.current());
+            failed = failed + ret.failed;
+            synthetic = synthetic + ret.synthetic;
+            run = run + 1;
+        }
+    }
 
-	currentTest = nullptr;
-	TestRunner::output = nullptr;
+    currentTest = nullptr;
+    TestRunner::output = nullptr;
 
     output->reportFinal(run, failed, synthetic);
     return failed ? -1 : 0;
@@ -124,31 +124,31 @@ int TestRunner::runAllTests(TestOutput* output, const char* filter)
 
 int TestRunner::getTestCount(const char* filter)
 {
-	int ret = 0;
+    int ret = 0;
 
-	for(auto it = Registry<TestInterface>::iterator(); it.current(); it.step())
-	{
-		if(!filter || it.current()->matches(filter))
-		{
-			ret++;
-		}
-	}
+    for(auto it = Registry<TestInterface>::iterator(); it.current(); it.step())
+    {
+        if(!filter || it.current()->matches(filter))
+        {
+            ret++;
+        }
+    }
 
-	return ret;
+    return ret;
 }
 
 bool TestRunner::installPlugin(TestPlugin* plugin)  {
-	return plugins.add(plugin);
+    return plugins.add(plugin);
 }
 
 void TestRunner::failTestAlways(const char* sourceInfo, const char* text)
 {
-	if(!failing)
-	{
-		failing = true;
-	    output->reportTestFailure(FailureInjector::getRerunOrdinal(), currentTest->getName(), currentTest->getSourceInfo(), sourceInfo, text);
-	    longjmp(jmpBuff, 1);
-	}
+    if(!failing)
+    {
+        failing = true;
+        output->reportTestFailure(FailureInjector::getRerunOrdinal(), currentTest->getName(), currentTest->getSourceInfo(), sourceInfo, text);
+        longjmp(jmpBuff, 1);
+    }
 }
 
 void TestRunner::failTest(const char* sourceInfo, const char* text)

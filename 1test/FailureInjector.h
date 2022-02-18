@@ -54,25 +54,25 @@ protected:
 public:
     static bool shouldSimulateError()
     {
-    	if(!enabled)
-    	{
-    		return false;
-    	}
+        if(!enabled)
+        {
+            return false;
+        }
 
         counter++;
         return counter == failAt;
     }
 
     static void enable() {
-    	enabled = true;
+        enabled = true;
     }
 
     static void disable() {
-    	enabled = false;
+        enabled = false;
     }
 
     static auto getRerunOrdinal() {
-    	return failAt;
+        return failAt;
     }
 };
 

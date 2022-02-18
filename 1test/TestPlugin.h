@@ -27,15 +27,15 @@ template<class> class LinkedPtrList;
 
 class TestPlugin
 {
-	friend LinkedPtrList<TestPlugin*>;
-	TestPlugin *next;
+    friend LinkedPtrList<TestPlugin*>;
+    TestPlugin *next;
 
-	friend TestRunner;
-	virtual void beforeTest() = 0;
-	virtual void afterTest(bool failed) = 0;
+    friend TestRunner;
+    virtual void beforeTest() = 0;
+    virtual void afterTest(bool failed) = 0;
 public:
 
-	inline virtual ~TestPlugin() {}
+    inline virtual ~TestPlugin() {}
 };
 
 }
