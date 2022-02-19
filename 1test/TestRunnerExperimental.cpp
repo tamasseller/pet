@@ -22,6 +22,7 @@
 #include <sys/wait.h>
 #include <sys/mman.h>
 #include <sys/time.h>
+#include <sys/uio.h>
 
 #include <signal.h>
 #include <unistd.h>
@@ -259,12 +260,17 @@ int TestRunner::Experimental::main(int argc, const char* argv[], TestOutput* out
 
     std::optional<bool> doParallel;
     std::optional<std::string> filter;
+    bool show = false;
 
     for(auto it = args.cbegin(); it != args.cend();)
     {
         const auto name = *it++;
 
-        if(name == "--no-parallel" || name == "-n")
+        if(name == "--show" || name == "-s")
+        {
+            show = true;
+        }
+        else if(name == "--no-parallel" || name == "-n")
         {
             doParallel = false;
         }
@@ -287,6 +293,26 @@ int TestRunner::Experimental::main(int argc, const char* argv[], TestOutput* out
     }
 
     const char* const f = filter.has_value() ? filter->c_str() : nullptr;
+
+    if(show)
+    {
+        int n = 0;
+        for(auto it = Registry<TestInterface>::iterator(); it.current(); it.step())
+        {
+            const char* name = it->getName();
+            const char nl = '\n';
+            char buff[32];
+
+            const struct iovec v[] =
+            {
+                    {.iov_base = const_cast<char*>(buff), .iov_len = (size_t)snprintf(buff, sizeof(buff), "%03d: ", ++n)},
+                    {.iov_base = const_cast<char*>(name), .iov_len = strlen(name)},
+                    {.iov_base = const_cast<char*>(&nl), 1},
+            };
+
+            writev(STDOUT_FILENO, v, sizeof(v)/sizeof(v[0]));
+        }
+    }
 
     if(doParallel.value_or(pet::TestRunner::getTestCount(f) > 50))
     {
