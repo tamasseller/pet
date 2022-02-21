@@ -582,13 +582,13 @@ public:
      */
     inline uintptr_t resize(void* ptr, uintptr_t newSizeParam)
     {
-        assertThat(ptr, "shrink(): Null argument\n");
+        assertThat(ptr, "resize(): Null argument\n");
 
         const Block block(ptr);
         assertThat(block.checkChecksum(), "Heap corruption: resize called on a block with invalid checksum");
         assertThat(!block.isFree(), "Heap corruption: resize called on free block");
 
-        dbg() << "resize(" <<  ptr << "): " << decode(block.getSize()) << " -> " << newSizeParam;
+        dbg() << "resize(" <<  ptr << "): " << (decode(block.getSize()) - Block::headerSize) << " -> " << newSizeParam;
 
         uintptr_t requestedSize = encodeRoundUp(max(newSizeParam, Policy::freeHeaderSize) + Block::headerSize);
 
@@ -662,7 +662,7 @@ public:
             }
         }
 
-        return decode(block.getSize());
+        return decode(block.getSize()) - Block::headerSize;
     }
 
     /**
@@ -684,7 +684,7 @@ public:
      */
     inline void* dropFront(void* ptr, uintptr_t offset)
     {
-        assertThat(ptr, "shrink(): Null argument\n");
+        assertThat(ptr, "dropFront(): Null argument\n");
         dbg() << "dropFront(" <<  ptr << ", " << offset << ") ";
 
         const Block block(ptr);
