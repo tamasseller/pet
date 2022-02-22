@@ -43,17 +43,37 @@ public:
     inline Value operator()(Op&& op, Args... args)
     {
         Value old, result;
-        do {
+
+        do
+        {
             old = ldrex(&this->data);
 
-            if(!op(old, result, args...)) {
+            if(!op(old, result, args...))
+            {
                 clrex();
                 break;
             }
 
-        } while(!strex(&this->data, result));
+        }
+        while(!strex(&this->data, result));
 
         return old;
+    }
+
+    inline bool compareAndSwap(Value expectedValue, Value newValue)
+    {
+        do
+        {
+            if(ldrex(&this->data) != expectedValue)
+            {
+                clrex();
+                return false;
+            }
+
+        }
+        while(!strex(&this->data, newValue));
+
+        return true;
     }
 };
 

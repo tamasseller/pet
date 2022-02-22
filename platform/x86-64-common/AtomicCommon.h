@@ -53,6 +53,10 @@ public:
 
         return old;
     }
+
+    really_inline bool compareAndSwap(Value expectedValue, Value newValue) {
+        return CasHolder::cas(&this->data, expectedValue, newValue);
+    }
 };
 
 }
