@@ -25,7 +25,8 @@ namespace pet {
 namespace IntelArchCommon {
 
 template<class Value, class CasHolder>
-class Atomic {
+class Atomic
+{
     volatile Value data;
 public:
     inline Atomic(): data(0) {}
@@ -43,19 +44,35 @@ public:
     {
         Value old, result;
 
-        do {
+        do
+        {
             old = this->data;
 
             if(!op(old, result, args...))
+            {
                 break;
+            }
 
-        } while(!CasHolder::cas(&this->data, old, result));
+        } while(unlikely(!CasHolder::cas(&this->data, old, result)));
 
         return old;
     }
 
     really_inline bool compareAndSwap(Value expectedValue, Value newValue) {
         return CasHolder::cas(&this->data, expectedValue, newValue);
+    }
+
+    really_inline Value swap(Value newValue)
+    {
+        Value ret;
+
+        do
+        {
+            ret = this->data;
+        }
+        while(unlikely(!CasHolder::cas(&this->data, ret, newValue)));
+
+        return ret;
     }
 };
 

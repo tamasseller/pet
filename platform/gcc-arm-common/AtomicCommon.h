@@ -75,6 +75,19 @@ public:
 
         return true;
     }
+
+    inline Value swap(Value newValue)
+    {
+        Value ret;
+
+        do
+        {
+            ret = ldrex(&this->data);
+        }
+        while(!strex(&this->data, newValue));
+
+        return ret;
+    }
 };
 
 }
