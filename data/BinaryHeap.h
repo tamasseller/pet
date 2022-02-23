@@ -27,27 +27,29 @@ namespace pet {
 /**
  * A node of the BinaryHeap.
  */
-struct HeapNode {
-        /// Pointer to the parent of the node or null for the root.
-        HeapNode *parent;
+struct HeapNode
+{
+    /// Pointer to the parent of the node or null for the root.
+    HeapNode *parent;
 
-        /// Pointer to the children of the node or null if not exists.
-        HeapNode *children[2];
+    /// Pointer to the children of the node or null if not exists.
+    HeapNode *children[2];
 
-        /// Create a disconnected node.
-        inline HeapNode(): parent(nullptr), children{nullptr, nullptr} {}
+    /// Create a disconnected node.
+    inline HeapNode(): parent(nullptr), children{nullptr, nullptr} {}
 };
 
 /**
  * Intrusive binary heap, based on the generic PrioQueueBase logic.
  *
  * This class implements a binary heap (a binary tree that is heap
- * structured) according to the used supplied comparison function,
+ * structured) according to the user supplied comparison function,
  * that is of the 'less' kind. Which means that it must return true
  * if the strict ordering relation between the elements is true.
  */
 template<bool (*compare)(const HeapNode*, const HeapNode*)>
-class BinaryHeap: PrioQueueBase<BinaryHeap<compare>, HeapNode*> {
+class BinaryHeap: PrioQueueBase<BinaryHeap<compare>, HeapNode*>
+{
     friend class PrioQueueBase<BinaryHeap<compare>, HeapNode*>;
     using Node = HeapNode;
 
@@ -86,14 +88,16 @@ class BinaryHeap: PrioQueueBase<BinaryHeap<compare>, HeapNode*> {
     size_t nElements = 0;
 
     /// Exchange the contents of two pointers.
-    static inline void swapPointers(Node* &a, Node* &b) {
+    static inline void swapPointers(Node* &a, Node* &b)
+    {
         Node* const temp = a;
         a = b;
         b = temp;
     }
 
     /// Exchange the position of two element in the tree (PrioQueueBase requirement).
-    inline void swapElement(Node* a, Node* b) {
+    inline void swapElement(Node* a, Node* b)
+    {
         /*
          * Update parent backlinks to the swapped state.
          */
@@ -119,7 +123,6 @@ class BinaryHeap: PrioQueueBase<BinaryHeap<compare>, HeapNode*> {
         }
     }
 
-
     /**
      * In-tree position of an existing or new node.
      *
@@ -133,7 +136,8 @@ class BinaryHeap: PrioQueueBase<BinaryHeap<compare>, HeapNode*> {
      *  - a pointer to the parent node if there is any
      *  - and a pointer to the pointer that is to be pointed at the node.
      */
-    struct Position {
+    struct Position
+    {
         Node* parent;
         Node** backLink;
     };
@@ -149,12 +153,18 @@ class BinaryHeap: PrioQueueBase<BinaryHeap<compare>, HeapNode*> {
         /*
          * Halving search for the bit position of the most significant one bit.
          */
-        while(low != high){
+        while(low != high)
+        {
             size_t mid = (low + high + 1) >> 1;
+
             if(~((1 << mid) - 1) & path)
+            {
                 low = mid;
+            }
             else
+            {
                 high = mid - 1;
+            }
         }
 
         // ^^^ TODO replace with clz based approach ^^^
@@ -164,7 +174,8 @@ class BinaryHeap: PrioQueueBase<BinaryHeap<compare>, HeapNode*> {
          * parent of the last element. At every bit position, zero bits mean
          * 'left' turn one bits mean 'right'.
          */
-        while(low) {
+        while(low)
+        {
             const size_t currentBit = 1 << (low-- - 1);
             ret.parent = *ret.backLink;
             ret.backLink = ret.parent->children + ((path & currentBit) ? 1 : 0);
@@ -185,12 +196,16 @@ public:
      * Insert a node at an adequate position according the
      * comparison of elements.
      */
-    void insert(Node* n) {
+    void insert(Node* n)
+    {
         nElements++;
         Position pos = findLastPlace();
+
         n->children[0] = n->children[1] = nullptr;
+
         *pos.backLink = n;
         n->parent = pos.parent;
+
         this->heapUp(n);
     }
 
@@ -202,7 +217,8 @@ public:
      *       in an other heap). This is not checked, as there
      *       is no zero-overhead way of doing it.
      */
-    void remove(Node* n) {
+    void remove(Node* n)
+    {
         Position pos = findLastPlace();
         nElements--;
 
@@ -210,16 +226,21 @@ public:
         *pos.backLink = nullptr;
 
         if(n == subst)
+        {
             return;
+        }
 
         subst->parent = n->parent;
         *(n->parent ? (n->parent->children + (n->parent->children[0] == n ? 0 : 1)) : &root) = subst;
 
-        for(int i=0; i<2; i++) {
+        for(int i=0; i<2; i++)
+        {
             subst->children[i] = n->children[i];
 
             if(subst->children[i])
+            {
                 subst->children[i]->parent = subst;
+            }
         }
 
         this->heapDown(subst);
@@ -233,7 +254,9 @@ public:
     void pop()
     {
         if(!root)
+        {
             return;
+        }
 
         remove(root);
     }

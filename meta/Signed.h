@@ -34,6 +34,11 @@ namespace detail {
 
 template<class T> using Signed = typename detail::SignedVersionOf<T>::type;
 
+template<class T>
+static inline constexpr auto asSigned(T v) {
+    return static_cast<Signed<T>>(v);
+}
+
 }
 
 #endif /* PET_META_SIGNED_H_ */
