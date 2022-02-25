@@ -32,31 +32,30 @@ class listIterator:
         return self
 
     def __next__(self):
-
-        if self.ptr == gdb.Value(0).cast(it.type):
+        if self.ptr == gdb.Value(0).cast(self.ptr.type):
             raise StopIteration
 
-        count, val = self.count, gdb.Value(gdb.parse_and_eval("(*(('"+self.ptr.type.name+"'*)("+str(self.ptr.address)+")))->next")).cast(self.ptr.type)
-        self.count, self.ptr = count + 1, val
-        return ('[%d]' % count, val)
+        ret = ("[%d]" % self.count, self.ptr)
+        self.count, self.ptr = self.count + 1, self.ptr.dereference()['next'] 
+        return ret
 
 class linkedListPrinter:
     def __init__(self, val):
-        self.val = val
+        self.first = val["first"]
     
     def display_hint(self):
         return 'array'
 
     def children (self):
-        return listIterator(self.val["first"])
+        return listIterator(self.first)
 
     def to_string (self):
         n = 0
-        it = self.val["first"]
+        it = self.first
 
         while it != gdb.Value(0).cast(it.type):
             n = n + 1
-            it = gdb.Value(gdb.parse_and_eval("(*(('"+it.type.name+"'*)("+str(it.address)+")))->next")).cast(it.type)
+            it = it.dereference()['next']
 
         return "list with " + str(n) + " elements"
 
@@ -71,10 +70,21 @@ class unionPrinter:
         tag = self.val["tag"]
 
         if tag < 0:
-            return "uninitialized union"
+            return "Uninitialized union"
 
-        daddr=self.val["data"].address
-        return daddr.cast(self.val.type.template_argument(tag).pointer()).dereference()
+        type = self.val.type.template_argument(tag)
+        return "Tagged union currently holding: '" + type.name + "'" 
+        
+    def children (self):
+        tag = self.val["tag"]
+
+        if 0 <= tag:
+            daddr = self.val["data"].address
+            type = self.val.type.template_argument(tag)
+            value = daddr.cast(type.pointer()).dereference()
+            return [("<content>", value)]
+
+        return [];
 
 class smartPtrPrinter:
     def __init__(self, val):
