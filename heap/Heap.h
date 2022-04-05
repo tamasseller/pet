@@ -31,6 +31,14 @@ class HeapInternalsTest;
 
 namespace pet {
 
+struct HeapStat
+{
+    size_t longestFree;
+    size_t totalFree;
+    size_t nUsed;
+    size_t totalUsed;
+};
+
 /**
  * Policy based heap.
  *
@@ -369,14 +377,6 @@ class Heap:	public Policy,
     }
 
 public:
-    struct Stat
-    {
-        size_t longestFree;
-        size_t totalFree;
-        size_t nUsed;
-        size_t totalUsed;
-    };
-
     /**
      * Create an uninitialized heap, must be set up before use with the **init** method.
      */
@@ -484,8 +484,6 @@ public:
             assertThat(block.getSize() >= size, "Internal error: output size less than requested");
             return block.ptr;
         }
-
-
     }
 
     /**
@@ -732,10 +730,10 @@ public:
     }
 
     /** @cond */
-    inline Stat getStats(void *start)
+    inline HeapStat getStats(void *start)
     {
         Block block((char*)alignUp((uintptr_t)((char*)start + Block::headerSize)));
-        Stat ret{0, 0, 0, 0};
+        HeapStat ret{0, 0, 0, 0};
 
         bool prevFree = false;
         while(true)
