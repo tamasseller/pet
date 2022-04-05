@@ -131,14 +131,14 @@ inline void clearExclusive()
 }
 
 template<class Data>
-struct Atomic: CortexCommon::AtomicCommon<
+struct BaseAtomic: CortexCommon::AtomicCommon<
     Data,
     &detail::loadExclusive<Data>,
     &detail::storeExclusive<Data>,
     &detail::clearExclusive>
 {
-    inline Atomic(): Atomic::AtomicCommon(0) {}
-    inline Atomic(Data data): Atomic::AtomicCommon(data) {}
+    inline BaseAtomic(): BaseAtomic::AtomicCommon(0) {}
+    inline BaseAtomic(Data data): BaseAtomic::AtomicCommon(data) {}
 };
 
 }

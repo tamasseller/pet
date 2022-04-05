@@ -36,7 +36,7 @@ namespace detail
 }
 
 template<class Data>
-using Atomic = IntelArchCommon::Atomic<Data, detail::CasHolder>;
+using BaseAtomic = IntelArchCommon::Atomic<Data, detail::CasHolder>;
 
 }
 
