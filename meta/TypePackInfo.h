@@ -23,6 +23,8 @@
 #include "meta/ApplyToPack.h"
 #include "meta/TypeManipulation.h"
 
+#include <stddef.h>
+
 namespace pet {
 
 template<class T> struct IsSomeReference { static constexpr bool value = false; };
