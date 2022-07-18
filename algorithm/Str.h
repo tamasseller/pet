@@ -194,6 +194,40 @@ struct Str {
         return true;
     }
 
+
+    template<unsigned int base>
+    static inline bool formatInteger(unsigned int x, char* &ptr, char* const end)
+    {
+        static constexpr const char digits[] = "0123456789abcdef";
+
+        static_assert(base <= (sizeof(digits)/sizeof(digits[0])), "Radix too high");
+
+        constexpr auto maxPlaces = pet::log<base>::template x<UINT_MAX>::value;
+        constexpr auto &table = pet::applyOverRange<pet::exp<base>::template x, 1, maxPlaces>::value;
+        constexpr auto * const tend = table + sizeof(table)/sizeof(table[0]);
+
+        auto* p = &table[0];
+        while(x >= *p && p < tend) p++;
+
+        auto n = p - table;
+        auto output = ptr + n;
+        ptr += n + 1;
+
+        if(end <= output)
+        {
+        	return false; // too long
+        }
+
+        output[1] = '\0';
+
+        do {
+            *output-- = digits[x % base];
+            x /= base;
+        } while(n--);
+
+        return true;
+    }
+
     template<unsigned int base>
     static inline bool atou(unsigned int &x, const char* input, unsigned int length)
     {
