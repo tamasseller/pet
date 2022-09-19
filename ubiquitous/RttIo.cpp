@@ -30,12 +30,11 @@
 /*
 
 $_TARGETNAME configure -event gdb-flash-write-start {
-
     rtt stop
 }
 
 $_TARGETNAME configure -event semihosting-user-cmd-0x100 {
-    set command {rtt }
+    set command {rtt}
     set params [arm semihosting_read_user_param]
     eval "$command $params" 
 }
@@ -68,7 +67,6 @@ bool RttBufferDescriptor::write(const char* str, size_t length)
     commitWrite(wIt);
     return true;
 }
-
 
 static void sendTclCommand(const char* const command, const uint32_t len)
 {
