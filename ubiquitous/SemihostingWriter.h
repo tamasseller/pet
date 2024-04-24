@@ -49,6 +49,8 @@ public:
     /** Method that flushes the semihosting output buffer if not empty already. */
     static void flush();
 
+    static inline void setup() {}
+
     /** Writes a zero terminated string to the output */
     SemihostingWriter& operator<<(const char* val);
 
